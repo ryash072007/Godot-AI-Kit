@@ -1,0 +1,41 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+_global_script_classes=[{
+"base": "RefCounted",
+"class": &"Activation",
+"language": &"GDScript",
+"path": "res://addons/neural_network/Scripts/Activation.gd"
+}, {
+"base": "RefCounted",
+"class": &"Matrix",
+"language": &"GDScript",
+"path": "res://addons/neural_network/Scripts/Matrix.gd"
+}, {
+"base": "Node",
+"class": &"NeuralNetwork",
+"language": &"GDScript",
+"path": "res://addons/neural_network/Scripts/Neural_Network.gd"
+}]
+_global_script_class_icons={
+"Activation": "",
+"Matrix": "",
+"NeuralNetwork": ""
+}
+
+[application]
+
+config/name="Godot Neural Network Plugin"
+config/features=PackedStringArray("4.0", "Vulkan Clustered")
+config/icon="res://icon.svg"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/neural_network/plugin.cfg")
