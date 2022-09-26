@@ -1,0 +1,2 @@
+extends StaticBody2D
+

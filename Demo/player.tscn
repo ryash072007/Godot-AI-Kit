@@ -1,0 +1,46 @@
+[gd_scene load_steps=4 format=3 uid="uid://c6vtfwmfbs8rs"]
+
+[ext_resource type="Texture2D" uid="uid://dofy04mphk2l8" path="res://Demo/player.png" id="1_5tfnd"]
+[ext_resource type="Script" path="res://Demo/player.gd" id="1_68c25"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_iqe1o"]
+size = Vector2(32, 32)
+
+[node name="player" type="CharacterBody2D"]
+collision_layer = 2
+script = ExtResource("1_68c25")
+
+[node name="Sprite2d" type="Sprite2D" parent="."]
+texture = ExtResource("1_5tfnd")
+
+[node name="CollisionShape2d" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_iqe1o")
+
+[node name="dec" type="Area2D" parent="."]
+
+[node name="CollisionShape2d2" type="CollisionShape2D" parent="dec"]
+shape = SubResource("RectangleShape2D_iqe1o")
+
+[node name="rays" type="Node2D" parent="."]
+
+[node name="RayCast2d2" type="RayCast2D" parent="rays"]
+rotation = -0.546592
+target_position = Vector2(238, 0)
+
+[node name="RayCast2d5" type="RayCast2D" parent="rays"]
+rotation = -1.20836
+target_position = Vector2(238, 0)
+
+[node name="RayCast2d3" type="RayCast2D" parent="rays"]
+rotation = -0.241506
+scale = Vector2(1, 1)
+target_position = Vector2(238, 0)
+
+[node name="RayCast2d" type="RayCast2D" parent="rays"]
+target_position = Vector2(238, 0)
+
+[node name="RayCast2d4" type="RayCast2D" parent="rays"]
+rotation = -0.866253
+target_position = Vector2(238, 0)
+
+[connection signal="area_entered" from="dec" to="." method="_on_dec_area_entered"]

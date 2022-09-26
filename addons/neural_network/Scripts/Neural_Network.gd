@@ -124,7 +124,7 @@ func get_inputs_from_raycasts() -> Array:
 	
 	return _input_array
 
-func get_prediction_from_raycasts(optional_val: Array[float]) -> Array:
+func get_prediction_from_raycasts(optional_val: Array = []) -> Array[float]:
 	assert(raycasts.size() != 0, "Can not get inputs from RayCasts that are not set!")
 	
 	var _array_ = get_inputs_from_raycasts()
@@ -132,12 +132,12 @@ func get_prediction_from_raycasts(optional_val: Array[float]) -> Array:
 	return predict(_array_)
 
 func get_distance(_raycast: RayCast2D):
-	var distance: float = 1.0
+	var distance: float = 0.0
 	if _raycast.is_colliding():
-		var raycast_length: float = _raycast.cast_to.y
 		var origin: Vector2 = _raycast.global_transform.get_origin()
 		var collision: Vector2 = _raycast.get_collision_point()
-		distance = origin.distance_to(collision) / raycast_length
+		
+		distance = origin.distance_to(collision)
 
 	return distance
 
@@ -170,7 +170,9 @@ static func copy(nn : NeuralNetwork) -> NeuralNetwork:
 	return result
 
 static func mutate_callable(value, _row, _col):
-	if randf_range(0, 1) < 0.3:
-		value += randf_range(-0.5, 0.5)
+	seed(randi())
+	randomize()
+#	if randf_range(0, 1) < 0.7:
+	value += randf_range(-0.5, 0.5)
 		
 	return value

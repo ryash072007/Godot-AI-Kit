@@ -119,3 +119,10 @@ static func random(a: Matrix, b: Matrix) -> Matrix:
 			result.data[row][col] = a.data[row][col] if _random > 0.5 else b.data[row][col]
 	
 	return result
+
+static func copy(matrix: Matrix) -> Matrix:
+	var result = Matrix.new(matrix.rows, matrix.cols)
+	for row in range(result.rows):
+		for col in range(result.cols):
+			result.data[row][col] = matrix.data[row][col]
+	return result

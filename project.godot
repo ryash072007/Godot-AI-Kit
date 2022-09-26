@@ -33,9 +33,21 @@ _global_script_class_icons={
 [application]
 
 config/name="Godot Neural Network Plugin"
+run/main_scene="res://Demo/Demo.tscn"
 config/features=PackedStringArray("4.0", "Vulkan Clustered")
+boot_splash/show_image=false
+boot_splash/bg_color=Color(0, 0, 0, 1)
 config/icon="res://icon.svg"
+
+[display]
+
+window/stretch/mode="viewport"
+window/stretch/aspect="expand"
 
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/neural_network/plugin.cfg")
+
+[rendering]
+
+environment/defaults/default_clear_color=Color(0, 0, 0, 1)
