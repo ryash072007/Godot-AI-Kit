@@ -59,5 +59,11 @@ wait_time = 10.0
 one_shot = true
 autostart = true
 
+[node name="Line2d" type="Line2D" parent="."]
+position = Vector2(-16, 16)
+points = PackedVector2Array(0, -32, 0, 0, 32, 0, 32, -32, -1, -32)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
 [connection signal="area_entered" from="dec" to="." method="_on_dec_area_entered"]
 [connection signal="timeout" from="alive" to="." method="_on_alive_timeout"]

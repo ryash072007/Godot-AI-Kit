@@ -28,6 +28,7 @@ static func to_array(matrix: Matrix) -> Array:
 	return result
 
 static func rand(matrix: Matrix) -> Matrix:
+	seed(randi())
 	randomize()
 	
 	var result = Matrix.new(matrix.rows, matrix.cols)
@@ -126,3 +127,11 @@ static func copy(matrix: Matrix) -> Matrix:
 		for col in range(result.cols):
 			result.data[row][col] = matrix.data[row][col]
 	return result
+
+static func average(matrix: Matrix) -> float:
+	var average_value: float = 0.0
+	for row in range(matrix.rows):
+		for col in range(matrix.cols):
+			average_value += matrix.data[row][col]
+	average_value = average_value / matrix.rows * matrix.cols
+	return average_value

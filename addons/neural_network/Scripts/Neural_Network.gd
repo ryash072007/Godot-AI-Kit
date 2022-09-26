@@ -29,7 +29,7 @@ func _init() -> void:
 
 func set_nn_data(_input_nodes: int, _hidden_nodes: int, _output_nodes: int) -> void:
 	assert(_input_nodes != 0 or _output_nodes != 0, "The NN's input or output nodes can NOT be set to 0!")
-	
+	seed(randi())
 	randomize()
 	
 	input_nodes = _input_nodes;
@@ -53,10 +53,18 @@ func set_nodes(_input_nodes: int, _hidden_nodes: int, _output_nodes: int) -> voi
 	hidden_nodes = _hidden_nodes;
 	output_nodes = _output_nodes;
 	
-	set_random_color()
+#	set_random_color()
 
-func set_random_color():
-	color = Color(randi_range(0, 1), randi_range(0, 1), randi_range(0, 1), 1)
+func set_random_color(object = self):
+#	seed(randi())
+#	randomize()
+#	color = Color(randi_range(0, 1), randi_range(0, 1), randi_range(0, 1), 1)
+	color = Color(
+		Matrix.average(object.weights_input_hidden),
+		Matrix.average(object.weights_hidden_output),
+		Matrix.average(object.bias_hidden),
+		Matrix.average(object.bias_output)
+	)
 
 func set_activation_function(callback: Callable = Callable(Activation, "sigmoid"), dcallback: Callable = Callable(Activation, "dsigmoid")) -> void:
 	activation_function = callback
@@ -140,7 +148,8 @@ func get_distance(_raycast: RayCast2D):
 		var collision: Vector2 = _raycast.get_collision_point()
 		
 		distance = origin.distance_to(collision)
-
+	else:
+		distance = sqrt((pow(_raycast.target_position.x, 2) + pow(_raycast.target_position.y, 2)))
 	return distance
 
 static func reproduce(a: NeuralNetwork, b: NeuralNetwork) -> NeuralNetwork:
@@ -160,6 +169,23 @@ static func mutate(nn: NeuralNetwork, callback: Callable = Callable(NeuralNetwor
 	result.weights_hidden_output = Matrix.map(nn.weights_hidden_output, callback)
 	result.bias_hidden = Matrix.map(nn.bias_hidden, callback)
 	result.bias_output = Matrix.map(nn.bias_output, callback)
+	randomize()
+	result.color = Color(
+		Matrix.average(result.weights_input_hidden),
+		Matrix.average(result.weights_hidden_output),
+		Matrix.average(result.bias_hidden),
+		Matrix.average(result.bias_output)
+	) + Color(randf_range(-0.2, 0.2), randf_range(-0.2, 0.2), randf_range(-0.2, 0.2))
+	
+	if result.color.r > 1 or result.color.r < 0:
+		result.color.r = floori(result.color.r)
+	if result.color.g > 1 or result.color.g < 0:
+		result.color.g = floori(result.color.g)
+	if result.color.b > 1 or result.color.b < 0:
+		result.color.b = floori(result.color.b)
+	if result.color.a > 1 or result.color.a < 0:
+		result.color.a = floori(result.color.a)
+#	result.color = nn.color + Color(randf_range(-0.2, 0.2), randf_range(-0.2, 0.2), randf_range(-0.2, 0.2))
 	return result
 
 static func copy(nn : NeuralNetwork) -> NeuralNetwork:
@@ -169,6 +195,7 @@ static func copy(nn : NeuralNetwork) -> NeuralNetwork:
 	result.weights_hidden_output = Matrix.copy(nn.weights_hidden_output)
 	result.bias_hidden = Matrix.copy(nn.bias_hidden)
 	result.bias_output = Matrix.copy(nn.bias_output)
+	result.color = nn.color
 	return result
 
 static func mutate_callable(value, _row, _col):

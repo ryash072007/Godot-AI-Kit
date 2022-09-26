@@ -6,9 +6,9 @@ var ai = preload("res://Demo/player.tscn")
 
 
 var best_fitness: float
-var best_nn
+var best_nn: NeuralNetwork
 
-var batch_size := 25
+var batch_size := 35
 var left_alive: int
 
 var generation: int = 0
@@ -34,7 +34,7 @@ func _process(_delta):
 	$al.text = str(left_alive)
 	$fit.text = str(best_fitness)
 	if $AIs.get_child_count() == 0:
-#		print("Gen " + str(generation - 1) + ", Best Fitness: " + str(best_fitness))
+#		print("Gen " + str(generation - 1) + ", Best NN Hidden Nodes: " + str(best_nn.hidden_nodes))
 		left_alive = batch_size
 		spawn(batch_size - 1)
 		var new = ai.instantiate()
