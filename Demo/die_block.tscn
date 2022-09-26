@@ -1,0 +1,23 @@
+[gd_scene load_steps=4 format=3 uid="uid://bi5h17l3c1sxm"]
+
+[ext_resource type="Texture2D" uid="uid://dofy04mphk2l8" path="res://Demo/player.png" id="1_1rfa4"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_38nui"]
+size = Vector2(33, 30)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_k5i7e"]
+size = Vector2(34, 32)
+
+[node name="dieBlock" type="StaticBody2D"]
+
+[node name="Sprite2d" type="Sprite2D" parent="."]
+modulate = Color(0, 1, 0.141176, 1)
+texture = ExtResource("1_1rfa4")
+
+[node name="CollisionShape2d" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_38nui")
+
+[node name="kill" type="Area2D" parent="."]
+
+[node name="CollisionShape2d2" type="CollisionShape2D" parent="kill"]
+shape = SubResource("RectangleShape2D_k5i7e")
