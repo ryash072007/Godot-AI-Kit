@@ -52,6 +52,8 @@ func set_nodes(_input_nodes: int, _hidden_nodes: int, _output_nodes: int) -> voi
 	input_nodes = _input_nodes;
 	hidden_nodes = _hidden_nodes;
 	output_nodes = _output_nodes;
+	
+	set_random_color()
 
 func set_random_color():
 	color = Color(randi_range(0, 1), randi_range(0, 1), randi_range(0, 1), 1)
@@ -120,7 +122,7 @@ func get_inputs_from_raycasts() -> Array:
 	var _input_array: Array[float]
 	
 	for ray in raycasts:
-		_input_array.push_front(get_distance(ray))
+		if is_instance_valid(ray): _input_array.push_front(get_distance(ray))
 	
 	return _input_array
 
@@ -173,6 +175,6 @@ static func mutate_callable(value, _row, _col):
 	seed(randi())
 	randomize()
 #	if randf_range(0, 1) < 0.7:
-	value += randf_range(-0.5, 0.5)
+	value += randf_range(-0.1, 0.1)
 		
 	return value

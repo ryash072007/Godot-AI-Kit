@@ -6,7 +6,7 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_iqe1o"]
 size = Vector2(32, 32)
 
-[node name="player" type="CharacterBody2D"]
+[node name="player" type="CharacterBody2D" groups=["ai"]]
 collision_layer = 2
 script = ExtResource("1_68c25")
 
@@ -31,9 +31,20 @@ target_position = Vector2(238, 0)
 rotation = -1.20836
 target_position = Vector2(238, 0)
 
+[node name="RayCast2d6" type="RayCast2D" parent="rays"]
+rotation = -1.56858
+target_position = Vector2(238, 0)
+
+[node name="RayCast2d7" type="RayCast2D" parent="rays"]
+rotation = -1.40204
+target_position = Vector2(238, 0)
+
+[node name="RayCast2d8" type="RayCast2D" parent="rays"]
+rotation = -1.40204
+target_position = Vector2(238, 0)
+
 [node name="RayCast2d3" type="RayCast2D" parent="rays"]
 rotation = -0.241506
-scale = Vector2(1, 1)
 target_position = Vector2(238, 0)
 
 [node name="RayCast2d" type="RayCast2D" parent="rays"]
@@ -43,4 +54,10 @@ target_position = Vector2(238, 0)
 rotation = -0.866253
 target_position = Vector2(238, 0)
 
+[node name="alive" type="Timer" parent="."]
+wait_time = 10.0
+one_shot = true
+autostart = true
+
 [connection signal="area_entered" from="dec" to="." method="_on_dec_area_entered"]
+[connection signal="timeout" from="alive" to="." method="_on_alive_timeout"]
