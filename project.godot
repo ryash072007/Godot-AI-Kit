@@ -8,39 +8,11 @@
 
 config_version=5
 
-_global_script_classes=[{
-"base": "RefCounted",
-"class": &"Activation",
-"language": &"GDScript",
-"path": "res://addons/neural_net/Scripts/Activation.gd"
-}, {
-"base": "RefCounted",
-"class": &"Matrix",
-"language": &"GDScript",
-"path": "res://addons/neural_net/Scripts/Matrix.gd"
-}, {
-"base": "RefCounted",
-"class": &"NeuralNetwork",
-"language": &"GDScript",
-"path": "res://addons/neural_net/Scripts/Neural_Network.gd"
-}, {
-"base": "RefCounted",
-"class": &"NeuralNetworkAdvanced",
-"language": &"GDScript",
-"path": "res://addons/neural_net/Scripts/Neural_Network_Advanced.gd"
-}]
-_global_script_class_icons={
-"Activation": "",
-"Matrix": "",
-"NeuralNetwork": "",
-"NeuralNetworkAdvanced": ""
-}
-
 [application]
 
 config/name="Neural Net Plugin"
 run/main_scene="res://Demo/demo.tscn"
-config/features=PackedStringArray("4.0")
+config/features=PackedStringArray("4.1")
 config/icon="res://icon.svg"
 
 [display]
@@ -56,6 +28,6 @@ enabled=PackedStringArray("res://addons/neural_net/plugin.cfg")
 
 predict={
 "deadzone": 0.5,
-"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":4194309,"unicode":0,"echo":false,"script":null)
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":4194309,"key_label":0,"unicode":0,"echo":false,"script":null)
 ]
 }
