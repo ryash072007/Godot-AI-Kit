@@ -290,15 +290,9 @@ offset_top = 496.0
 offset_right = 80.0
 offset_bottom = 560.0
 
-[node name="control" type="Timer" parent="."]
-wait_time = 0.02
-autostart = true
-
 [node name="lr" type="Label" parent="."]
 offset_left = 608.0
 offset_top = 64.0
 offset_right = 1040.0
 offset_bottom = 160.0
 theme_override_font_sizes/font_size = 50
-
-[connection signal="timeout" from="control" to="." method="_on_control_timeout"]
