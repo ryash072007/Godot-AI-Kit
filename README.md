@@ -90,5 +90,14 @@ where nn_1 and nn_2 are the parent Neural Networks.
 
 ## Q-Learning Algorithm
 
+This algorithm implements Q-Learning algorithm using Q-Table natively in Godot.
+
+### Things to keep in mind when using QLearning
+1. The predict method of the QLearning class takes two compulsory arguments:
+	```
+	<QLearning variable>.predict(current_state, previous_state_reward)
+	```
+	The current state has to be a whole number representing the state it is currently in, while the previous_state_reward has to a float representing the reward it got for the previous action it took.
+2. 
 ## Credits
 NeuralNet basis: Greaby
