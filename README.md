@@ -155,7 +155,7 @@ This can be set to <code>true</code> if you want to print debug info - total ste
 </ol>
 <h3 id="things-to-keep-in-mind-when-using-qlearning">Things to keep in mind when using QLearning</h3>
 <ol>
-<li>The predict method of the QLearning class takes two compulsory arguments:<pre><code>&lt;QLearning variable&gt;.predict(current_state, previous_state_reward)
+<li>The predict method of the QLearning class takes two compulsory arguments:<pre><code>qnet.predict(current_state, previous_state_reward)
 </code></pre>
 The <code>current_state</code> has to be a whole number representing the state it is currently in, while the <code>previous_state_reward</code> has to a float representing the reward it got for the previous action it took.</li>
 </ol>
