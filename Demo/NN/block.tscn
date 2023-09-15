@@ -1,0 +1,17 @@
+[gd_scene load_steps=4 format=3 uid="uid://c87rop3h5d1ue"]
+
+[ext_resource type="Script" path="res://Demo/NN/block.gd" id="1_70jfv"]
+[ext_resource type="Texture2D" uid="uid://bkofsmbtcxgkr" path="res://Demo/NN/player.png" id="1_l0mlx"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_32rde"]
+size = Vector2(32, 32)
+
+[node name="block" type="StaticBody2D"]
+script = ExtResource("1_70jfv")
+
+[node name="Sprite2d" type="Sprite2D" parent="."]
+modulate = Color(1, 0.121569, 0.0196078, 1)
+texture = ExtResource("1_l0mlx")
+
+[node name="CollisionShape2d" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_32rde")

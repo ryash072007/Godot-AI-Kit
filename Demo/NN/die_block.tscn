@@ -1,0 +1,19 @@
+[gd_scene load_steps=4 format=3 uid="uid://c3pjp67bbav1k"]
+
+[ext_resource type="Texture2D" uid="uid://bkofsmbtcxgkr" path="res://Demo/NN/player.png" id="1_1rfa4"]
+[ext_resource type="Script" path="res://Demo/NN/kill.gd" id="2_tkpe6"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_k5i7e"]
+size = Vector2(32, 32)
+
+[node name="kill" type="Area2D" groups=["enemy"]]
+script = ExtResource("2_tkpe6")
+
+[node name="CollisionShape2d2" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_k5i7e")
+
+[node name="Sprite2d" type="Sprite2D" parent="."]
+modulate = Color(0, 1, 0.141176, 1)
+texture = ExtResource("1_1rfa4")
+
+[connection signal="area_entered" from="." to="." method="_on_kill_area_entered"]

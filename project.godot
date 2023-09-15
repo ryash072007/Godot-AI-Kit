@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Neural Net Plugin"
-run/main_scene="res://Demo/demo.tscn"
+run/main_scene="res://Demo/QL/QL_demo.tscn"
 config/features=PackedStringArray("4.1")
 config/icon="res://icon.svg"
 
@@ -19,6 +19,11 @@ config/icon="res://icon.svg"
 
 window/stretch/mode="viewport"
 window/stretch/aspect="expand"
+
+[editor]
+
+movie_writer/movie_file="C:/Users/ryash/Documents/Godot 4 - Projects/Plugins/Godot Neural Network Plugin/learning_cubes.avi"
+movie_writer/fps=30
 
 [editor_plugins]
 

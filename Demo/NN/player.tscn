@@ -1,0 +1,76 @@
+[gd_scene load_steps=5 format=3 uid="uid://dqh5ftagl7t68"]
+
+[ext_resource type="Script" path="res://Demo/NN/player.gd" id="1_ws817"]
+[ext_resource type="Texture2D" uid="uid://bkofsmbtcxgkr" path="res://Demo/NN/player.png" id="2_2ifkm"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_iqe1o"]
+size = Vector2(32, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_aecva"]
+size = Vector2(34, 34)
+
+[node name="player" type="CharacterBody2D" groups=["ai"]]
+collision_layer = 2
+floor_stop_on_slope = false
+floor_block_on_wall = false
+script = ExtResource("1_ws817")
+
+[node name="Sprite2d" type="Sprite2D" parent="."]
+texture = ExtResource("2_2ifkm")
+
+[node name="enemy_detector" type="Area2D" parent="."]
+
+[node name="CollisionShape2d2" type="CollisionShape2D" parent="enemy_detector"]
+shape = SubResource("RectangleShape2D_iqe1o")
+
+[node name="rays" type="Node2D" parent="."]
+
+[node name="RayCast2d2" type="RayCast2D" parent="rays"]
+rotation = -0.546592
+target_position = Vector2(238, 0)
+collide_with_areas = true
+
+[node name="RayCast2d5" type="RayCast2D" parent="rays"]
+rotation = -1.20836
+target_position = Vector2(238, 0)
+collide_with_areas = true
+
+[node name="RayCast2d6" type="RayCast2D" parent="rays"]
+rotation = -1.56858
+target_position = Vector2(90, 0)
+collide_with_areas = true
+
+[node name="RayCast2d7" type="RayCast2D" parent="rays"]
+rotation = -1.40204
+target_position = Vector2(238, 0)
+collide_with_areas = true
+
+[node name="RayCast2d8" type="RayCast2D" parent="rays"]
+rotation = -1.40204
+target_position = Vector2(238, 0)
+collide_with_areas = true
+
+[node name="RayCast2d3" type="RayCast2D" parent="rays"]
+rotation = -0.241506
+target_position = Vector2(238, 0)
+collide_with_areas = true
+
+[node name="RayCast2d" type="RayCast2D" parent="rays"]
+target_position = Vector2(238, 0)
+collide_with_areas = true
+
+[node name="RayCast2d4" type="RayCast2D" parent="rays"]
+rotation = -0.866253
+target_position = Vector2(238, 0)
+collide_with_areas = true
+
+[node name="Line2d" type="Line2D" parent="."]
+position = Vector2(-16, 16)
+points = PackedVector2Array(0, -32, 0, 0, 32, 0, 32, -32, -1, -32)
+width = 4.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="CollisionShape2d2" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_aecva")
+
+[connection signal="area_entered" from="enemy_detector" to="." method="_on_enemy_detector_area_entered"]

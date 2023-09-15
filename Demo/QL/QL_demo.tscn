@@ -1,0 +1,304 @@
+[gd_scene load_steps=2 format=3 uid="uid://br7q850tfbf6"]
+
+[ext_resource type="Script" path="res://Demo/QL/QL_demo.gd" id="1_0okm1"]
+
+[node name="QL_demo" type="Node2D"]
+position = Vector2(64, 32)
+script = ExtResource("1_0okm1")
+
+[node name="bck" type="Node2D" parent="."]
+
+[node name="normal1" type="ColorRect" parent="bck"]
+offset_right = 96.0
+offset_bottom = 96.0
+color = Color(0, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal2" type="ColorRect" parent="bck"]
+offset_top = 96.0
+offset_right = 96.0
+offset_bottom = 192.0
+color = Color(0, 1, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal3" type="ColorRect" parent="bck"]
+offset_top = 192.0
+offset_right = 96.0
+offset_bottom = 288.0
+color = Color(1, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal4" type="ColorRect" parent="bck"]
+offset_top = 288.0
+offset_right = 96.0
+offset_bottom = 384.0
+color = Color(0, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal5" type="ColorRect" parent="bck"]
+offset_top = 384.0
+offset_right = 96.0
+offset_bottom = 480.0
+color = Color(0, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal6" type="ColorRect" parent="bck"]
+offset_top = 480.0
+offset_right = 96.0
+offset_bottom = 576.0
+color = Color(0, 0, 1, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal7" type="ColorRect" parent="bck"]
+offset_left = 96.0
+offset_right = 192.0
+offset_bottom = 96.0
+color = Color(1, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal8" type="ColorRect" parent="bck"]
+offset_left = 96.0
+offset_top = 96.0
+offset_right = 192.0
+offset_bottom = 192.0
+color = Color(0, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal9" type="ColorRect" parent="bck"]
+offset_left = 96.0
+offset_top = 192.0
+offset_right = 192.0
+offset_bottom = 288.0
+color = Color(0, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal10" type="ColorRect" parent="bck"]
+offset_left = 96.0
+offset_top = 288.0
+offset_right = 192.0
+offset_bottom = 384.0
+color = Color(0, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal11" type="ColorRect" parent="bck"]
+offset_left = 96.0
+offset_top = 384.0
+offset_right = 192.0
+offset_bottom = 480.0
+color = Color(0, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal12" type="ColorRect" parent="bck"]
+offset_left = 96.0
+offset_top = 480.0
+offset_right = 192.0
+offset_bottom = 576.0
+color = Color(0, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal13" type="ColorRect" parent="bck"]
+offset_left = 192.0
+offset_right = 288.0
+offset_bottom = 96.0
+color = Color(0, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal14" type="ColorRect" parent="bck"]
+offset_left = 192.0
+offset_top = 96.0
+offset_right = 288.0
+offset_bottom = 192.0
+color = Color(0, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal15" type="ColorRect" parent="bck"]
+offset_left = 192.0
+offset_top = 192.0
+offset_right = 288.0
+offset_bottom = 288.0
+color = Color(0, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal16" type="ColorRect" parent="bck"]
+offset_left = 192.0
+offset_top = 288.0
+offset_right = 288.0
+offset_bottom = 384.0
+color = Color(0, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal17" type="ColorRect" parent="bck"]
+offset_left = 192.0
+offset_top = 384.0
+offset_right = 288.0
+offset_bottom = 480.0
+color = Color(0, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal18" type="ColorRect" parent="bck"]
+offset_left = 192.0
+offset_top = 480.0
+offset_right = 288.0
+offset_bottom = 576.0
+color = Color(0, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal19" type="ColorRect" parent="bck"]
+offset_left = 288.0
+offset_right = 384.0
+offset_bottom = 96.0
+color = Color(0, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal20" type="ColorRect" parent="bck"]
+offset_left = 288.0
+offset_top = 96.0
+offset_right = 384.0
+offset_bottom = 192.0
+color = Color(0, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal21" type="ColorRect" parent="bck"]
+offset_left = 288.0
+offset_top = 192.0
+offset_right = 384.0
+offset_bottom = 288.0
+color = Color(1, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal22" type="ColorRect" parent="bck"]
+offset_left = 288.0
+offset_top = 288.0
+offset_right = 384.0
+offset_bottom = 384.0
+color = Color(0, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal23" type="ColorRect" parent="bck"]
+offset_left = 288.0
+offset_top = 384.0
+offset_right = 384.0
+offset_bottom = 480.0
+color = Color(0, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal24" type="ColorRect" parent="bck"]
+offset_left = 288.0
+offset_top = 480.0
+offset_right = 384.0
+offset_bottom = 576.0
+color = Color(1, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal25" type="ColorRect" parent="bck"]
+offset_left = 384.0
+offset_right = 480.0
+offset_bottom = 96.0
+color = Color(0, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal26" type="ColorRect" parent="bck"]
+offset_left = 384.0
+offset_top = 96.0
+offset_right = 480.0
+offset_bottom = 192.0
+color = Color(1, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal27" type="ColorRect" parent="bck"]
+offset_left = 384.0
+offset_top = 192.0
+offset_right = 480.0
+offset_bottom = 288.0
+color = Color(0, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal28" type="ColorRect" parent="bck"]
+offset_left = 384.0
+offset_top = 288.0
+offset_right = 480.0
+offset_bottom = 384.0
+color = Color(0, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal29" type="ColorRect" parent="bck"]
+offset_left = 384.0
+offset_top = 384.0
+offset_right = 480.0
+offset_bottom = 480.0
+color = Color(0, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal30" type="ColorRect" parent="bck"]
+offset_left = 384.0
+offset_top = 480.0
+offset_right = 480.0
+offset_bottom = 576.0
+color = Color(0, 1, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal31" type="ColorRect" parent="bck"]
+offset_left = 480.0
+offset_right = 576.0
+offset_bottom = 96.0
+color = Color(0, 1, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal32" type="ColorRect" parent="bck"]
+offset_left = 480.0
+offset_top = 96.0
+offset_right = 576.0
+offset_bottom = 192.0
+color = Color(0, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal33" type="ColorRect" parent="bck"]
+offset_left = 480.0
+offset_top = 192.0
+offset_right = 576.0
+offset_bottom = 288.0
+color = Color(0, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal34" type="ColorRect" parent="bck"]
+offset_left = 480.0
+offset_top = 288.0
+offset_right = 576.0
+offset_bottom = 384.0
+color = Color(0, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal35" type="ColorRect" parent="bck"]
+offset_left = 480.0
+offset_top = 384.0
+offset_right = 576.0
+offset_bottom = 480.0
+color = Color(0, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="normal36" type="ColorRect" parent="bck"]
+offset_left = 480.0
+offset_top = 480.0
+offset_right = 576.0
+offset_bottom = 576.0
+color = Color(0, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="player" type="ColorRect" parent="."]
+offset_left = 16.0
+offset_top = 496.0
+offset_right = 80.0
+offset_bottom = 560.0
+
+[node name="control" type="Timer" parent="."]
+wait_time = 0.02
+autostart = true
+
+[node name="lr" type="Label" parent="."]
+offset_left = 608.0
+offset_top = 64.0
+offset_right = 1040.0
+offset_bottom = 160.0
+theme_override_font_sizes/font_size = 50
+
+[connection signal="timeout" from="control" to="." method="_on_control_timeout"]
