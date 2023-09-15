@@ -1,11 +1,17 @@
-# Neural Network and Neural Net Plugin for Godot 4
+# AI Algorithm for Godot 4
+The goal of this project is to provide a variety of AI Algorithms in Godot 4 natively using GDscript.
+
+## Index
+1. [Simple Neural Network and Neural Net](#simple-neural-network-and-neural-net-plugin-for-godot-4)
+2. [Q-Learning Algorithm](#q-learning-algorithm)
+## Simple Neural Network and Neural Net Plugin for Godot 4
 
 
-This plugin allows you to create a Multi Layer Neural Network and also provides a NeuralNet by which you can easily automatically train the network (which can be found under Node2D Section in the add node window).
+This part of the plugin allows you to create a Multi Layer Neural Network and also provides a NeuralNet by which you can easily automatically train the network (which can be found under Node2D Section in the add node window).
 This plugin is intended for creating AIs that can complete a game level.
 
 
-## Rules to be followed if using Neural Net
+### Rules to be followed if using Neural Net
 
 1. If using Neural Net, the identifier or name of the variable of the Neural Network used in your code has to be "nn.". Like this:
 ```
@@ -24,7 +30,7 @@ This is because the Neural Net depends on the fact that "nn" is not assigned any
 Object.queue_free()
 ```
 
-## What each variable means and how to use them
+### What each variable means and how to use them
 1. Ai Scene: This is where you will assign the AI or Player scene by clicking on the drop down arrow on the right side, clicking "quick load" and selecting your scene.
 2. Batch Size: This is the informal Batch Size of each generation. The actual batch size of each generation is emitted by the "true_batch_size" signal. This controls the base amount of AIs spawned.
 3. Generation Delay: This is the time limit (in seconds) for any generation. Once a generation has lived longer than the amount specified in this, the generation is reset and the next generation comes.
@@ -35,11 +41,11 @@ Object.queue_free()
 8. Use Reproduction: This determines whether reproduction will also be used to create new AIs for the next generations. This enables for combination of different traits of different "nn"s. However, you will most probably not need this as Random and Mutated Population will suffice.
 9. Reproduced Population: If "Use Reproduction" is checked, this will determine how many AIs will be spawned with reproduced "nn"s. Note: This value must always be greater than half of the value of Batch Size if you have checked "Use Reproduction" as true.
 
-## How to use Neural Net
+### How to use Neural Net
 
 Just ensure that all the variables/properties mentioned above are correctly set. The position of this node is where all the AIs will be spawned, meaning, the position of this node = position of AI when spawned.
 
-## How to use Neural Network
+### How to use Neural Network
 
 ```
 var nn: NeuralNetwork = NeuralNetwork.new(input_nodes, hidden_nodes, output_nodes)
@@ -82,5 +88,7 @@ reproduced_nn = NeuralNetwork.reproduce(nn_1, nn_2)
 ```
 where nn_1 and nn_2 are the parent Neural Networks.
 
+## Q-Learning Algorithm
+
 ## Credits
-I would like to credit Greaby for the basis of the Neural Network.
+NeuralNet basis: Greaby
