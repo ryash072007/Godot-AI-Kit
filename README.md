@@ -1,5 +1,6 @@
 ---
 
+Project will continue once I complete CS50ai.
 
 ---
 
