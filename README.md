@@ -1,11 +1,11 @@
 ---
-
+<p>
 Project will continue once I complete CS50ai.
 
 TODO:
 1. Multi-Layer Neural Network Support (more than a single hidden network)
 2. PPO Support (Unrealistic but will try!)
-
+</p>
 ---
 
 <h1 id="ai-algorithm-for-godot-4">AI Algorithm for Godot 4</h1>
