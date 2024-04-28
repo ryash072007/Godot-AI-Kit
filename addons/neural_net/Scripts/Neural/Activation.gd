@@ -51,3 +51,9 @@ static func softplus(value: float, _row: int, _col: int) -> float:
 
 static func dsoftplus(value: float, _row: int, _col: int) -> float:
 	return 1 / (1 + exp(-value))
+
+static func identity(value: float, _row: int, _col: int) -> float:
+	return value
+
+static func didentity(value: float, _row: int, _col: int) -> float:
+	return value

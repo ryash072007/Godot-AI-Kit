@@ -27,6 +27,17 @@ static func to_array(matrix: Matrix) -> Array:
 			result.append(matrix.data[row][col])
 	return result
 
+static func rand_value_matrix(_rows: int, _cols: int) -> Matrix:
+	seed(randi())
+	randomize()
+	
+	var result = Matrix.new(_rows, _cols)
+	
+	for row in range(result.rows):
+		for col in range(result.cols):
+			result.data[row][col] = randf_range(-1, 1)
+	return result
+
 static func rand(matrix: Matrix) -> Matrix:
 	seed(randi())
 	randomize()
@@ -94,8 +105,6 @@ static func dot_divide(a: Matrix, b: Matrix) -> Matrix:
 				result.data[row][col] += b.data[k][col] / a.data[row][k]
 
 	return result
-
-
 
 
 static func multiply(a: Matrix, b: Matrix) -> Matrix:
