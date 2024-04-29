@@ -1,5 +1,12 @@
 class_name NeuralNetworkAdvanced
 
+"""
+TODO:
+	1. Continous Output Type -> Ongoing
+	2. Discrete Output Type -> Not started
+"""
+
+
 static var ACTIVATIONS: Dictionary = {
 	"SIGMOID": {
 		"function": Callable(Activation, "sigmoid"),
