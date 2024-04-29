@@ -54,7 +54,7 @@ class Layer:
 	func add_biases(inputsDotWeight: Matrix):
 		return Matrix.add(inputsDotWeight, biases) # Order: (m x 1)
 	
-	func _init(_input_nodes: int, _nodes: int, _activation_functions):
+	func _init(_nodes: int, _input_nodes: int, _activation_functions):
 		# Setting up values
 		nodes = _nodes
 		input_nodes = _input_nodes
@@ -68,12 +68,13 @@ class Layer:
 var no_of_layers: int = 0
 var layer_data: Array[Layer] = []
 
-func add_layer(nodes: int, activation_function: Dictionary = ACTIVATIONS["IDENTITY"]):
+func add_layer(nodes: int, activation_function: Dictionary=ACTIVATIONS["IDENTITY"]):
 	var new_layer
 	if len(layer_data) == 0:
-		new_layer = Layer.new(1, nodes, activation_function)
+		new_layer = Layer.new(nodes, 1, activation_function)
 	else:
-		new_layer = Layer.new(layer_data[-1].nodes, nodes, activation_function)
+		new_layer = Layer.new(nodes, layer_data[-1].nodes, activation_function)
 	new_layer.index = no_of_layers
 	no_of_layers += 1
 	layer_data.append(new_layer)
+
