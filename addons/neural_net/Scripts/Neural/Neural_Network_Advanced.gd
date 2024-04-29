@@ -6,7 +6,6 @@ TODO:
 	2. Discrete Output Type -> Not started
 """
 
-
 static var ACTIVATIONS: Dictionary = {
 	"SIGMOID": {
 		"function": Callable(Activation, "sigmoid"),
@@ -55,10 +54,13 @@ class Layer:
 	var weights: Matrix # Dimensions = (m x n)
 	var biases: Matrix # Dimensions = # Dimensions = (m x 1)
 
-	func dot_weights(inputs: Matrix):
+	func dot_weights(inputs: Matrix) -> Matrix:
+		# print("_______________________")
+		# print("cols: ", weights.cols)
+		# print("rows: ", inputs.rows)
 		return Matrix.dot_product(weights, inputs) # Dimensions = (m x 1)
 	
-	func add_biases(inputsDotWeight: Matrix):
+	func add_biases(inputsDotWeight: Matrix) -> Matrix:
 		return Matrix.add(inputsDotWeight, biases) # Order: (m x 1)
 	
 	func _init(_nodes: int, _input_nodes: int, _activation_functions):
@@ -75,13 +77,24 @@ class Layer:
 var no_of_layers: int = 0
 var layer_data: Array[Layer] = []
 
-func add_layer(nodes: int, activation_function: Dictionary=ACTIVATIONS["IDENTITY"]):
+func add_layer(nodes: int, activation_function: Dictionary=self.ACTIVATIONS["IDENTITY"]):
 	var new_layer
 	if len(layer_data) == 0:
 		new_layer = Layer.new(nodes, 1, activation_function)
 	else:
-		new_layer = Layer.new(nodes, layer_data[-1].nodes, activation_function)
+		new_layer = Layer.new(nodes, layer_data[ - 1].nodes, activation_function)
 	new_layer.index = no_of_layers
 	no_of_layers += 1
 	layer_data.append(new_layer)
 
+func predict(input: Array) -> Array:
+	assert(len(input) == layer_data[0].nodes, "The input data has to have the same number of elements as there is nodes in the first layer")
+	var layer_input: Matrix = Matrix.from_array(input)
+	for layer_index in range(1, no_of_layers):
+		var current_layer: Layer = layer_data[layer_index]
+		var weighted_inputs: Matrix = current_layer.dot_weights(layer_input)
+		var weighted_inputs_biased: Matrix = current_layer.add_biases(weighted_inputs)
+		var activated_weighted_inputs_biased: Matrix = Matrix.map(weighted_inputs_biased, current_layer.activation_function)
+		layer_input = activated_weighted_inputs_biased
+
+	return Matrix.to_array(layer_input)
