@@ -56,4 +56,4 @@ static func identity(value: float, _row: int, _col: int) -> float:
 	return value
 
 static func didentity(value: float, _row: int, _col: int) -> float:
-	return value
+	return 1.0
