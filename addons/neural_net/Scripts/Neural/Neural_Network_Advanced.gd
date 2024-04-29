@@ -90,11 +90,45 @@ func add_layer(nodes: int, activation_function: Dictionary=self.ACTIVATIONS["IDE
 func predict(input: Array) -> Array:
 	assert(len(input) == layer_data[0].nodes, "The input data has to have the same number of elements as there is nodes in the first layer")
 	var layer_input: Matrix = Matrix.from_array(input)
+	var prediction: Matrix = forward_propagation(layer_input)
+	return Matrix.to_array(prediction)
+
+
+func predict_matrix(input: Matrix) -> Matrix:
+	assert(input.rows == layer_data[0].nodes)
+	var prediction: Matrix = forward_propagation(input)
+	return prediction
+
+
+func forward_propagation(_layer_input: Matrix):
+	var layer_input: Matrix = _layer_input
 	for layer_index in range(1, no_of_layers):
 		var current_layer: Layer = layer_data[layer_index]
 		var weighted_inputs: Matrix = current_layer.dot_weights(layer_input)
 		var weighted_inputs_biased: Matrix = current_layer.add_biases(weighted_inputs)
 		var activated_weighted_inputs_biased: Matrix = Matrix.map(weighted_inputs_biased, current_layer.activation_function)
 		layer_input = activated_weighted_inputs_biased
+	return layer_input
 
-	return Matrix.to_array(layer_input)
+
+func train(inputs: Array[Array], target_outputs: Array[Array]) -> void:
+	assert(len(inputs) != 0 and len(target_outputs) != 0)
+	assert(len(inputs) == len(target_outputs))
+	
+	var length_of_train: int = len(inputs)
+
+	for index in range(length_of_train):
+		var input: Matrix = Matrix.from_array(inputs[index])
+		var predicted_output: Matrix = self.predict_matrix(input)
+		var target_output: Matrix =  Matrix.from_array(target_outputs[index])
+		var loss: Matrix # Also called delta
+		for layer_index in range(no_of_layers, 1, -1): # Going back in layer_data excluding the first one
+			var current_layer: Layer = layer_data[layer_index]
+			loss = Matrix.subtract(target_output, predicted_output)
+			var d_output: Matrix = Matrix.map(predicted_output, current_layer.d_activation_function)
+			var d_outputXloss: Matrix = Matrix.multiply(d_output, loss) # (m x 1)
+			var transposed_weights: Matrix = Matrix.transpose(current_layer.weights) # (n x m)
+			var loss_previous_layer: Matrix = Matrix.dot_product(transposed_weights, d_outputXloss)
+
+			loss = loss_previous_layer
+
