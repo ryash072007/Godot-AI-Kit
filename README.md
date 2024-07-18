@@ -8,7 +8,7 @@ TODO:
 
 <h1 id="ai-algorithm-for-godot-4">AI Algorithm for Godot 4</h1>
 <p>The goal of this project is to provide a variety of AI Algorithms in Godot 4 natively using GDscript.</p>
-<p> Current Active Branch: <a href="https://github.com/ryash072007/Godot-4-Neural-Network/tree/NNA-Rewrite">NNA-Rewrite</a></p>
+<p> Current Active Branch: <a href="https://github.com/ryash072007/Godot-4-Neural-Network/tree/Minimax">Minimax</a></p>
 <h2 id="index">Index</h2>
 <ol>
 <li><a href="#simple-neural-network-and-neural-net-plugin-for-godot-4">Simple Neural Network and Neural Net</a></li>
