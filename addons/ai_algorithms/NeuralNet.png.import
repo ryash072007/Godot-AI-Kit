@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b4f7rqsx18y1v"
-path="res://.godot/imported/NeuralNetwork.png-774c8db8300f6891ef6856984031d44d.ctex"
+uid="uid://do4jgq30xysek"
+path="res://.godot/imported/NeuralNet.png-9ee0727f34a0eb95684cea04beef27ef.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/neural_net/NeuralNetwork.png"
-dest_files=["res://.godot/imported/NeuralNetwork.png-774c8db8300f6891ef6856984031d44d.ctex"]
+source_file="res://addons/ai_algorithms/NeuralNet.png"
+dest_files=["res://.godot/imported/NeuralNet.png-9ee0727f34a0eb95684cea04beef27ef.ctex"]
 
 [params]
 

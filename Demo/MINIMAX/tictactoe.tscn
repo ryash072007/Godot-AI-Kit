@@ -1,0 +1,3 @@
+[gd_scene format=3 uid="uid://dkirr84hb380s"]
+
+[node name="Tictactoe" type="Node2D"]
