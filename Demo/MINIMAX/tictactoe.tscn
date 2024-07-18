@@ -1,3 +1,123 @@
-[gd_scene format=3 uid="uid://dkirr84hb380s"]
+[gd_scene load_steps=2 format=3 uid="uid://dkirr84hb380s"]
+
+[ext_resource type="Script" path="res://Demo/MINIMAX/tictactoe.gd" id="1_u3n37"]
 
 [node name="Tictactoe" type="Node2D"]
+script = ExtResource("1_u3n37")
+
+[node name="board" type="Node2D" parent="."]
+position = Vector2(382, 143)
+scale = Vector2(3, 3)
+
+[node name="border" type="ColorRect" parent="board"]
+offset_left = -2.0
+offset_top = -2.0
+offset_right = 122.0
+offset_bottom = 122.0
+color = Color(0, 0, 0, 1)
+
+[node name="background" type="ColorRect" parent="board"]
+offset_right = 120.0
+offset_bottom = 120.0
+color = Color(0.858316, 0.534704, 0.344562, 1)
+
+[node name="col_brder" type="Node2D" parent="board"]
+
+[node name="inner_border2" type="Line2D" parent="board/col_brder"]
+position = Vector2(40, 0)
+points = PackedVector2Array(40, 0, 40, 120)
+width = 1.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="inner_border" type="Line2D" parent="board/col_brder"]
+points = PackedVector2Array(40, 0, 40, 120)
+width = 1.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="row_brder" type="Node2D" parent="board"]
+position = Vector2(120, 0)
+rotation = 1.5708
+
+[node name="inner_border2" type="Line2D" parent="board/row_brder"]
+position = Vector2(40, 0)
+points = PackedVector2Array(40, 0, 40, 120)
+width = 1.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="inner_border" type="Line2D" parent="board/row_brder"]
+points = PackedVector2Array(40, 0, 40, 120)
+width = 1.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="0" type="Node2D" parent="board"]
+
+[node name="0" type="Button" parent="board/0"]
+offset_right = 40.0
+offset_bottom = 40.0
+flat = true
+
+[node name="1" type="Button" parent="board/0"]
+offset_left = 40.0
+offset_right = 80.0
+offset_bottom = 40.0
+flat = true
+
+[node name="2" type="Button" parent="board/0"]
+offset_left = 80.0
+offset_right = 120.0
+offset_bottom = 40.0
+flat = true
+
+[node name="1" type="Node2D" parent="board"]
+
+[node name="0" type="Button" parent="board/1"]
+offset_top = 40.0
+offset_right = 40.0
+offset_bottom = 80.0
+flat = true
+
+[node name="1" type="Button" parent="board/1"]
+offset_left = 40.0
+offset_top = 40.0
+offset_right = 80.0
+offset_bottom = 80.0
+flat = true
+
+[node name="2" type="Button" parent="board/1"]
+offset_left = 80.0
+offset_top = 40.0
+offset_right = 120.0
+offset_bottom = 80.0
+flat = true
+
+[node name="2" type="Node2D" parent="board"]
+
+[node name="0" type="Button" parent="board/2"]
+offset_top = 80.0
+offset_right = 40.0
+offset_bottom = 120.0
+flat = true
+
+[node name="1" type="Button" parent="board/2"]
+offset_left = 40.0
+offset_top = 80.0
+offset_right = 80.0
+offset_bottom = 120.0
+flat = true
+
+[node name="2" type="Button" parent="board/2"]
+offset_left = 80.0
+offset_top = 80.0
+offset_right = 120.0
+offset_bottom = 120.0
+flat = true
+
+[connection signal="pressed" from="board/0/0" to="." method="grid_cell_clicked" binds= [Vector2i(0, 0)]]
+[connection signal="pressed" from="board/0/1" to="." method="grid_cell_clicked" binds= [Vector2i(1, 0)]]
+[connection signal="pressed" from="board/0/2" to="." method="grid_cell_clicked" binds= [Vector2i(2, 0)]]
+[connection signal="pressed" from="board/1/0" to="." method="grid_cell_clicked" binds= [Vector2i(0, 1)]]
+[connection signal="pressed" from="board/1/1" to="." method="grid_cell_clicked" binds= [Vector2i(1, 1)]]
+[connection signal="pressed" from="board/1/2" to="." method="grid_cell_clicked" binds= [Vector2i(2, 1)]]
+[connection signal="pressed" from="board/2/0" to="." method="grid_cell_clicked" binds= [Vector2i(0, 2)]]
+[connection signal="pressed" from="board/2/1" to="." method="grid_cell_clicked" binds= [Vector2i(1, 2)]]
+[connection signal="pressed" from="board/2/2" to="." method="grid_cell_clicked" binds= [Vector2i(2, 2)]]
