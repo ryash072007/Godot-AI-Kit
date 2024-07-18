@@ -112,6 +112,12 @@ offset_right = 120.0
 offset_bottom = 120.0
 flat = true
 
+[node name="caption" type="RichTextLabel" parent="."]
+offset_left = 371.0
+offset_top = 533.0
+offset_right = 768.0
+offset_bottom = 622.0
+
 [connection signal="pressed" from="board/0/0" to="." method="grid_cell_clicked" binds= [Vector2i(0, 0)]]
 [connection signal="pressed" from="board/0/1" to="." method="grid_cell_clicked" binds= [Vector2i(1, 0)]]
 [connection signal="pressed" from="board/0/2" to="." method="grid_cell_clicked" binds= [Vector2i(2, 0)]]

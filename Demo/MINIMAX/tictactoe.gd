@@ -9,9 +9,14 @@ Callable(possible_actions)
 var turn = "X"
 var _board = [[null, null, null],[null, null, null],[null, null, null]]
 
+var _is_adversary: bool = false
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	minimax.is_adversary = true
+	if _is_adversary:
+		minimax.is_adversary = _is_adversary
+	else:
+		ai_minimax()
 
 
 func result(board: Array, action: Array, is_adversary: bool) -> Array:
@@ -72,13 +77,26 @@ func grid_cell_clicked(pos: Vector2i) -> void:
 	_board[pos.y][pos.x] = turn
 	var grid_cell = get_node("board/%s/%s" % [pos.y, pos.x])
 	grid_cell.text = turn
-	
 	change_turn()
+	check_game_over()
 	
+	ai_minimax()
+
+
+func check_game_over():
+	if utility(_board, _is_adversary) != 0:
+		$caption.text = turn + " won!"
+
+	if terminal(_board):
+		$caption.text = "Draw!"
+
+
+func ai_minimax() -> void:
 	var action_to_do: Array = minimax.action(_board)
 	if not action_to_do:
 		return
 	_board[action_to_do[1]][action_to_do[0]] = turn
-	grid_cell = get_node("board/%s/%s" % [action_to_do[1], action_to_do[0]])
+	var grid_cell = get_node("board/%s/%s" % [action_to_do[1], action_to_do[0]])
 	grid_cell.text = turn
 	change_turn()
+	check_game_over()
