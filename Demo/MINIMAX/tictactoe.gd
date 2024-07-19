@@ -9,7 +9,7 @@ Callable(possible_actions)
 var turn = "X"
 var _board = [[null, null, null],[null, null, null],[null, null, null]]
 
-var _is_adversary: bool = false
+var _is_adversary: bool = true
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -85,10 +85,10 @@ func grid_cell_clicked(pos: Vector2i) -> void:
 
 func check_game_over():
 	if utility(_board, _is_adversary) != 0:
-		$caption.text = turn + " won!"
+		$caption.text = turn + " won!" + str(minimax.states_explored)
 
 	if terminal(_board):
-		$caption.text = "Draw!"
+		$caption.text = "Draw!" + str(minimax.states_explored)
 
 
 func ai_minimax() -> void:

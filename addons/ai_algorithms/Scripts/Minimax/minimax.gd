@@ -6,6 +6,7 @@ var utility_func: Callable
 var possible_actions_func: Callable
 
 var is_adversary: bool = false
+var states_explored: int = 0
 
 func _init(result_func: Callable, terminal_func: Callable, utility_func: Callable, possible_actions_func: Callable):
 	self.result_func = result_func
@@ -45,6 +46,7 @@ func minimax(state: Array, _is_adversary: bool) -> float:
 	
 	for _action in possible_actions:
 		var result_state = result_func.call(state, _action, _is_adversary)
+		states_explored += 1
 		var value_of_result_state: float = self.minimax(result_state, not _is_adversary)
 		match not _is_adversary:
 			true:
