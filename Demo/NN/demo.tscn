@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://c87rop3h5d1ue" path="res://Demo/NN/block.tscn" id="2_iyiel"]
 [ext_resource type="PackedScene" uid="uid://c3pjp67bbav1k" path="res://Demo/NN/die_block.tscn" id="3_4mem1"]
 [ext_resource type="Script" path="res://Demo/NN/won.gd" id="4_v6yp1"]
-[ext_resource type="Script" path="res://addons/neural_net/Scripts/Neural/Neural_Net.gd" id="5_tewmy"]
+[ext_resource type="Script" path="res://addons/ai_algorithms/Scripts/Neural/Neural_Net.gd" id="5_tewmy"]
 [ext_resource type="PackedScene" uid="uid://dqh5ftagl7t68" path="res://Demo/NN/player.tscn" id="6_qs1wj"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_b72eq"]
@@ -2515,6 +2515,13 @@ position = Vector2(720, 384)
 zoom = Vector2(0.8, 0.85)
 
 [connection signal="tree_exiting" from="." to="." method="_on_demo_tree_exiting"]
+[connection signal="area_entered" from="track/kill" to="track/kill" method="_on_kill_area_entered"]
+[connection signal="area_entered" from="track/@Area2D@31619" to="track/@Area2D@31619" method="_on_kill_area_entered"]
+[connection signal="area_entered" from="track/@Area2D@31620" to="track/@Area2D@31620" method="_on_kill_area_entered"]
+[connection signal="area_entered" from="track/@Area2D@31621" to="track/@Area2D@31621" method="_on_kill_area_entered"]
+[connection signal="area_entered" from="track/@Area2D@31622" to="track/@Area2D@31622" method="_on_kill_area_entered"]
+[connection signal="area_entered" from="track/@Area2D@31623" to="track/@Area2D@31623" method="_on_kill_area_entered"]
+[connection signal="area_entered" from="track/@Area2D@31624" to="track/@Area2D@31624" method="_on_kill_area_entered"]
 [connection signal="body_entered" from="won" to="won" method="_on_won_body_entered"]
 [connection signal="gen_changed" from="Neural_Net" to="won" method="_on_neural_net_gen_changed"]
 [connection signal="true_batch_size" from="Neural_Net" to="won" method="_on_neural_net_true_batch_size"]
