@@ -85,10 +85,10 @@ func grid_cell_clicked(pos: Vector2i) -> void:
 
 func check_game_over():
 	if utility(_board, _is_adversary) != 0:
-		$caption.text = turn + " won!" + str(minimax.states_explored)
+		$caption.text = turn + " won! States explored: " + str(minimax.states_explored)
 
-	if terminal(_board):
-		$caption.text = "Draw!" + str(minimax.states_explored)
+	elif terminal(_board):
+		$caption.text = "Draw! States explored: " + str(minimax.states_explored)
 
 
 func ai_minimax() -> void:
