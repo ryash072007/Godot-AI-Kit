@@ -12,6 +12,8 @@ TODO:
 
 </p>
 
+
+<video src="https://github.com/ryash072007/Godot-AI-Kit/blob/0d8e79a7641ab1fb6973a2761532cac866cdcd2d/videos/Godot%20AI%20Kit.mp4"></video>
   
 
 <h1  id="ai-algorithm-for-godot-4">AI Algorithm for Godot 4</h1>
