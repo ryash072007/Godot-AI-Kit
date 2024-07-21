@@ -13,8 +13,8 @@ TODO:
 </p>
 
 
-<video src="https://github.com/ryash072007/Godot-AI-Kit/blob/0d8e79a7641ab1fb6973a2761532cac866cdcd2d/videos/Godot%20AI%20Kit.mp4"></video>
-  
+[https://github.com/ryash072007/Godot-AI-Kit/blob/d1fab400e05bb33b6b00007e4790bfca6c76b23a/videos/Godot%20AI%20Kit.mp4](https://github.com/ryash072007/Godot-AI-Kit/blob/d1fab400e05bb33b6b00007e4790bfca6c76b23a/videos/Godot%20AI%20Kit.mp4)
+
 
 <h1  id="ai-algorithm-for-godot-4">AI Algorithm for Godot 4</h1>
 
