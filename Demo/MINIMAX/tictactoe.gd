@@ -11,7 +11,6 @@ var _board = [[null, null, null],[null, null, null],[null, null, null]]
 
 var _is_adversary: bool = true
 
-# Called when the node enters the scene tree for the first time.
 func _ready():
 	if _is_adversary:
 		minimax.is_adversary = _is_adversary

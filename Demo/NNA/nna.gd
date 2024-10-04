@@ -9,8 +9,6 @@ func _ready() -> void:
 	nnas.add_layer(1, nnas.ACTIVATIONS.SIGMOID)
 	
 
-#	print(nnas.predict([1, 1]))
-
 func _physics_process(delta: float) -> void:
 	nnas.train([0,0], [0])
 	nnas.train([1,0], [1])

@@ -96,8 +96,6 @@ static func dot_divide(a: Matrix, b: Matrix) -> Matrix:
 	return result
 
 
-
-
 static func multiply(a: Matrix, b: Matrix) -> Matrix:
 	assert(a.rows == b.rows and a.cols == b.cols)
 	

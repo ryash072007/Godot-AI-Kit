@@ -1,77 +1,93 @@
-extends Node2D
+class_name Minimax
 
-var qnet: QLearning
-var row: int = 0
-var column: int = 0
+var result_func: Callable
+var terminal_func: Callable
+var utility_func: Callable
+var possible_actions_func: Callable
 
-var reward_states = [4, 24, 35]
-var punish_states = [3, 18, 21, 28, 31]
+var is_adversary: bool = false
+var states_explored: int = 0
+var depth_reached: int = 0
+var max_depth: int
 
-var current_state: int = 0
-var previous_reward: float = 0.0
+func _init(result_func: Callable, terminal_func: Callable, utility_func: Callable, possible_actions_func: Callable, depth: int = -1):
+	self.result_func = result_func
+	self.terminal_func = terminal_func
+	self.utility_func = utility_func
+	self.possible_actions_func = possible_actions_func
+	self.max_depth = depth
 
-var total_iteration_rewards: Array[float] = []
-var current_iteration_rewards: float = 0.0
-var done: bool = false
-
-func _ready() -> void:
-	qnet = QLearning.new(36, 4)
-	qnet.print_debug_info = true
-
-
-func _physics_process(_delta: float) -> void:
-	if Input.is_action_just_pressed("predict"):
-		$control.wait_time = 0.5
-	elif Input.is_action_just_pressed("ui_down"):
-		$control.wait_time = 0.02
-	if done:
-		reset()
-		return
-	current_state = row * 6 + column
-	var action_to_do: int = qnet.predict(current_state, previous_reward)
+# Modified action function with alpha-beta pruning.
+func action(state: Array, depth: int = -1) -> Array:
+	var possible_actions: Array = possible_actions_func.call(state)
+	var optimal_action: Array
+	var optimal_value: float = -INF if not is_adversary else INF
 	
-	current_iteration_rewards += previous_reward
-	previous_reward = 0.0
-		
-	if is_out_bound(action_to_do):
-		previous_reward -= 0.75
-		done = true
-	elif row * 6 + column in punish_states:
-		previous_reward -= 0.5
-		done = true
-	elif (row * 6 + column) in reward_states:
-		previous_reward += 1.0
-		done = true
-	else:
-		previous_reward -= 0.05
-	$player.position = Vector2(96 * column + 16, 512 - (96 * row + 16))
-	$lr.text = str(qnet.exploration_probability)
+	depth_reached += 1
 
+	# Initialize alpha and beta for pruning.
+	var alpha: float = -INF
+	var beta: float = INF
 
-func is_out_bound(action: int) -> bool:
-	var _column := column
-	var _row := row
-	match action:
-		0:
-			_column -= 1
-		1:
-			_row += 1
-		2:
-			_column += 1
-		3:
-			_row -= 1
-	if _column < 0 or _row < 0 or _column > 5 or _row > 5:
-		return true
-	else:
-		column = _column
-		row = _row
-		return false
+	# Iterate through all possible actions.
+	for _action in possible_actions:
+		var result_state = result_func.call(state, _action, not is_adversary)
+		# Call minimax with alpha and beta values.
+		var value_of_result_state: float = self.minimax(result_state, not is_adversary, alpha, beta)
+		match not is_adversary:
+			true:
+				if value_of_result_state > optimal_value:
+					optimal_action = _action
+					optimal_value = value_of_result_state
+				# Update alpha.
+				alpha = max(alpha, optimal_value)
+			false:
+				if value_of_result_state < optimal_value:
+					optimal_action = _action
+					optimal_value = value_of_result_state
+				# Update beta.
+				beta = min(beta, optimal_value)
 
-func reset():
-	row = 0
-	column = 0
-	done = false
-	print(current_iteration_rewards)
-	total_iteration_rewards.append(current_iteration_rewards)
-	current_iteration_rewards = 0.0
-	$player.position = Vector2(96 * column + 16, 512 - (96 * row + 16))
+		# Prune if alpha is greater or equal to beta.
+		if beta <= alpha:
+			break
+
+	return optimal_action
+
+# Modified minimax function with alpha-beta pruning.
+func minimax(state: Array, _is_adversary: bool, alpha: float, beta: float) -> float:
+	# Base case: Check if the state is terminal or maximum depth reached.
+	if terminal_func.call(state) == true or (max_depth != -1 and depth_reached >= max_depth):
+		depth_reached = 0
+		return utility_func.call(state, not _is_adversary)
+
+	var possible_actions: Array = possible_actions_func.call(state)
+	var optimal_value: float = -INF if not _is_adversary else INF
+
+	depth_reached += 1
+
+	# Iterate through possible actions.
+	for _action in possible_actions:
+		var result_state = result_func.call(state, _action, _is_adversary)
+		states_explored += 1
+		var value_of_result_state: float = self.minimax(result_state, not _is_adversary, alpha, beta)
+
+		match not _is_adversary:
+			# Maximize the value for non-adversary (player).
+			true:
+				if value_of_result_state > optimal_value:
+					optimal_value = value_of_result_state
+				# Update alpha value.
+				alpha = max(alpha, optimal_value)
+			# Minimize the value for adversary.
+			false:
+				if value_of_result_state < optimal_value:
+					optimal_value = value_of_result_state
+				# Update beta value.
+				beta = min(beta, optimal_value)
+
+		# Prune the branches if alpha is greater or equal to beta.
+		if beta <= alpha:
+			break
+
+	return optimal_value
