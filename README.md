@@ -1,19 +1,10 @@
-<p>
-
-Project will continue once I complete CS50ai.
-
-  
-
 TODO:
 
-1. Multi-Layer Neural Network Support (more than a single hidden network)
+~~1. Multi-Layer Neural Network Support (more than a single hidden network)~~ [Completed]
 
 2. PPO Support (Unrealistic but will try!)
 
 </p>
-
-
-[https://github.com/ryash072007/Godot-AI-Kit/blob/d1fab400e05bb33b6b00007e4790bfca6c76b23a/videos/Godot%20AI%20Kit.mp4](https://github.com/ryash072007/Godot-AI-Kit/blob/d1fab400e05bb33b6b00007e4790bfca6c76b23a/videos/Godot%20AI%20Kit.mp4)
 
 
 <h1  id="ai-algorithm-for-godot-4">AI Algorithm for Godot 4</h1>
@@ -25,6 +16,8 @@ TODO:
 <ol>
 
 <li><a  href="#simple-neural-network-and-neural-net-plugin-for-godot-4">Simple Neural Network and Neural Net</a></li>
+
+<li><a  href="#NNA">Neural Network Advanced (Multi-Layered Neural Network)</a></li>
 
 <li><a  href="#q-learning-algorithm">Q-Learning Algorithm</a></li>
 
@@ -200,6 +193,46 @@ nn.train([1, 1], [0])
 
 <p>where <code>nn_1</code> and <code>nn_2</code> are the parent Neural Networks.</p>
 
+<h2 id="NNA">Neural Network Advanced </h2>
+<p> <b>Note:</b> Support for this in the Neural Net has not been implemented yet.</p>
+<h3> How to use NeuralNetworkAdvanced class</h3>
+<ol>
+<li> Initialising the NNA variable
+
+    var nnas: NeuralNetworkAdvanced = NeuralNetworkAdvanced.new()
+</li>
+<li>Add the first layer to the network. Here you should only specify the number of nodes needed in this layer.
+
+    nnas.add_layer(2)
+  </li>
+<li> Add the remaining layers to the network. Here you can also specify which activation function to use. Eg:
+
+    nnas.add_layer(4, nnas.ACTIVATIONS.ARCTAN)
+	nnas.add_layer(6, nnas.ACTIVATIONS.ARCTAN)
+	nnas.add_layer(1, nnas.ACTIVATIONS.SIGMOID)
+</li>
+<li> To train the network, you can call the <code>train()</code> function on the NNA. The first argument has to be the <b>input array of size same as that of the first layer</b> and the <b>second argument has to be the output array of size same as the last layer of the network.</b>
+Note: This only runs a single train call. You need to do a lot of these to train your NNA to be accurate. Eg: Training for an XOR Gate. In the demo, you can see that this code is placed in the <code>_physics_process</code> function so that it is ran many times a second.
+
+    nnas.train([0,0], [0])
+	nnas.train([1,0], [1])
+	nnas.train([0,1], [1])
+	nnas.train([1,1], [0])
+</li>
+<li> To get a prediction/output from the NNA. You have to call the <code>predict</code> function on the NNA. The first and only argument has to be input  array for the network. It will return an array of the same size as that of the last/output layer. Eg:
+
+    print(nnas.predict([1,0]))
+will return <code>[1]</code> when trained.
+</ol>
+<h3>Note</h3>
+<ol>
+<li>
+Addition of layers should only happen once and so <code>_ready()</code> is an appropriate place to put them.
+</li>
+<li>
+All the possible activations functions can be seen here: [NeuralNetworkAdvanced.gd](https://github.com/ryash072007/Godot-AI-Kit/blob/main/addons/ai_algorithms/Scripts/Neural/Neural_Network_Advanced.gd) under the <code>ACTIVATION</code> dictionary.
+</li>
+</ol>
 <h2  id="q-learning-algorithm">Q-Learning Algorithm</h2>
 
 <p>This algorithm implements Q-Learning algorithm using Q-Table natively in Godot.</p>
