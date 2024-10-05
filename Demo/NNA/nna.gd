@@ -2,7 +2,6 @@ extends Node2D
 
 var nnas: NeuralNetworkAdvanced = NeuralNetworkAdvanced.new()
 func _ready() -> void:
-
 	nnas.add_layer(2)
 	nnas.add_layer(4, nnas.ACTIVATIONS.ARCTAN)
 	nnas.add_layer(6, nnas.ACTIVATIONS.ARCTAN)

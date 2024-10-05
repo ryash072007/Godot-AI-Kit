@@ -2,64 +2,69 @@ class_name QLearning
 
 # Observation Spaces are the possible states the agent can be in
 # Action Spaces are the possible actions the agent can take
-var observation_space: int
-var action_spaces: int
+var observation_space: int  # Number of different states the agent can encounter
+var action_spaces: int       # Number of different actions the agent can take
 
-# The table that contains the value for each cell in the QLearning alogorithm
-var QTable: Matrix
+# The table that contains the value for each cell in the QLearning algorithm
+var QTable: Matrix          # Matrix to store Q-values for state-action pairs
 
 # Hyper-parameters
-var exploration_probability: float = 1.0 # The probability that the agent will either explore or exploit the QTable
-var exploration_decreasing_decay: float = 0.01 # The exploartion decreasing decay for exponential decreasing
-var min_exploration_probability: float = 0.01 # The least value that the exploration_probability can fall to
-var discounted_factor: float = 0.9 # Basically the gamma
-var learning_rate: float = 0.2 # How fast the agent learns
-var decay_per_steps: int = 100
-var steps_completed: int = 0
+var exploration_probability: float = 1.0 # The probability that the agent will explore instead of exploiting the QTable
+var exploration_decreasing_decay: float = 0.01 # Rate at which exploration probability decreases
+var min_exploration_probability: float = 0.01 # The minimum value exploration probability can reach
+var discounted_factor: float = 0.9 # Discount factor (gamma) for future rewards
+var learning_rate: float = 0.2 # Rate at which the agent learns from new information
+var decay_per_steps: int = 100  # Number of steps after which exploration probability decays
+var steps_completed: int = 0      # Counter for steps taken by the agent
 
 # States
-var previous_state: int = -100# To be used in the algorithms
-var current_state: int # To be swapped for the previous state at the end of each prediction
-var previous_action: int # To b usd in the algorithm
+var previous_state: int = -100 # Used to store the previous state for updates
+var current_state: int          # Current state of the agent to be updated
+var previous_action: int        # Action taken in the previous step, to be used for updates
 
-var done: bool = false
-var is_learning: bool = true
-var print_debug_info: bool = false
+var done: bool = false           # Flag indicating if the episode is finished
+var is_learning: bool = true     # Flag to indicate if the agent is currently learning
+var print_debug_info: bool = false # Flag to enable printing debug information
 
+# Constructor function to initialize the QLearning agent
 func _init(n_observations: int, n_action_spaces: int, _is_learning: bool = true) -> void:
-	observation_space = n_observations
-	action_spaces = n_action_spaces
-	is_learning = _is_learning
+	observation_space = n_observations  # Set the number of observations
+	action_spaces = n_action_spaces      # Set the number of actions
+	is_learning = _is_learning            # Set the learning flag
 	
-	QTable = Matrix.new(observation_space, action_spaces)
+	QTable = Matrix.new(observation_space, action_spaces)  # Initialize the Q-table as a matrix
 
+# Function to predict the action to take based on the current state and reward
 func predict(current_state: int, reward_of_previous_state: float) -> int:
+	# Update the Q-table if the agent is in learning mode
 	if is_learning:
-		if previous_state != -100:
+		if previous_state != -100:  # Check if there's a valid previous state
+			# Update the Q-value for the previous state-action pair
 			QTable.data[previous_state][previous_action] = (1 - learning_rate) * QTable.data[previous_state][previous_action] + \
 			learning_rate * (reward_of_previous_state + discounted_factor * QTable.max_from_row(current_state))
 		
-	var action_to_take: int
+	var action_to_take: int  # Variable to hold the action to take
 	
-	# If randf is lesser than the exploration probability, which will be the case initially, 
-	# it chooses a random value, else, it exploits the QTable
+	# If a random number is less than exploration probability, explore; otherwise, exploit the QTable
 	if randf() < exploration_probability and is_learning:
-		action_to_take = randi_range(0, action_spaces - 1)
+		action_to_take = randi_range(0, action_spaces - 1)  # Choose a random action
 	else:
-		action_to_take = QTable.index_of_max_from_row(current_state)
+		action_to_take = QTable.index_of_max_from_row(current_state)  # Choose the best action based on Q-values
 	
 	if is_learning:
-		previous_state = current_state
-		previous_action = action_to_take
-	
+		previous_state = current_state  # Update previous state
+		previous_action = action_to_take  # Update previous action
+		
+		# Decay exploration probability after a certain number of steps
 		if steps_completed != 0 and steps_completed % decay_per_steps == 0:
-			exploration_probability = maxf(min_exploration_probability, exploration_probability - exploration_decreasing_decay)#, exp(-exploration_decreasing_decay * exp(1)))
-	
+			exploration_probability = maxf(min_exploration_probability, exploration_probability - exploration_decreasing_decay)  # Decrease exploration probability, but not below the minimum
+			
+	# Print debug information if enabled and if it's time to do so
 	if print_debug_info and steps_completed % decay_per_steps == 0:
-		print("Total steps completed:", steps_completed)
-		print("Current exploration probability:", exploration_probability)
-		print("Q-Table data:", QTable.data)
+		print("Total steps completed:", steps_completed)  # Print total steps taken
+		print("Current exploration probability:", exploration_probability)  # Print current exploration probability
+		print("Q-Table data:", QTable.data)  # Print Q-table data
 		print("-----------------------------------------------------------------------------------------")
 	
-	steps_completed += 1
-	return action_to_take
+	steps_completed += 1  # Increment the steps completed counter
+	return action_to_take  # Return the action to be taken
