@@ -20,7 +20,7 @@ TODO:
 
 <li><a  href="#NNA">Neural Network Advanced (Multi-Layered Neural Network)</a></li>
 
-<li><a  href="#q-learning-algorithm">Q-Learning Algorithm</a></li>
+<li><a  href="#q-learning-algorithm">Q-Learning Algorithm (and SARSA)</a></li>
 
 <li><a  href="#minimax-algorithm">Minimax Algorithm</a></li>
 
