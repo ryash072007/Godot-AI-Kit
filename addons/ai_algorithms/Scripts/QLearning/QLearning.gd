@@ -8,6 +8,9 @@ var action_spaces: int       # Number of different actions the agent can take
 # The table that contains the value for each cell in the QLearning algorithm
 var QTable: Matrix          # Matrix to store Q-values for state-action pairs
 
+# Modified version of QLearning that enables SARSA (State-Action-Reward-State-Action)
+var SARSA: bool = true
+
 # Hyper-parameters
 var exploration_probability: float = 1.0 # The probability that the agent will explore instead of exploiting the QTable
 var exploration_decreasing_decay: float = 0.01 # Rate at which exploration probability decreases
@@ -27,22 +30,17 @@ var is_learning: bool = true     # Flag to indicate if the agent is currently le
 var print_debug_info: bool = false # Flag to enable printing debug information
 
 # Constructor function to initialize the QLearning agent
-func _init(n_observations: int, n_action_spaces: int, _is_learning: bool = true) -> void:
+func _init(n_observations: int, n_action_spaces: int, _is_learning: bool = true, not_sarsa: bool = false) -> void:
 	observation_space = n_observations  # Set the number of observations
 	action_spaces = n_action_spaces      # Set the number of actions
 	is_learning = _is_learning            # Set the learning flag
+	SARSA = not not_sarsa
 	
 	QTable = Matrix.new(observation_space, action_spaces)  # Initialize the Q-table as a matrix
 
 # Function to predict the action to take based on the current state and reward
 func predict(current_state: int, reward_of_previous_state: float) -> int:
-	# Update the Q-table if the agent is in learning mode
-	if is_learning:
-		if previous_state != -100:  # Check if there's a valid previous state
-			# Update the Q-value for the previous state-action pair
-			QTable.data[previous_state][previous_action] = (1 - learning_rate) * QTable.data[previous_state][previous_action] + \
-			learning_rate * (reward_of_previous_state + discounted_factor * QTable.max_from_row(current_state))
-		
+	
 	var action_to_take: int  # Variable to hold the action to take
 	
 	# If a random number is less than exploration probability, explore; otherwise, exploit the QTable
@@ -52,6 +50,18 @@ func predict(current_state: int, reward_of_previous_state: float) -> int:
 		action_to_take = QTable.index_of_max_from_row(current_state)  # Choose the best action based on Q-values
 	
 	if is_learning:
+		# Update the Q-table if the agent is in learning mode
+		if previous_state != -100:  # Check if there's a valid previous state
+			# Update the Q-value for the previous state-action pair
+			if not SARSA:
+				# Traditional QLearning algo
+				QTable.data[previous_state][previous_action] = (1 - learning_rate) * QTable.data[previous_state][previous_action] + \
+				learning_rate * (reward_of_previous_state + discounted_factor * QTable.max_from_row(current_state))
+			else:
+				# SARSA algo
+				QTable.data[previous_state][previous_action] = (1 - learning_rate) * QTable.data[previous_state][previous_action] + \
+				learning_rate * (reward_of_previous_state + discounted_factor * QTable.data[current_state][action_to_take])
+			
 		previous_state = current_state  # Update previous state
 		previous_action = action_to_take  # Update previous action
 		

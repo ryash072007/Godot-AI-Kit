@@ -1,3 +1,4 @@
+
 TODO:
 
 ~~1. Multi-Layer Neural Network Support (more than a single hidden network)~~ [Completed]
@@ -199,29 +200,29 @@ nn.train([1, 1], [0])
 <ol>
 <li> Initialising the NNA variable
 
-    var nnas: NeuralNetworkAdvanced = NeuralNetworkAdvanced.new()
+	var nnas: NeuralNetworkAdvanced = NeuralNetworkAdvanced.new()
 </li>
 <li>Add the first layer to the network. Here you should only specify the number of nodes needed in this layer.
 
-    nnas.add_layer(2)
+	nnas.add_layer(2)
   </li>
 <li> Add the remaining layers to the network. Here you can also specify which activation function to use. Eg:
 
-    nnas.add_layer(4, nnas.ACTIVATIONS.ARCTAN)
+	nnas.add_layer(4, nnas.ACTIVATIONS.ARCTAN)
 	nnas.add_layer(6, nnas.ACTIVATIONS.ARCTAN)
 	nnas.add_layer(1, nnas.ACTIVATIONS.SIGMOID)
 </li>
 <li> To train the network, you can call the <code>train()</code> function on the NNA. The first argument has to be the <b>input array of size same as that of the first layer</b> and the <b>second argument has to be the output array of size same as the last layer of the network.</b>
 Note: This only runs a single train call. You need to do a lot of these to train your NNA to be accurate. Eg: Training for an XOR Gate. In the demo, you can see that this code is placed in the <code>_physics_process</code> function so that it is ran many times a second.
 
-    nnas.train([0,0], [0])
+	nnas.train([0,0], [0])
 	nnas.train([1,0], [1])
 	nnas.train([0,1], [1])
 	nnas.train([1,1], [0])
 </li>
 <li> To get a prediction/output from the NNA. You have to call the <code>predict</code> function on the NNA. The first and only argument has to be input  array for the network. It will return an array of the same size as that of the last/output layer. Eg:
 
-    print(nnas.predict([1,0]))
+	print(nnas.predict([1,0]))
 will return <code>[1]</code> when trained.
 </ol>
 <h3>Note</h3>
@@ -245,11 +246,11 @@ All the possible activations functions can be seen here: [NeuralNetworkAdvanced.
 
 <p>Initialise a QLearning variable</p>
 
-<pre><code>var qnet: QLearning = QLearning.new(observation_space, action_space)
+<pre><code>var qnet: QLearning = QLearning.new(observation_space, action_space, is_learning, not_sarsa)
 
 </code></pre>
 
-<p>Both the <code>observation_space</code> and <code>action_space</code> have to be natural numbers representing the possible states the agent can be in and the possible actions choices the agent can take in any given state.</p>
+<p>Both the <code>observation_space</code> and <code>action_space</code> have to be natural numbers representing the possible states the agent can be in and the possible actions choices the agent can take in any given state. <code>is_learning</code> is a boolean value of whether the agent should be learning or not, and <code>not_sarsa</code> set to <code>true</code> will disable sarsa (on-policy). I would recommend sarsa if you want a safer route to the final path.</p>
 
 </li>
 
