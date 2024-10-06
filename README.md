@@ -364,7 +364,6 @@ The <code>current_state</code> has to be a whole number representing the state i
 
 </ol>
 <h2  id="minimax-algorithm">Minimax Algorithm</h2>
-The implementation of this algorithm currently does not support alpha-beta pruning (however, depth-limited minimax is implemented but not documented), i.e., this algorithm is not optimised whatsoever.
 If the AI is playing the role of the adversary, then set <code>minimax.is_adversary</code> to <code>true</code> else <code> false</code>.
 <h3  id="how-to-use-minimax-class">How to use Minimax class</h3>
 <ol>
