@@ -3,7 +3,9 @@ TODO:
 
 ~~1. Multi-Layer Neural Network Support (more than a single hidden network)~~ [Completed]
 
-2. PPO Support (Unrealistic but will try!)
+~~2. PPO Support (Unrealistic but will try!)~~ [On Hold]
+
+3. Simple DQN Support [will start soon]
 
 </p>
 
