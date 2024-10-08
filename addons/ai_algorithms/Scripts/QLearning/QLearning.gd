@@ -66,15 +66,16 @@ func predict(current_state: int, reward_of_previous_state: float) -> int:
 		previous_action = action_to_take  # Update previous action
 		
 		# Decay exploration probability after a certain number of steps
-		if steps_completed != 0 and steps_completed % decay_per_steps == 0:
-			exploration_probability = maxf(min_exploration_probability, exploration_probability - exploration_decreasing_decay)  # Decrease exploration probability, but not below the minimum
-			
-	# Print debug information if enabled and if it's time to do so
-	if print_debug_info and steps_completed % decay_per_steps == 0:
-		print("Total steps completed:", steps_completed)  # Print total steps taken
-		print("Current exploration probability:", exploration_probability)  # Print current exploration probability
-		print("Q-Table data:", QTable.data)  # Print Q-table data
-		print("-----------------------------------------------------------------------------------------")
+		if decay_per_steps != 0:
+			if steps_completed != 0 and steps_completed % decay_per_steps == 0:
+				exploration_probability = maxf(min_exploration_probability, exploration_probability - exploration_decreasing_decay)  # Decrease exploration probability, but not below the minimum
+	if decay_per_steps != 0:
+		# Print debug information if enabled and if it's time to do so
+		if print_debug_info and steps_completed % decay_per_steps == 0:
+			print("Total steps completed:", steps_completed)  # Print total steps taken
+			print("Current exploration probability:", exploration_probability)  # Print current exploration probability
+			print("Q-Table data:", QTable.data)  # Print Q-table data
+			print("-----------------------------------------------------------------------------------------")
 	
 	steps_completed += 1  # Increment the steps completed counter
 	return action_to_take  # Return the action to be taken

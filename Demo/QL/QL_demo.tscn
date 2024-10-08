@@ -296,3 +296,9 @@ offset_top = 64.0
 offset_right = 1040.0
 offset_bottom = 160.0
 theme_override_font_sizes/font_size = 50
+
+[node name="control" type="Timer" parent="."]
+wait_time = 0.05
+autostart = true
+
+[connection signal="timeout" from="control" to="." method="_on_control_timeout"]
