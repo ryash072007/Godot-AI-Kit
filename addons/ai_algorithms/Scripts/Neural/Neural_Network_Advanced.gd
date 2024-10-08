@@ -32,6 +32,10 @@ var ACTIVATIONS: Dictionary = {
 	"SOFTPLUS": {
 		"function": Callable(Activation, "softplus"),
 		"derivative": Callable(Activation, "dsoftplus")
+	},
+	"LINEAR": {
+		"function": Callable(Activation, "linear"),
+		"derivative": Callable(Activation, "dlinear")
 	}
 }
 
@@ -59,14 +63,14 @@ func add_layer(nodes: int, activation: Dictionary = ACTIVATIONS.SIGMOID):
 func predict(input_array: Array) -> Array:
 	# Convert input array to a matrix
 	var inputs: Matrix = Matrix.from_array(input_array)
-	
+
 	# Forward pass through the network
 	for layer in network:
 		var product: Matrix = Matrix.dot_product(layer.weights, inputs) # Calculate the weighted sum of inputs
 		var sum: Matrix = Matrix.add(product, layer.bias) # Add bias to the sum
 		var map: Matrix = Matrix.map(sum, layer.activation.function) # Apply activation function
 		inputs = map # Use the output of this layer as input for the next
-	
+
 	# Return the final output as an array
 	return Matrix.to_array(inputs)
 
@@ -107,14 +111,14 @@ func train(input_array: Array, target_array: Array):
 			var gradients: Matrix = Matrix.map(layer_outputs, layer.activation.derivative) # Calculate gradients (derivative of activation)
 			gradients = Matrix.multiply(gradients, output_errors) # Multiply by the error
 			gradients = Matrix.scalar(gradients, learning_rate) # Multiply by learning rate
-			
+
 			# Calculate weight updates (weight delta)
 			var weight_delta: Matrix
 			if layer_index == 0:
 				weight_delta = Matrix.dot_product(gradients, Matrix.transpose(inputs)) # Use inputs if first layer
 			else:
 				weight_delta = Matrix.dot_product(gradients, Matrix.transpose(outputs[layer_index - 1])) # Otherwise, use previous layer outputs
-			
+
 			# Update weights and biases
 			network[layer_index].weights = Matrix.add(layer.weights, weight_delta)
 			network[layer_index].bias = Matrix.add(layer.bias, gradients)
@@ -126,7 +130,7 @@ func train(input_array: Array, target_array: Array):
 			var hidden_gradient = Matrix.map(layer_outputs, layer.activation.derivative) # Calculate gradients for hidden layers
 			hidden_gradient = Matrix.multiply(hidden_gradient, hidden_errors) # Multiply by hidden layer error
 			hidden_gradient = Matrix.scalar(hidden_gradient, learning_rate) # Multiply by learning rate
-			
+
 			# Calculate weight updates for hidden layers
 			var inputs_t: Matrix
 			if layer_index != 0:
@@ -134,7 +138,7 @@ func train(input_array: Array, target_array: Array):
 			else:
 				inputs_t = Matrix.transpose(inputs) # Use inputs for the first layer
 			var weight_delta = Matrix.dot_product(hidden_gradient, inputs_t) # Calculate weight delta
-			
+
 			# Update weights and biases
 			network[layer_index].weights = Matrix.add(layer.weights, weight_delta)
 			network[layer_index].bias = Matrix.add(layer.bias, hidden_gradient)

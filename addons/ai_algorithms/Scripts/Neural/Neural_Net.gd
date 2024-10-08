@@ -52,10 +52,10 @@ func _ready():
 	child_exiting_tree.connect(Callable(self, "on_ai_exit_tree"))
 	timer.wait_time = Generation_Delay
 	timer.timeout.connect(Callable(self, "reload_generation"))
-	
+
 
 	best_nn = NeuralNetwork.new(input_nodes, hidden_nodes, output_nodes)
-	
+
 	spawn()
 
 func spawn():
@@ -63,7 +63,7 @@ func spawn():
 	print("Generation: ", generation)
 	spawn_population = []
 
-	
+
 	if generation == 0:
 		for i in range(first_gen_spawn_size):
 			randomize()
@@ -75,21 +75,21 @@ func spawn():
 			var new_ai = AI_Scene.instantiate()
 			new_ai.nn =  NeuralNetwork.copy(NeuralNetwork.mutate(best_nn))
 			spawn_population.append(new_ai)
-		
+
 		for i in range(random_population):
 			randomize()
 			var new_ai = AI_Scene.instantiate()
 			new_ai.nn = NeuralNetwork.new(input_nodes, hidden_nodes, output_nodes)
 			spawn_population.append(new_ai)
-			
+
 		var new_ai = AI_Scene.instantiate()
 		new_ai.nn = NeuralNetwork.copy(best_nn)
 		spawn_population.append(new_ai)
-	
+
 		if use_reproduction:
 			var first_array: Array[NeuralNetwork]
 			var second_array: Array[NeuralNetwork]
-			
+
 			randomize()
 			for i in range(best_10_nn.size()):
 				var random_choice = randi_range(0, best_10_nn.size() - 1)
@@ -98,7 +98,7 @@ func spawn():
 				else:
 					second_array.append(best_10_nn[random_choice])
 				best_10_nn.remove_at(random_choice)
-			
+
 			for i in range(first_array.size()):
 				if first_array.size() == second_array.size():
 					var _new_ai = AI_Scene.instantiate()
@@ -143,13 +143,13 @@ func on_ai_exit_tree(node: Node):
 func reload_generation():
 	best_10_nn.sort_custom(Callable(self, "custom_sort"))
 	if use_reproduction: best_10_nn = best_10_nn.slice(best_10_nn.size() - top_value_cutoff, -1)
-	
+
 	freeing = true
 	timer.stop()
-	
+
 	for i in get_children():
 		if !(i is Timer): i.queue_free()
-	
+
 	spawn()
 	freeing = false
 

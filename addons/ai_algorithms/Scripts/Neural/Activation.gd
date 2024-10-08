@@ -10,10 +10,7 @@ static func relu(value: float, _row: int, _col: int) -> float:
 	return max(0.0, value)
 
 static func drelu(value: float, _row: int, _col: int) -> float:
-	if value < 0:
-		return 0.0
-	else:
-		return 1.0
+	return 1.0 if value > 0 else 0.0
 
 static func tanh_(value: float, _row: int, _col: int) -> float:
 	return tanh(value)
@@ -51,3 +48,9 @@ static func softplus(value: float, _row: int, _col: int) -> float:
 
 static func dsoftplus(value: float, _row: int, _col: int) -> float:
 	return 1 / (1 + exp(-value))
+
+static func linear(value: float, _row: int, _col: int) -> float:
+	return value
+
+static func dlinear(value: float, _row: int, _col: int) -> float:
+	return 1
