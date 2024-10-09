@@ -142,3 +142,13 @@ func train(input_array: Array, target_array: Array):
 			# Update weights and biases
 			network[layer_index].weights = Matrix.add(layer.weights, weight_delta)
 			network[layer_index].bias = Matrix.add(layer.bias, hidden_gradient)
+
+
+# Copy the NNA Completely
+func copy() -> NeuralNetworkAdvanced:
+	var copied_nna: NeuralNetworkAdvanced = NeuralNetworkAdvanced.new()
+	copied_nna.network = network.duplicate(true)
+	copied_nna.learning_rate = learning_rate
+	copied_nna.layer_structure = layer_structure.duplicate(true)
+	return copied_nna
+
