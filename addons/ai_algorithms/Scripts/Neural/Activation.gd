@@ -19,7 +19,7 @@ static func dtanh(value: float, _row: int, _col: int) -> float:
 	return 1 - pow(tanh(value), 2)
 
 static func arcTan(value: float, _row: int, _col: int) -> float:
-	return pow(tan(value), -1)
+	return atan(value)
 
 static func darcTan(value: float, _row: int, _col: int) -> float:
 	return 1 / (pow(value, 2) + 1)
@@ -34,17 +34,14 @@ static func dprelu(value: float, _row: int, _col: int) -> float:
 
 static func elu(value: float, _row: int, _col: int) -> float:
 	var alpha: float = 0.1
-	if value < 0:
-		return alpha * (exp(value) - 1)
-	else:
-		return value
+	return (alpha * (exp(value) - 1)) if value < 0 else value
 
 static func delu(value: float, _row: int, _col: int) -> float:
 	var alpha: float = 0.1
-	return (((alpha * (exp(value) - 1)) if value < 0 else value) + alpha) if value < 0 else 1
+	return alpha * exp(value) if value < 0 else 1
 
 static func softplus(value: float, _row: int, _col: int) -> float:
-	return log(exp(1)) * (1 + exp(value))
+	return log(1 + exp(value))
 
 static func dsoftplus(value: float, _row: int, _col: int) -> float:
 	return 1 / (1 + exp(-value))

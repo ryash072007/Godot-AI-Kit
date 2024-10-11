@@ -52,6 +52,34 @@ position = Vector2(20, 20)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Map/good/GOOD"]
 shape = SubResource("RectangleShape2D_lgxib")
 
+[node name="good2" type="ColorRect" parent="Map"]
+offset_left = 551.0
+offset_top = 551.0
+offset_right = 591.0
+offset_bottom = 591.0
+color = Color(0, 1, 0, 1)
+
+[node name="GOOD" type="Area2D" parent="Map/good2" groups=["2"]]
+show_behind_parent = true
+position = Vector2(20, 20)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Map/good2/GOOD"]
+shape = SubResource("RectangleShape2D_lgxib")
+
+[node name="good3" type="ColorRect" parent="Map"]
+offset_left = 89.0
+offset_top = 48.0
+offset_right = 129.0
+offset_bottom = 88.0
+color = Color(0, 1, 0, 1)
+
+[node name="GOOD" type="Area2D" parent="Map/good3" groups=["2"]]
+show_behind_parent = true
+position = Vector2(20, 20)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Map/good3/GOOD"]
+shape = SubResource("RectangleShape2D_lgxib")
+
 [node name="boundary" type="Area2D" parent="Map" groups=["1"]]
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Map/boundary"]
@@ -76,58 +104,61 @@ color = Color(0.670588, 0.372549, 0.462745, 1)
 show_behind_parent = true
 
 [node name="RayCast2D" type="RayCast2D" parent="agent/raycasts"]
-target_position = Vector2(0, 75)
+target_position = Vector2(0, 150)
 collide_with_areas = true
 collide_with_bodies = false
 
 [node name="RayCast2D2" type="RayCast2D" parent="agent/raycasts"]
 rotation = 0.785398
-target_position = Vector2(0, 75)
+target_position = Vector2(0, 150)
 collide_with_areas = true
 collide_with_bodies = false
 
 [node name="RayCast2D3" type="RayCast2D" parent="agent/raycasts"]
 rotation = 1.5708
-target_position = Vector2(0, 75)
+target_position = Vector2(0, 150)
 collide_with_areas = true
 collide_with_bodies = false
 
 [node name="RayCast2D4" type="RayCast2D" parent="agent/raycasts"]
 rotation = 2.35619
-target_position = Vector2(0, 75)
+target_position = Vector2(0, 150)
 collide_with_areas = true
 collide_with_bodies = false
 
 [node name="RayCast2D5" type="RayCast2D" parent="agent/raycasts"]
 rotation = 3.14159
-target_position = Vector2(0, 75)
+target_position = Vector2(0, 150)
 collide_with_areas = true
 collide_with_bodies = false
 
 [node name="RayCast2D6" type="RayCast2D" parent="agent/raycasts"]
 rotation = 3.92699
-target_position = Vector2(0, 75)
+target_position = Vector2(0, 150)
 collide_with_areas = true
 collide_with_bodies = false
 
 [node name="RayCast2D7" type="RayCast2D" parent="agent/raycasts"]
 rotation = 4.71239
-target_position = Vector2(0, 75)
+target_position = Vector2(0, 150)
 collide_with_areas = true
 collide_with_bodies = false
 
 [node name="RayCast2D8" type="RayCast2D" parent="agent/raycasts"]
 rotation = 5.49779
-target_position = Vector2(0, 75)
+target_position = Vector2(0, 150)
 collide_with_areas = true
 collide_with_bodies = false
 
 [node name="max_life" type="Timer" parent="agent"]
-wait_time = 10.0
+wait_time = 15.0
 one_shot = true
 autostart = true
 
 [connection signal="body_entered" from="Map/bad1/BAD" to="agent" method="_on_bad_body_entered"]
+[connection signal="body_entered" from="Map/bad2/BAD" to="agent" method="_on_bad_body_entered"]
 [connection signal="body_entered" from="Map/good/GOOD" to="agent" method="_on_good_body_entered"]
+[connection signal="body_entered" from="Map/good2/GOOD" to="agent" method="_on_good_body_entered"]
+[connection signal="body_entered" from="Map/good3/GOOD" to="agent" method="_on_good_body_entered"]
 [connection signal="body_entered" from="Map/boundary" to="agent" method="_on_boundary_body_entered"]
 [connection signal="timeout" from="agent/max_life" to="agent" method="_on_max_life_timeout"]

@@ -30,9 +30,9 @@ static func to_array(matrix: Matrix) -> Array:
 static func rand(matrix: Matrix) -> Matrix:
 	seed(randi())
 	randomize()
-	
+
 	var result = Matrix.new(matrix.rows, matrix.cols)
-	
+
 	for row in range(result.rows):
 		for col in range(result.cols):
 			result.data[row][col] = randf_range(-1, 1)
@@ -40,7 +40,7 @@ static func rand(matrix: Matrix) -> Matrix:
 
 static func add(a: Matrix, b: Matrix) -> Matrix:
 	assert(a.rows == b.rows and a.cols == b.cols)
-	
+
 	var result = Matrix.new(a.rows, a.cols)
 
 	for row in range(result.rows):
@@ -62,11 +62,11 @@ static func subtract(a: Matrix, b: Matrix) -> Matrix:
 
 static func scalar(matrix: Matrix, value: float) -> Matrix:
 	var result = Matrix.new(matrix.rows, matrix.cols)
-	
+
 	for row in range(result.rows):
 		for col in range(result.cols):
 			result.data[row][col] = matrix.data[row][col] * value
-	
+
 	return result
 
 static func dot_product(a: Matrix, b: Matrix) -> Matrix:
@@ -98,25 +98,25 @@ static func dot_divide(a: Matrix, b: Matrix) -> Matrix:
 
 static func multiply(a: Matrix, b: Matrix) -> Matrix:
 	assert(a.rows == b.rows and a.cols == b.cols)
-	
+
 	var result = Matrix.new(a.rows, a.cols)
-	
+
 	for row in range(result.rows):
 		for col in range(result.cols):
 			result.data[row][col] = a.data[row][col] * b.data[row][col]
-	
+
 	return result
 
 
 static func divide(a: Matrix, b: Matrix) -> Matrix:
 	assert(a.rows == b.rows and a.cols == b.cols)
-	
+
 	var result = Matrix.new(a.rows, a.cols)
-	
+
 	for row in range(result.rows):
 		for col in range(result.cols):
 			result.data[row][col] = a.data[row][col] / b.data[row][col]
-	
+
 	return result
 
 static func transpose(matrix: Matrix) -> Matrix:
@@ -130,7 +130,7 @@ static func transpose(matrix: Matrix) -> Matrix:
 
 static func map(matrix: Matrix, callback: Callable) -> Matrix:
 	var result = Matrix.new(matrix.rows, matrix.cols)
-	
+
 	for row in range(result.rows):
 		for col in range(result.cols):
 			result.data[row][col] = callback.call(matrix.data[row][col], row, col)
@@ -144,7 +144,7 @@ static func random(a: Matrix, b: Matrix) -> Matrix:
 			randomize()
 			var _random = randf_range(0, 1)
 			result.data[row][col] = a.data[row][col] if _random > 0.5 else b.data[row][col]
-	
+
 	return result
 
 static func copy(matrix: Matrix) -> Matrix:
