@@ -5,10 +5,11 @@ TODO:
 
 ~~2. PPO Support (Unrealistic but will try!)~~ [On Hold]
 
-3. Simple DQN Support [will start soon]
+3. Simple DQN Support [Ongoing]
 
 </p>
 
+NOTE: DQN algorithm is theoretically done, just need to perfect the demo for it.
 
 <h1  id="ai-algorithm-for-godot-4">AI Algorithm for Godot 4</h1>
 
