@@ -1,0 +1,76 @@
+[gd_scene load_steps=7 format=3 uid="uid://6jx3shfkqw40"]
+
+[ext_resource type="Script" path="res://Demo/DQN/SDQN 2/Agent.gd" id="1_6ic8v"]
+[ext_resource type="Script" path="res://Demo/DQN/SDQN 2/balancing ball.gd" id="2_c6mwc"]
+[ext_resource type="Script" path="res://Demo/DQN/SDQN 2/shaft.gd" id="3_uhb8k"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_db3gj"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_y5y4f"]
+size = Vector2(8, 123)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_sd8mg"]
+
+[node name="Cart Pole Game" type="Node2D"]
+
+[node name="game parts" type="Node2D" parent="."]
+
+[node name="Line2D" type="Line2D" parent="game parts"]
+position = Vector2(50.7464, 0)
+points = PackedVector2Array(-45, 450, 567, 450)
+
+[node name="floor_detector" type="Area2D" parent="game parts/Line2D"]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="game parts/Line2D/floor_detector"]
+polygon = PackedVector2Array(-44.7464, 445, 567.254, 445, 567.254, 455, -44.7464, 455)
+
+[node name="Agent" type="ColorRect" parent="."]
+offset_left = 300.0
+offset_top = 405.0
+offset_right = 340.0
+offset_bottom = 445.0
+color = Color(1, 0, 0, 1)
+script = ExtResource("1_6ic8v")
+
+[node name="balancing ball" type="RigidBody2D" parent="Agent"]
+modulate = Color(1, 0, 1, 1)
+show_behind_parent = true
+mass = 0.5
+linear_velocity = Vector2(10, 0)
+script = ExtResource("2_c6mwc")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Agent/balancing ball"]
+position = Vector2(20, -103)
+shape = SubResource("CircleShape2D_db3gj")
+
+[node name="shaft" type="RigidBody2D" parent="Agent"]
+mass = 0.01
+script = ExtResource("3_uhb8k")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Agent/shaft"]
+z_index = -1
+position = Vector2(20, -41.5)
+shape = SubResource("RectangleShape2D_y5y4f")
+
+[node name="ballshaft" type="PinJoint2D" parent="Agent"]
+position = Vector2(20, -103)
+node_a = NodePath("../balancing ball")
+node_b = NodePath("../shaft")
+
+[node name="mainshaft" type="PinJoint2D" parent="Agent"]
+position = Vector2(20, 20)
+node_a = NodePath("../shaft")
+node_b = NodePath("../main")
+bias = 0.5
+
+[node name="main" type="StaticBody2D" parent="Agent"]
+position = Vector2(20, 20)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Agent/main"]
+shape = SubResource("CircleShape2D_sd8mg")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(300, 299)
+zoom = Vector2(2, 2)
+
+[connection signal="body_entered" from="game parts/Line2D/floor_detector" to="Agent" method="_on_floor_collision"]

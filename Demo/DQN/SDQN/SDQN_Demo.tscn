@@ -52,34 +52,6 @@ position = Vector2(20, 20)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Map/good/GOOD"]
 shape = SubResource("RectangleShape2D_lgxib")
 
-[node name="good2" type="ColorRect" parent="Map"]
-offset_left = 551.0
-offset_top = 551.0
-offset_right = 591.0
-offset_bottom = 591.0
-color = Color(0, 1, 0, 1)
-
-[node name="GOOD" type="Area2D" parent="Map/good2" groups=["2"]]
-show_behind_parent = true
-position = Vector2(20, 20)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Map/good2/GOOD"]
-shape = SubResource("RectangleShape2D_lgxib")
-
-[node name="good3" type="ColorRect" parent="Map"]
-offset_left = 89.0
-offset_top = 48.0
-offset_right = 129.0
-offset_bottom = 88.0
-color = Color(0, 1, 0, 1)
-
-[node name="GOOD" type="Area2D" parent="Map/good3" groups=["2"]]
-show_behind_parent = true
-position = Vector2(20, 20)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Map/good3/GOOD"]
-shape = SubResource("RectangleShape2D_lgxib")
-
 [node name="boundary" type="Area2D" parent="Map" groups=["1"]]
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Map/boundary"]
@@ -158,7 +130,5 @@ autostart = true
 [connection signal="body_entered" from="Map/bad1/BAD" to="agent" method="_on_bad_body_entered"]
 [connection signal="body_entered" from="Map/bad2/BAD" to="agent" method="_on_bad_body_entered"]
 [connection signal="body_entered" from="Map/good/GOOD" to="agent" method="_on_good_body_entered"]
-[connection signal="body_entered" from="Map/good2/GOOD" to="agent" method="_on_good_body_entered"]
-[connection signal="body_entered" from="Map/good3/GOOD" to="agent" method="_on_good_body_entered"]
 [connection signal="body_entered" from="Map/boundary" to="agent" method="_on_boundary_body_entered"]
 [connection signal="timeout" from="agent/max_life" to="agent" method="_on_max_life_timeout"]
