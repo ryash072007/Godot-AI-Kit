@@ -1,10 +1,7 @@
-[gd_scene load_steps=7 format=3 uid="uid://6jx3shfkqw40"]
+[gd_scene load_steps=5 format=3 uid="uid://6jx3shfkqw40"]
 
 [ext_resource type="Script" path="res://Demo/DQN/SDQN 2/Agent.gd" id="1_6ic8v"]
-[ext_resource type="Script" path="res://Demo/DQN/SDQN 2/balancing ball.gd" id="2_c6mwc"]
 [ext_resource type="Script" path="res://Demo/DQN/SDQN 2/shaft.gd" id="3_uhb8k"]
-
-[sub_resource type="CircleShape2D" id="CircleShape2D_db3gj"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_y5y4f"]
 size = Vector2(8, 123)
@@ -32,30 +29,17 @@ offset_bottom = 445.0
 color = Color(1, 0, 0, 1)
 script = ExtResource("1_6ic8v")
 
-[node name="balancing ball" type="RigidBody2D" parent="Agent"]
-modulate = Color(1, 0, 1, 1)
-show_behind_parent = true
-mass = 0.5
-linear_velocity = Vector2(10, 0)
-script = ExtResource("2_c6mwc")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Agent/balancing ball"]
-position = Vector2(20, -103)
-shape = SubResource("CircleShape2D_db3gj")
-
 [node name="shaft" type="RigidBody2D" parent="Agent"]
 mass = 0.01
+gravity_scale = 0.5
+linear_damp_mode = 1
+angular_damp_mode = 1
 script = ExtResource("3_uhb8k")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Agent/shaft"]
 z_index = -1
 position = Vector2(20, -41.5)
 shape = SubResource("RectangleShape2D_y5y4f")
-
-[node name="ballshaft" type="PinJoint2D" parent="Agent"]
-position = Vector2(20, -103)
-node_a = NodePath("../balancing ball")
-node_b = NodePath("../shaft")
 
 [node name="mainshaft" type="PinJoint2D" parent="Agent"]
 position = Vector2(20, 20)

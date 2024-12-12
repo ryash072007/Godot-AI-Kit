@@ -1,15 +1,15 @@
 class_name SDQN
 
 # Neural network parameters
-var learning_rate: float = 0.05
-var discount_factor: float = 0.99
+var learning_rate: float = 0.001
+var discount_factor: float = 0.95
 var exploration_probability: float = 1.0
 var min_exploration_probability: float = 0.01
 var exploration_decay: float = 0.005
-var batch_size: int = 32
-var max_steps: int = 100
-var target_update_frequency: int = 1000  # Update target network every 1000 steps
-var max_memory_size: int = 5000  # Max size of replay memory
+var batch_size: int = 128
+var max_steps: int = 2056
+var target_update_frequency: int = 5000  # Update target network every 1000 steps
+var max_memory_size: int = 15000  # Max size of replay memory
 var automatic_decay: bool = true
 
 # Variables to hold state and action information

@@ -58,7 +58,7 @@ shape = SubResource("RectangleShape2D_lgxib")
 polygon = PackedVector2Array(0, 0, 0, 648, 1154, 648, 1152, 0, -3, 0, -3, -1, 1154, -2, 1158, 653, -4, 653, -3, 0)
 
 [node name="agent" type="CharacterBody2D" parent="."]
-position = Vector2(308, 356)
+position = Vector2(925, 93)
 motion_mode = 1
 script = ExtResource("1_mihi2")
 

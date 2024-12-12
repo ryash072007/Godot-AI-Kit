@@ -10,13 +10,14 @@ const speed: int = 100
 @onready var goodObjPos: Vector2 = $"../Map/good/GOOD".global_position  # Position of the goal object (good object)
 
 # Initialize the Deep Q-Network (DQN) with 19 state inputs and 4 possible actions
-var DQN: SDQN = SDQN.new(17, 4)
+var DQN: SDQN = SDQN.new(18, 4)
 var prev_state: Array = []  # Previous state of the environment
 var prev_action: int = -1   # Previous action taken by the agent
 var reward: float = 0  # Current reward for the agent
 var done: bool = false  # Whether the episode is over
 var total_reward: float = 0  # Cumulative reward for the current episode
 var resets: int = 0  # Number of times the environment has been reset
+var epoch: int = 0
 @onready var prev_distance_to_goal: float = global_position.distance_to(goodObjPos)  # Previous distance to the goal
 
 # Function called when the scene is ready
@@ -40,11 +41,14 @@ func get_state() -> Array:
 	for raycast in $raycasts.get_children():  # Iterate through all raycasts
 		state.append_array(get_distance_and_object(raycast))  # Append the raycast information to the state
 	state.append(global_position.distance_to(goodObjPos) / MAX_DISTANCE)  # Add the distance to the goal
+	state.append($max_life.time_left)
 	return state
 
 # Function to reset the environment after an episode ends
 func reset():
 	print("***************************")
+	print("Epoch: " + str(epoch))
+	print("Total resets this epoch: " + str(resets))
 	print("exploration_probability: " + str(DQN.exploration_probability))
 	print("total_reward: " + str(total_reward))
 
@@ -57,22 +61,26 @@ func reset():
 	resets += 1
 
 	# Decay exploration probability gradually every 4 resets
-	if resets >= 4:
-		resets = 0
+	if resets % 4 == 0:
 		DQN.exploration_probability = max(DQN.min_exploration_probability, DQN.exploration_probability - DQN.exploration_decay)
 
+	if resets % 900 == 0:
+		DQN.exploration_probability = 1.0
+		epoch += 1
+		resets = 0
+
 	# Randomly reposition the agent on the map
-	global_position = Vector2(randi_range(50, 1100), randi_range(50, 590))
+	global_position = Vector2(randi_range(700, 1100), randi_range(20, 200))
 	prev_distance_to_goal = global_position.distance_to(goodObjPos)  # Reset the distance to goal
 	$max_life.start()  # Start the timer for the episode
 
 # Main loop of the game, called every frame
 func _process(delta: float) -> void:
 	# For testing: manually adjust exploration probability using keyboard input
-	if Input.is_action_just_pressed("ui_up"):
-		DQN.exploration_probability = 0.01
-	if Input.is_action_just_pressed("ui_down"):
-		DQN.exploration_probability = 0.6
+	#if Input.is_action_just_pressed("ui_up"):
+		#DQN.exploration_probability = 0.01
+	#if Input.is_action_just_pressed("ui_down"):
+		#DQN.exploration_probability = 0.6
 
 	# Get the current state
 	var current_state: Array = get_state()
@@ -116,20 +124,20 @@ func _process(delta: float) -> void:
 # Event handlers for different collisions
 # Called when the agent hits a bad object
 func _on_bad_body_entered(_body: Node2D) -> void:
-	reward -= 1  # Penalty for hitting a bad object
+	reward -= 0.5  # Penalty for hitting a bad object
 	done = true  # End the episode
 
 # Called when the agent hits the boundary of the map
 func _on_boundary_body_entered(body: Node2D) -> void:
-	reward -= 1  # Penalty for hitting the boundary
+	reward -= 0.7  # Penalty for hitting the boundary
 	done = true  # End the episode
 
 # Called when the agent reaches the goal (good object)
 func _on_good_body_entered(body: Node2D) -> void:
-	reward += 10  # Large reward for reaching the goal
+	reward += 1  # Large reward for reaching the goal
 	done = true  # End the episode
 
 # Called when the timer for the episode runs out
 func _on_max_life_timeout() -> void:
-	#reward -= 0.1  # Small penalty for running out of time
+	reward -= 0.1  # Small penalty for running out of time
 	done = true  # End the episode
