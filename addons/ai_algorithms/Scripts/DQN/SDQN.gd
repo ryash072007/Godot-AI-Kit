@@ -4,12 +4,12 @@ class_name SDQN
 var learning_rate: float = 0.001
 var discount_factor: float = 0.95
 var exploration_probability: float = 1.0
-var min_exploration_probability: float = 0.01
-var exploration_decay: float = 0.005
+var min_exploration_probability: float = 0.001
+var exploration_decay: float = 0.0005
 var batch_size: int = 128
-var max_steps: int = 2056
-var target_update_frequency: int = 5000  # Update target network every 1000 steps
-var max_memory_size: int = 15000  # Max size of replay memory
+var max_steps: int = 2500
+var target_update_frequency: int = 10000  # Update target network every 5000 steps
+var max_memory_size: int = 10000  # Max size of replay memory
 var automatic_decay: bool = true
 
 # Variables to hold state and action information

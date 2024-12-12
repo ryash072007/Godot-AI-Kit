@@ -61,10 +61,20 @@ func reset():
 	resets += 1
 
 	# Decay exploration probability gradually every 4 resets
-	if resets % 4 == 0:
+	if resets % 10 == 0:
 		DQN.exploration_probability = max(DQN.min_exploration_probability, DQN.exploration_probability - DQN.exploration_decay)
 
-	if resets % 900 == 0:
+	if resets % 2000 == 0:
+		var file = FileAccess.open("SDQNEpochData.txt", FileAccess.READ_WRITE)
+		file.seek_end()
+		file.store_string("Epoch: " + str(epoch) + " | Total Reward: " + str(total_reward) + '\n')
+		file.store_string("DQN Values: ")
+		file.store_var(DQN.Q_network.network)
+		file.store_string("DQN Target Values: ")
+		file.store_var(DQN.target_Q_network.network)
+		file.store_string("____________________________________________________")
+		file.close()
+
 		DQN.exploration_probability = 1.0
 		epoch += 1
 		resets = 0
