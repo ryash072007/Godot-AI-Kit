@@ -28,14 +28,11 @@ static func to_array(matrix: Matrix) -> Array:
 	return result
 
 static func rand(matrix: Matrix) -> Matrix:
-	seed(randi())
-	randomize()
-
 	var result = Matrix.new(matrix.rows, matrix.cols)
 
 	for row in range(result.rows):
 		for col in range(result.cols):
-			result.data[row][col] = randf_range(-1, 1)
+			result.data[row][col] = randf_range(-0.1, 0.1)
 	return result
 
 static func add(a: Matrix, b: Matrix) -> Matrix:

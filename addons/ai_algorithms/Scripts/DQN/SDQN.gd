@@ -29,8 +29,8 @@ func _init(state_space: int, action_space: int) -> void:
 
 	Q_network = NeuralNetworkAdvanced.new()
 	Q_network.add_layer(state_space)
-	Q_network.add_layer(32, Q_network.ACTIVATIONS["RELU"])
-	Q_network.add_layer(32, Q_network.ACTIVATIONS["RELU"])
+	Q_network.add_layer(16, Q_network.ACTIVATIONS["PRELU"])
+	Q_network.add_layer(16, Q_network.ACTIVATIONS["PRELU"])
 	Q_network.add_layer(action_space, Q_network.ACTIVATIONS["LINEAR"])
 
 	target_Q_network = Q_network.copy()
@@ -46,7 +46,7 @@ func choose_action(state: Array) -> int:
 
 func predict(state: Array) -> int:
 	var predicted_q_values: Array = Q_network.predict(state)
-	print(predicted_q_values)
+	#print(predicted_q_values)
 	var max_value_index: int = 0
 	var max_value: float = predicted_q_values[max_value_index]
 	for i in range(1, action_space):

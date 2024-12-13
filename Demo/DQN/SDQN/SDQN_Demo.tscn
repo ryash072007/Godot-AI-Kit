@@ -48,6 +48,8 @@ color = Color(0, 1, 0, 1)
 [node name="GOOD" type="Area2D" parent="Map/good" groups=["2"]]
 show_behind_parent = true
 position = Vector2(20, 20)
+collision_layer = 2
+collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Map/good/GOOD"]
 shape = SubResource("RectangleShape2D_lgxib")
@@ -59,6 +61,8 @@ polygon = PackedVector2Array(0, 0, 0, 648, 1154, 648, 1152, 0, -3, 0, -3, -1, 11
 
 [node name="agent" type="CharacterBody2D" parent="."]
 position = Vector2(925, 93)
+collision_layer = 3
+collision_mask = 3
 motion_mode = 1
 script = ExtResource("1_mihi2")
 
@@ -123,7 +127,7 @@ collide_with_areas = true
 collide_with_bodies = false
 
 [node name="max_life" type="Timer" parent="agent"]
-wait_time = 15.0
+wait_time = 5.0
 one_shot = true
 autostart = true
 
