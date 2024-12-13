@@ -1,15 +1,15 @@
 class_name SDQN
 
 # Neural network parameters
-var learning_rate: float = 0.001
-var discount_factor: float = 0.95
+var learning_rate: float = 0.01
+var discount_factor: float = 0.6
 var exploration_probability: float = 1.0
 var min_exploration_probability: float = 0.001
-var exploration_decay: float = 0.0005
+var exploration_decay: float = 0.005
 var batch_size: int = 128
-var max_steps: int = 2500
-var target_update_frequency: int = 10000  # Update target network every 5000 steps
-var max_memory_size: int = 10000  # Max size of replay memory
+var max_steps: int = 1024
+var target_update_frequency: int = 2048  # Update target network every 5000 steps
+var max_memory_size: int = 4096  # Max size of replay memory
 var automatic_decay: bool = true
 
 # Variables to hold state and action information
@@ -29,9 +29,8 @@ func _init(state_space: int, action_space: int) -> void:
 
 	Q_network = NeuralNetworkAdvanced.new()
 	Q_network.add_layer(state_space)
-	Q_network.add_layer(16, Q_network.ACTIVATIONS["RELU"])
-	Q_network.add_layer(16, Q_network.ACTIVATIONS["RELU"])
-	#Q_network.add_layer(32, Q_network.ACTIVATIONS["RELU"])
+	Q_network.add_layer(32, Q_network.ACTIVATIONS["RELU"])
+	Q_network.add_layer(32, Q_network.ACTIVATIONS["RELU"])
 	Q_network.add_layer(action_space, Q_network.ACTIVATIONS["LINEAR"])
 
 	target_Q_network = Q_network.copy()
@@ -47,6 +46,7 @@ func choose_action(state: Array) -> int:
 
 func predict(state: Array) -> int:
 	var predicted_q_values: Array = Q_network.predict(state)
+	print(predicted_q_values)
 	var max_value_index: int = 0
 	var max_value: float = predicted_q_values[max_value_index]
 	for i in range(1, action_space):
@@ -97,6 +97,7 @@ func sample(array: Array) -> Array:
 
 
 func train(replay_memory: Array) -> void:
+	print("Training Now")
 	# Sample a minibatch from the replay memory
 	var minibatch: Array = sample(replay_memory)
 

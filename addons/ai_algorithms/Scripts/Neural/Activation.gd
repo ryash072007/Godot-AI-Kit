@@ -50,4 +50,4 @@ static func linear(value: float, _row: int, _col: int) -> float:
 	return value
 
 static func dlinear(value: float, _row: int, _col: int) -> float:
-	return 1
+	return 1.0

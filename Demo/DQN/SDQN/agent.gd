@@ -16,9 +16,11 @@ var prev_action: int = -1   # Previous action taken by the agent
 var reward: float = 0  # Current reward for the agent
 var done: bool = false  # Whether the episode is over
 var total_reward: float = 0  # Cumulative reward for the current episode
-var resets: int = 0  # Number of times the environment has been reset
+var resets: int = -1  # Number of times the environment has been reset
 var epoch: int = 0
 @onready var prev_distance_to_goal: float = global_position.distance_to(goodObjPos)  # Previous distance to the goal
+
+var prev_EP: float = 0.0
 
 # Function called when the scene is ready
 func _ready() -> void:
@@ -40,8 +42,9 @@ func get_state() -> Array:
 	var state: Array = []
 	for raycast in $raycasts.get_children():  # Iterate through all raycasts
 		state.append_array(get_distance_and_object(raycast))  # Append the raycast information to the state
-	state.append(global_position.distance_to(goodObjPos) / MAX_DISTANCE)  # Add the distance to the goal
+	state.append(global_position.distance_to(goodObjPos)  / MAX_DISTANCE)  # Add the distance to the goal
 	state.append($max_life.time_left)
+	print(state)
 	return state
 
 # Function to reset the environment after an episode ends
@@ -61,21 +64,22 @@ func reset():
 	resets += 1
 
 	# Decay exploration probability gradually every 4 resets
-	if resets % 10 == 0:
+	#if resets % 1 == 0:
+		#DQN.exploration_probability = max(DQN.min_exploration_probability, DQN.exploration_probability - DQN.exploration_decay)
+
+
+	if resets % 8 == 0:
+		#var file = FileAccess.open("user://SDQNEpochData.txt", FileAccess.READ_WRITE)
+		#file.seek_end()
+		#file.store_string("Epoch: " + str(epoch) + " | Total Reward: " + str(total_reward) + " | EP: " + str(DQN.exploration_probability) + '\n')
+		##file.store_string("DQN Values: ")
+		##file.store_var(DQN.Q_network.network, true)
+		##file.store_string("DQN Target Values: ")
+		##file.store_var(DQN.target_Q_network.network, true)
+		#file.store_string("____________________________________________________")
+		#file.close()
+
 		DQN.exploration_probability = max(DQN.min_exploration_probability, DQN.exploration_probability - DQN.exploration_decay)
-
-	if resets % 2000 == 0:
-		var file = FileAccess.open("SDQNEpochData.txt", FileAccess.READ_WRITE)
-		file.seek_end()
-		file.store_string("Epoch: " + str(epoch) + " | Total Reward: " + str(total_reward) + '\n')
-		file.store_string("DQN Values: ")
-		file.store_var(DQN.Q_network.network)
-		file.store_string("DQN Target Values: ")
-		file.store_var(DQN.target_Q_network.network)
-		file.store_string("____________________________________________________")
-		file.close()
-
-		DQN.exploration_probability = 1.0
 		epoch += 1
 		resets = 0
 
@@ -86,11 +90,12 @@ func reset():
 
 # Main loop of the game, called every frame
 func _process(delta: float) -> void:
-	# For testing: manually adjust exploration probability using keyboard input
-	#if Input.is_action_just_pressed("ui_up"):
-		#DQN.exploration_probability = 0.01
-	#if Input.is_action_just_pressed("ui_down"):
-		#DQN.exploration_probability = 0.6
+	 #For testing: manually adjust exploration probability using keyboard input
+	if Input.is_action_just_pressed("ui_up"):
+		prev_EP = DQN.exploration_probability
+		DQN.exploration_probability = 0.01
+	if Input.is_action_just_pressed("ui_down"):
+		DQN.exploration_probability = prev_EP
 
 	# Get the current state
 	var current_state: Array = get_state()
@@ -104,10 +109,15 @@ func _process(delta: float) -> void:
 
 			var difference: float = prev_distance_to_goal - goodDistance
 			# Reward shaping: Give a small positive reward if getting closer to the goal, negative otherwise
-			reward += difference if difference > 0 else 1.2 * difference
+			#reward += 1.5 * difference if difference > 0 else -2.0 * abs(difference)
+
+			if difference > 0:
+				reward += 0.01
+			else:
+				reward -= 0.02
 
 			# Penalize each step slightly to encourage faster decisions
-			reward -= 0.01
+			#reward -= 0.01
 
 		#print(reward)
 		total_reward += reward
@@ -139,7 +149,7 @@ func _on_bad_body_entered(_body: Node2D) -> void:
 
 # Called when the agent hits the boundary of the map
 func _on_boundary_body_entered(body: Node2D) -> void:
-	reward -= 0.7  # Penalty for hitting the boundary
+	reward -= 5  # Penalty for hitting the boundary
 	done = true  # End the episode
 
 # Called when the agent reaches the goal (good object)
@@ -149,5 +159,5 @@ func _on_good_body_entered(body: Node2D) -> void:
 
 # Called when the timer for the episode runs out
 func _on_max_life_timeout() -> void:
-	reward -= 0.1  # Small penalty for running out of time
+	reward -= 0.05  # Small penalty for running out of time
 	done = true  # End the episode

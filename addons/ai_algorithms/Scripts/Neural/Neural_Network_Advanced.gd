@@ -63,14 +63,12 @@ func add_layer(nodes: int, activation: Dictionary = ACTIVATIONS.SIGMOID):
 func predict(input_array: Array) -> Array:
 	# Convert input array to a matrix
 	var inputs: Matrix = Matrix.from_array(input_array)
-
 	# Forward pass through the network
 	for layer in network:
 		var product: Matrix = Matrix.dot_product(layer.weights, inputs) # Calculate the weighted sum of inputs
 		var sum: Matrix = Matrix.add(product, layer.bias) # Add bias to the sum
 		var map: Matrix = Matrix.map(sum, layer.activation.function) # Apply activation function
 		inputs = map # Use the output of this layer as input for the next
-
 	# Return the final output as an array
 	return Matrix.to_array(inputs)
 
