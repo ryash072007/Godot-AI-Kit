@@ -2,7 +2,7 @@ class_name SDQN
 
 # Neural network parameters
 var learning_rate: float = 0.01
-var discount_factor: float = 0.6
+var discount_factor: float = 0.9
 var exploration_probability: float = 0.8
 var min_exploration_probability: float = 0.2
 var exploration_decay: float = 0.01
@@ -23,14 +23,15 @@ var steps: int = 0
 var update_steps: int = 0  # Counter for updating target network
 
 
-func _init(state_space: int, action_space: int) -> void:
+func _init(state_space: int, action_space: int, learning_rate: float = 0.01) -> void:
 	self.state_space = state_space
 	self.action_space = action_space
+	self.learning_rate = learning_rate
 
 	Q_network = NeuralNetworkAdvanced.new()
 	Q_network.add_layer(state_space)
 	Q_network.add_layer(16, Q_network.ACTIVATIONS["ELU"])
-	Q_network.add_layer(8, Q_network.ACTIVATIONS["ELU"])
+	Q_network.add_layer(16, Q_network.ACTIVATIONS["ELU"])
 	Q_network.add_layer(action_space, Q_network.ACTIVATIONS["LINEAR"])
 	Q_network.learning_rate = learning_rate
 

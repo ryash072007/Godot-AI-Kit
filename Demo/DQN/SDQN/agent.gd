@@ -9,7 +9,7 @@ const speed: int = 100
 @onready var MAX_DISTANCE: float = 150  # Maximum distance for raycasts to detect objects
 #@onready var goodObjPos: Vector2 = $"../Map/good/GOOD".global_position  # Position of the goal object (good object)
 
-# Initialize the Deep Q-Network (DQN) with 18 state inputs and 4 possible actions
+# Initialize the Deep Q-Network (DQN) with 24 state inputs and 4 possible actions
 var DQN: SDQN = SDQN.new(24, 4)
 var prev_state: Array = []  # Previous state of the environment
 var prev_action: int = -1   # Previous action taken by the agent
@@ -120,7 +120,7 @@ func _process(delta: float) -> void:
 	if current_action == actions.RIGHT and prev_action == actions.LEFT:
 		reward -= 0.05
 
-	reward += delta / 100
+	reward += delta / 5
 	total_reward += reward
 
 
@@ -154,7 +154,7 @@ func _on_boundary_body_entered(body: Node2D) -> void:
 
 # Called when the agent reaches the goal (good object)
 func _on_good_body_entered(body: Node2D) -> void:
-	reward += 1  # Large reward for reaching the goal
+	reward += 2  # Large reward for reaching the goal
 	done = true  # End the episode
 
 # Called when the timer for the episode runs out
