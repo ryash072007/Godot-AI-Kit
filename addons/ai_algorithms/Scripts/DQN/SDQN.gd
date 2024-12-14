@@ -1,15 +1,15 @@
 class_name SDQN
 
 # Neural network parameters
-var learning_rate: float = 0.01
+var learning_rate: float = 0.001
 var discount_factor: float = 0.6
-var exploration_probability: float = 1.0
-var min_exploration_probability: float = 0.001
-var exploration_decay: float = 0.005
+var exploration_probability: float = 0.8
+var min_exploration_probability: float = 0.2
+var exploration_decay: float = 0.01
 var batch_size: int = 128
-var max_steps: int = 1024
-var target_update_frequency: int = 2048  # Update target network every 5000 steps
-var max_memory_size: int = 4096  # Max size of replay memory
+var max_steps: int = 2048
+var target_update_frequency: int = 4096  # Update target network every 5000 steps
+var max_memory_size: int = 8192  # Max size of replay memory
 var automatic_decay: bool = true
 
 # Variables to hold state and action information
@@ -30,7 +30,6 @@ func _init(state_space: int, action_space: int) -> void:
 	Q_network = NeuralNetworkAdvanced.new()
 	Q_network.add_layer(state_space)
 	Q_network.add_layer(32, Q_network.ACTIVATIONS["ELU"])
-	Q_network.add_layer(32, Q_network.ACTIVATIONS["ELU"])
 	Q_network.add_layer(action_space, Q_network.ACTIVATIONS["LINEAR"])
 
 	target_Q_network = Q_network.copy()
@@ -46,6 +45,9 @@ func choose_action(state: Array) -> int:
 
 func predict(state: Array) -> int:
 	var predicted_q_values: Array = Q_network.predict(state)
+	if NAN in predicted_q_values:
+		print("NaN value detected -> exiting")
+		#get_tree().quit()
 	#print(predicted_q_values)
 	var max_value_index: int = 0
 	var max_value: float = predicted_q_values[max_value_index]
@@ -70,17 +72,21 @@ func sample(array: Array) -> Array:
 	var indices: Array[int] = []
 	var sample: Array = []
 
-	# Choose a random number of sequential elements (2-4 sequential elements)
-	#var num_sequential = randi_range(2, 4)
-#
-	## Randomly choose a starting point for the sequential elements
-	#var start_index = randi_range(0, length - num_sequential)
-#
-	## Add sequential elements to the indices
-	#for i in range(num_sequential):
-		#var index: int = (start_index + i) % length
-		#if index not in indices:
-			#indices.append(index)
+	 #Choose a random number of sequential elements (2-4 sequential elements)
+
+	var num_num_sequential = randi_range(0, 2)
+
+	for n in range(num_num_sequential):
+		var num_sequential = randi_range(4, 8)
+
+		# Randomly choose a starting point for the sequential elements
+		var start_index = randi_range(0, length - num_sequential)
+
+		# Add sequential elements to the indices
+		for i in range(num_sequential):
+			var index: int = (start_index + i) % length
+			if index not in indices:
+				indices.append(index)
 
 	# Fill the rest with non-sequential random elements
 	while indices.size() < batch_size:

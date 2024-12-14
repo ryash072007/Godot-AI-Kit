@@ -48,10 +48,90 @@ color = Color(0, 1, 0, 1)
 [node name="GOOD" type="Area2D" parent="Map/good" groups=["2"]]
 show_behind_parent = true
 position = Vector2(20, 20)
-collision_layer = 2
-collision_mask = 2
+collision_layer = 3
+collision_mask = 3
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Map/good/GOOD"]
+shape = SubResource("RectangleShape2D_lgxib")
+
+[node name="good2" type="ColorRect" parent="Map"]
+offset_left = 561.0
+offset_top = 153.0
+offset_right = 601.0
+offset_bottom = 193.0
+color = Color(0, 1, 0, 1)
+
+[node name="GOOD" type="Area2D" parent="Map/good2" groups=["2"]]
+show_behind_parent = true
+position = Vector2(20, 20)
+collision_layer = 3
+collision_mask = 3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Map/good2/GOOD"]
+shape = SubResource("RectangleShape2D_lgxib")
+
+[node name="good3" type="ColorRect" parent="Map"]
+offset_left = 98.0
+offset_top = 502.0
+offset_right = 138.0
+offset_bottom = 542.0
+color = Color(0, 1, 0, 1)
+
+[node name="GOOD" type="Area2D" parent="Map/good3" groups=["2"]]
+show_behind_parent = true
+position = Vector2(20, 20)
+collision_layer = 3
+collision_mask = 3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Map/good3/GOOD"]
+shape = SubResource("RectangleShape2D_lgxib")
+
+[node name="good4" type="ColorRect" parent="Map"]
+offset_left = 545.0
+offset_top = 555.0
+offset_right = 585.0
+offset_bottom = 595.0
+color = Color(0, 1, 0, 1)
+
+[node name="GOOD" type="Area2D" parent="Map/good4" groups=["2"]]
+show_behind_parent = true
+position = Vector2(20, 20)
+collision_layer = 3
+collision_mask = 3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Map/good4/GOOD"]
+shape = SubResource("RectangleShape2D_lgxib")
+
+[node name="good5" type="ColorRect" parent="Map"]
+offset_left = 105.0
+offset_top = 110.0
+offset_right = 145.0
+offset_bottom = 150.0
+color = Color(0, 1, 0, 1)
+
+[node name="GOOD" type="Area2D" parent="Map/good5" groups=["2"]]
+show_behind_parent = true
+position = Vector2(20, 20)
+collision_layer = 3
+collision_mask = 3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Map/good5/GOOD"]
+shape = SubResource("RectangleShape2D_lgxib")
+
+[node name="good6" type="ColorRect" parent="Map"]
+offset_left = 1014.0
+offset_top = 566.0
+offset_right = 1054.0
+offset_bottom = 606.0
+color = Color(0, 1, 0, 1)
+
+[node name="GOOD" type="Area2D" parent="Map/good6" groups=["2"]]
+show_behind_parent = true
+position = Vector2(20, 20)
+collision_layer = 3
+collision_mask = 3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Map/good6/GOOD"]
 shape = SubResource("RectangleShape2D_lgxib")
 
 [node name="boundary" type="Area2D" parent="Map" groups=["1"]]
@@ -134,5 +214,10 @@ autostart = true
 [connection signal="body_entered" from="Map/bad1/BAD" to="agent" method="_on_bad_body_entered"]
 [connection signal="body_entered" from="Map/bad2/BAD" to="agent" method="_on_bad_body_entered"]
 [connection signal="body_entered" from="Map/good/GOOD" to="agent" method="_on_good_body_entered"]
+[connection signal="body_entered" from="Map/good2/GOOD" to="agent" method="_on_good_body_entered"]
+[connection signal="body_entered" from="Map/good3/GOOD" to="agent" method="_on_good_body_entered"]
+[connection signal="body_entered" from="Map/good4/GOOD" to="agent" method="_on_good_body_entered"]
+[connection signal="body_entered" from="Map/good5/GOOD" to="agent" method="_on_good_body_entered"]
+[connection signal="body_entered" from="Map/good6/GOOD" to="agent" method="_on_good_body_entered"]
 [connection signal="body_entered" from="Map/boundary" to="agent" method="_on_boundary_body_entered"]
 [connection signal="timeout" from="agent/max_life" to="agent" method="_on_max_life_timeout"]
