@@ -29,8 +29,8 @@ func _init(state_space: int, action_space: int) -> void:
 
 	Q_network = NeuralNetworkAdvanced.new()
 	Q_network.add_layer(state_space)
-	Q_network.add_layer(16, Q_network.ACTIVATIONS["PRELU"])
-	Q_network.add_layer(16, Q_network.ACTIVATIONS["PRELU"])
+	Q_network.add_layer(32, Q_network.ACTIVATIONS["ELU"])
+	Q_network.add_layer(32, Q_network.ACTIVATIONS["ELU"])
 	Q_network.add_layer(action_space, Q_network.ACTIVATIONS["LINEAR"])
 
 	target_Q_network = Q_network.copy()
@@ -71,16 +71,16 @@ func sample(array: Array) -> Array:
 	var sample: Array = []
 
 	# Choose a random number of sequential elements (2-4 sequential elements)
-	var num_sequential = randi_range(2, 4)
-
-	# Randomly choose a starting point for the sequential elements
-	var start_index = randi_range(0, length - num_sequential)
-
-	# Add sequential elements to the indices
-	for i in range(num_sequential):
-		var index: int = (start_index + i) % length
-		if index not in indices:
-			indices.append(index)
+	#var num_sequential = randi_range(2, 4)
+#
+	## Randomly choose a starting point for the sequential elements
+	#var start_index = randi_range(0, length - num_sequential)
+#
+	## Add sequential elements to the indices
+	#for i in range(num_sequential):
+		#var index: int = (start_index + i) % length
+		#if index not in indices:
+			#indices.append(index)
 
 	# Fill the rest with non-sequential random elements
 	while indices.size() < batch_size:

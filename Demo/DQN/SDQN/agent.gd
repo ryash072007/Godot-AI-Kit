@@ -9,8 +9,8 @@ const speed: int = 100
 @onready var MAX_DISTANCE: float = 150  # Maximum distance for raycasts to detect objects
 @onready var goodObjPos: Vector2 = $"../Map/good/GOOD".global_position  # Position of the goal object (good object)
 
-# Initialize the Deep Q-Network (DQN) with 19 state inputs and 4 possible actions
-var DQN: SDQN = SDQN.new(10, 4)
+# Initialize the Deep Q-Network (DQN) with 18 state inputs and 4 possible actions
+var DQN: SDQN = SDQN.new(18, 4)
 var prev_state: Array = []  # Previous state of the environment
 var prev_action: int = -1   # Previous action taken by the agent
 var reward: float = 0  # Current reward for the agent
@@ -18,6 +18,8 @@ var done: bool = false  # Whether the episode is over
 var total_reward: float = 0  # Cumulative reward for the current episode
 var resets: int = 0  # Number of times the environment has been reset
 var epoch: int = 0
+var max_length_on_screen: float = 1321.0
+
 @onready var prev_distance_to_goal: float = global_position.distance_to(goodObjPos)  # Previous distance to the goal
 
 var prev_EP: float = 0.0
@@ -29,18 +31,22 @@ func _ready() -> void:
 # Function to calculate distance and object type detected by the raycast
 func get_distance_and_object(_raycast: RayCast2D) -> Array:
 	var colliding: float = 0.0  # Default value if no collision detected
+	var distance: float = 0.0
 	#var object: int = objects.NONE  # Default object type is NONE
 	if _raycast.is_colliding():  # If the raycast collides with an object
 		colliding = 1.0
-	return [colliding]  # Return distance and object type
+		var origin: Vector2 = _raycast.global_transform.get_origin()  # Origin of the raycast
+		var collision: Vector2 = _raycast.get_collision_point()
+		distance = origin.distance_to(collision) / max_length_on_screen
+	return [colliding, distance]  # Return distance and object type
 
 # Function to get the current state for the agent
 func get_state() -> Array:
 	var state: Array = []
 	for raycast in $raycasts.get_children():  # Iterate through all raycasts
 		state.append_array(get_distance_and_object(raycast))  # Append the raycast information to the state
-	state.append(global_position.distance_to(goodObjPos) / 1321)  # Add the distance to the goal
-	state.append($max_life.time_left / 5)
+	state.append(global_position.distance_to(goodObjPos) / max_length_on_screen)  # Add the distance to the goal
+	state.append($max_life.time_left / 10)
 	#print(state)
 	return state
 
@@ -65,7 +71,7 @@ func reset():
 		#DQN.exploration_probability = max(DQN.min_exploration_probability, DQN.exploration_probability - DQN.exploration_decay)
 
 
-	if resets % 8 == 0:
+	if resets % 32 == 0:
 		#var file = FileAccess.open("user://SDQNEpochData.txt", FileAccess.READ_WRITE)
 		#file.seek_end()
 		#file.store_string("Epoch: " + str(epoch) + " | Total Reward: " + str(total_reward) + " | EP: " + str(DQN.exploration_probability) + '\n')

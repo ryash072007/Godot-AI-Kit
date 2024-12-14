@@ -127,7 +127,7 @@ collide_with_areas = true
 collide_with_bodies = false
 
 [node name="max_life" type="Timer" parent="agent"]
-wait_time = 5.0
+wait_time = 10.0
 one_shot = true
 autostart = true
 
