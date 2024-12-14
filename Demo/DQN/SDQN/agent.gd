@@ -101,37 +101,28 @@ func _process(delta: float) -> void:
 	if Input.is_action_just_pressed("ui_down"):
 		DQN.exploration_probability = prev_EP
 
+
 	# Get the current state
 	var current_state: Array = get_state()
+
+	DQN.add_memory(prev_state, prev_action, reward, current_state)
 	# Choose an action using the DQN
 	var current_action: int = DQN.choose_action(current_state)
 
 	# If there was a previous action, update the DQN with the current reward
 	#var goodDistance: float = global_position.distance_to(goodObjPos)
 	if current_action == actions.UP and prev_action == actions.DOWN:
-		reward -= 0.1
+		reward -= 0.05
 	if current_action == actions.DOWN and prev_action == actions.UP:
-		reward -= 0.1
+		reward -= 0.05
 	if current_action == actions.LEFT and prev_action == actions.RIGHT:
-		reward -= 0.1
+		reward -= 0.05
 	if current_action == actions.RIGHT and prev_action == actions.LEFT:
-		reward -= 0.1
-	#var difference: float = prev_distance_to_goal - goodDistance
-	# Reward shaping: Give a small positive reward if getting closer to the goal, negative otherwise
-	#reward += 1.5 * difference if difference > 0 else -2.0 * abs(difference)
+		reward -= 0.05
 
-	#if difference > 0:
-		#reward += 0.05
-	#else:
-		#reward -= 0.07
-
-	# Penalize each step slightly to encourage faster decisions
-	#reward -= 0.01
-
-	#print(reward)
-	reward += delta / 10
+	reward += delta / 100
 	total_reward += reward
-	DQN.add_memory(prev_state, prev_action, reward, current_state)
+
 
 	#prev_distance_to_goal = goodDistance
 	# If the episode is done, reset the environment
@@ -163,7 +154,7 @@ func _on_boundary_body_entered(body: Node2D) -> void:
 
 # Called when the agent reaches the goal (good object)
 func _on_good_body_entered(body: Node2D) -> void:
-	reward += 2  # Large reward for reaching the goal
+	reward += 1  # Large reward for reaching the goal
 	done = true  # End the episode
 
 # Called when the timer for the episode runs out

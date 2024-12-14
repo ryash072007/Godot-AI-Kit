@@ -1,14 +1,14 @@
 class_name SDQN
 
 # Neural network parameters
-var learning_rate: float = 0.001
+var learning_rate: float = 0.01
 var discount_factor: float = 0.6
 var exploration_probability: float = 0.8
 var min_exploration_probability: float = 0.2
 var exploration_decay: float = 0.01
 var batch_size: int = 128
-var max_steps: int = 2048
-var target_update_frequency: int = 4096  # Update target network every 5000 steps
+var max_steps: int = 1024
+var target_update_frequency: int = 4096  # Update target network every 4096 steps
 var max_memory_size: int = 8192  # Max size of replay memory
 var automatic_decay: bool = true
 
@@ -29,8 +29,10 @@ func _init(state_space: int, action_space: int) -> void:
 
 	Q_network = NeuralNetworkAdvanced.new()
 	Q_network.add_layer(state_space)
-	Q_network.add_layer(32, Q_network.ACTIVATIONS["ELU"])
+	Q_network.add_layer(16, Q_network.ACTIVATIONS["ELU"])
+	Q_network.add_layer(8, Q_network.ACTIVATIONS["ELU"])
 	Q_network.add_layer(action_space, Q_network.ACTIVATIONS["LINEAR"])
+	Q_network.learning_rate = learning_rate
 
 	target_Q_network = Q_network.copy()
 
@@ -121,11 +123,6 @@ func train(replay_memory: Array) -> void:
 		target_q_values[action] = target
 		Q_network.train(state, target_q_values)
 
-	# Update target network after fixed steps
-	update_steps += 1
-	if update_steps >= target_update_frequency:
-		update_steps = 0
-		target_Q_network = Q_network.copy()
 
 
 func add_memory(state: Array, action: int, reward: float, next_state: Array) -> void:
@@ -143,3 +140,9 @@ func add_memory(state: Array, action: int, reward: float, next_state: Array) -> 
 		if automatic_decay:
 			exploration_probability = max(min_exploration_probability, exploration_probability - exploration_decay)
 		train(memory)
+
+	update_steps += 1
+	if update_steps >= target_update_frequency:
+		update_steps = 0
+		print("Copying network into target now")
+		target_Q_network = Q_network.copy()

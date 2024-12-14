@@ -94,52 +94,39 @@ func train(input_array: Array, target_array: Array):
 
 	# Start backpropagation by calculating output errors
 	var expected_output: Matrix = targets
-	var next_layer_errors: Matrix
+	var next_layer_errors: Matrix = null
 
 	# Loop backward through the network layers
 	for layer_index in range(network.size() - 1, -1, -1):
 		var layer: Dictionary = network[layer_index]
-		var layer_outputs: Matrix = outputs[layer_index] # Outputs of the current layer
-		var layer_unactivated_output: Matrix = Matrix.transpose(unactivated_outputs[layer_index]) # Unactivated outputs (for gradients)
-
-		# If it's the output layer
-		if layer_index == network.size() - 1:
-			var output_errors: Matrix = Matrix.subtract(expected_output, layer_outputs) # Calculate output errors
-			next_layer_errors = output_errors # Set output errors as next layer's errors
-			var gradients: Matrix = Matrix.map(layer_outputs, layer.activation.derivative) # Calculate gradients (derivative of activation)
-			gradients = Matrix.multiply(gradients, output_errors) # Multiply by the error
-			gradients = Matrix.scalar(gradients, learning_rate) # Multiply by learning rate
-
-			# Calculate weight updates (weight delta)
-			var weight_delta: Matrix
-			if layer_index == 0:
-				weight_delta = Matrix.dot_product(gradients, Matrix.transpose(inputs)) # Use inputs if first layer
-			else:
-				weight_delta = Matrix.dot_product(gradients, Matrix.transpose(outputs[layer_index - 1])) # Otherwise, use previous layer outputs
-
-			# Update weights and biases
-			network[layer_index].weights = Matrix.add(layer.weights, weight_delta)
-			network[layer_index].bias = Matrix.add(layer.bias, gradients)
+		var layer_outputs: Matrix = outputs[layer_index]
+		var layer_unactivated_output: Matrix = unactivated_outputs[layer_index]
+		var current_error: Matrix
+		# Determine current errors
+		if next_layer_errors == null:
+			# Output layer error
+			current_error = Matrix.subtract(expected_output, layer_outputs)
 		else:
-			# For hidden layers
-			var weights_hidden_output_t = Matrix.transpose(network[layer_index + 1].weights) # Transpose weights of next layer
-			var hidden_errors = Matrix.dot_product(weights_hidden_output_t, next_layer_errors) # Calculate hidden layer errors
-			next_layer_errors = hidden_errors # Set hidden errors as next layer's errors
-			var hidden_gradient = Matrix.map(layer_outputs, layer.activation.derivative) # Calculate gradients for hidden layers
-			hidden_gradient = Matrix.multiply(hidden_gradient, hidden_errors) # Multiply by hidden layer error
-			hidden_gradient = Matrix.scalar(hidden_gradient, learning_rate) # Multiply by learning rate
+			# Hidden layer error
+			var weights_hidden_output_t = Matrix.transpose(network[layer_index + 1].weights)
+			current_error = Matrix.dot_product(weights_hidden_output_t, next_layer_errors)
+			current_error = Matrix.multiply(current_error, Matrix.map(layer_unactivated_output, layer.activation.derivative))
 
-			# Calculate weight updates for hidden layers
-			var inputs_t: Matrix
-			if layer_index != 0:
-				inputs_t = Matrix.transpose(outputs[layer_index - 1]) # Use previous layer's outputs
-			else:
-				inputs_t = Matrix.transpose(inputs) # Use inputs for the first layer
-			var weight_delta = Matrix.dot_product(hidden_gradient, inputs_t) # Calculate weight delta
+		# Gradient calculation
+		var gradients: Matrix = Matrix.map(layer_outputs, layer.activation.derivative)
+		gradients = Matrix.multiply(gradients, current_error)
+		gradients = Matrix.scalar(gradients, learning_rate)
 
-			# Update weights and biases
-			network[layer_index].weights = Matrix.add(layer.weights, weight_delta)
-			network[layer_index].bias = Matrix.add(layer.bias, hidden_gradient)
+		# Weight updates
+		var inputs_t: Matrix = Matrix.transpose(inputs) if layer_index == 0 else Matrix.transpose(outputs[layer_index - 1])
+		var weight_delta: Matrix = Matrix.dot_product(gradients, inputs_t)
+
+		# Update weights and biases
+		network[layer_index].weights = Matrix.add(layer.weights, weight_delta)
+		network[layer_index].bias = Matrix.add(layer.bias, gradients)
+
+		# Pass current error to the next layer
+		next_layer_errors = current_error
 
 
 # Copy the NNA Completely
