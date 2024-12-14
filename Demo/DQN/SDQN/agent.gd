@@ -7,10 +7,10 @@ enum actions {UP, DOWN, LEFT, RIGHT}
 # Character movement speed and maximum raycast sensing distance
 const speed: int = 100
 @onready var MAX_DISTANCE: float = 150  # Maximum distance for raycasts to detect objects
-#@onready var goodObjPos: Vector2 = $"../Map/good/GOOD".global_position  # Position of the goal object (good object)
+@onready var goodObjPos: Vector2 = $"../Map/good/GOOD".global_position  # Position of the goal object (good object)
 
-# Initialize the Deep Q-Network (DQN) with 24 state inputs and 4 possible actions
-var DQN: SDQN = SDQN.new(24, 4)
+# Initialize the Deep Q-Network (DQN) with 17 state inputs and 4 possible actions
+var DQN: SDQN = SDQN.new(18, 4)
 var prev_state: Array = []  # Previous state of the environment
 var prev_action: int = -1   # Previous action taken by the agent
 var reward: float = 0  # Current reward for the agent
@@ -20,7 +20,7 @@ var resets: int = 0  # Number of times the environment has been reset
 var epoch: int = 0
 var max_length_on_screen: float = 1321.0
 
-#@onready var prev_distance_to_goal: float = global_position.distance_to(goodObjPos)  # Previous distance to the goal
+@onready var prev_distance_to_goal: float = global_position.distance_to(goodObjPos)  # Previous distance to the goal
 
 var prev_EP: float = 0.0
 
@@ -37,17 +37,17 @@ func get_distance_and_object(_raycast: RayCast2D) -> Array:
 		colliding = 1.0
 		var origin: Vector2 = _raycast.global_transform.get_origin()  # Origin of the raycast
 		var collision: Vector2 = _raycast.get_collision_point()
-		object = _raycast.get_collider().get_groups()[0].to_int()
+		#object = _raycast.get_collider().get_groups()[0].to_int()
 		distance = origin.distance_to(collision) / MAX_DISTANCE
-	return [colliding, distance, object]  # Return distance and object type
+	return [colliding, distance]  # Return distance and object type
 
 # Function to get the current state for the agent
 func get_state() -> Array:
 	var state: Array = []
 	for raycast in $raycasts.get_children():  # Iterate through all raycasts
 		state.append_array(get_distance_and_object(raycast))  # Append the raycast information to the state
-	#state.append(global_position.distance_to(goodObjPos) / max_length_on_screen)  # Add the distance to the goal
-	#state.append($max_life.time_left / 10)
+	state.append(global_position.distance_to(goodObjPos) / max_length_on_screen)  # Add the distance to the goal
+	state.append($max_life.time_left / 10)
 	#print(state)
 	return state
 
@@ -72,7 +72,7 @@ func reset():
 		#DQN.exploration_probability = max(DQN.min_exploration_probability, DQN.exploration_probability - DQN.exploration_decay)
 
 
-	if resets % 16 == 0:
+	if resets % 8 == 0:
 		#var file = FileAccess.open("user://SDQNEpochData.txt", FileAccess.READ_WRITE)
 		#file.seek_end()
 		#file.store_string("Epoch: " + str(epoch) + " | Total Reward: " + str(total_reward) + " | EP: " + str(DQN.exploration_probability) + '\n')
@@ -89,6 +89,7 @@ func reset():
 
 	# Randomly reposition the agent on the map
 	global_position = Vector2(randi_range(40, 1100), randi_range(20, 600))
+	prev_distance_to_goal = global_position.distance_to(goodObjPos)
 	#prev_distance_to_goal = global_position.distance_to(goodObjPos)  # Reset the distance to goal
 	$max_life.start()  # Start the timer for the episode
 
@@ -102,6 +103,12 @@ func _process(delta: float) -> void:
 		DQN.exploration_probability = prev_EP
 
 
+	var distance: float = global_position.distance_to(goodObjPos)
+	if prev_distance_to_goal >= distance:
+		reward += 0.05
+	else:
+		reward -= 0.07
+
 	# Get the current state
 	var current_state: Array = get_state()
 
@@ -110,21 +117,22 @@ func _process(delta: float) -> void:
 	var current_action: int = DQN.choose_action(current_state)
 
 	# If there was a previous action, update the DQN with the current reward
-	#var goodDistance: float = global_position.distance_to(goodObjPos)
-	if current_action == actions.UP and prev_action == actions.DOWN:
-		reward -= 0.05
-	if current_action == actions.DOWN and prev_action == actions.UP:
-		reward -= 0.05
-	if current_action == actions.LEFT and prev_action == actions.RIGHT:
-		reward -= 0.05
-	if current_action == actions.RIGHT and prev_action == actions.LEFT:
-		reward -= 0.05
 
-	reward += delta / 5
+
+	#if current_action == actions.UP and prev_action == actions.DOWN:
+		#reward -= 0.05
+	#if current_action == actions.DOWN and prev_action == actions.UP:
+		#reward -= 0.05
+	#if current_action == actions.LEFT and prev_action == actions.RIGHT:
+		#reward -= 0.05
+	#if current_action == actions.RIGHT and prev_action == actions.LEFT:
+		#reward -= 0.05
+
+	#reward += delta / 5
 	total_reward += reward
 
 
-	#prev_distance_to_goal = goodDistance
+	prev_distance_to_goal = distance
 	# If the episode is done, reset the environment
 	if done == true:
 		reset()
@@ -154,7 +162,7 @@ func _on_boundary_body_entered(body: Node2D) -> void:
 
 # Called when the agent reaches the goal (good object)
 func _on_good_body_entered(body: Node2D) -> void:
-	reward += 2  # Large reward for reaching the goal
+	reward += 1  # Large reward for reaching the goal
 	done = true  # End the episode
 
 # Called when the timer for the episode runs out
