@@ -1,13 +1,13 @@
 class_name SDQN
 
 # Neural network parameters
-var learning_rate: float = 0.01
-var discount_factor: float = 0.6
+var learning_rate: float = 0.05
+var discount_factor: float = 0.3
 var exploration_probability: float = 0.95
 var min_exploration_probability: float = 0.05
 var exploration_decay: float = 0.005
 var batch_size: int = 128
-var max_steps: int = 1024
+var max_steps: int = 512
 var target_update_frequency: int = 4096  # Update target network every 4096 steps
 var max_memory_size: int = 4096  # Max size of replay memory
 var automatic_decay: bool = true
@@ -120,6 +120,9 @@ func train(replay_memory: Array) -> void:
 		var target = reward + discount_factor * max_q_predict(next_state)  # Predict the max Q-value for next state
 
 		# Update the Q-network
+		if state.size() != state_space:
+			print("Erronius state detected, skipping it!")
+			continue
 		var target_q_values: Array = Q_network.predict(state)
 		target_q_values[action] = target
 		Q_network.train(state, target_q_values)

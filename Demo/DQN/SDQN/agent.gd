@@ -10,7 +10,7 @@ const speed: int = 100
 @onready var goodObjPos: Vector2 = $"../Map/good/GOOD".global_position  # Position of the goal object (good object)
 
 # Initialize the Deep Q-Network (DQN) with 17 state inputs and 4 possible actions
-var DQN: SDQN = SDQN.new(18, 4)
+var DQN: SDQN = SDQN.new(26, 4)
 var prev_state: Array = []  # Previous state of the environment
 var prev_action: int = -1   # Previous action taken by the agent
 var reward: float = 0  # Current reward for the agent
@@ -37,9 +37,9 @@ func get_distance_and_object(_raycast: RayCast2D) -> Array:
 		colliding = 1.0
 		var origin: Vector2 = _raycast.global_transform.get_origin()  # Origin of the raycast
 		var collision: Vector2 = _raycast.get_collision_point()
-		#object = _raycast.get_collider().get_groups()[0].to_int()
+		object = _raycast.get_collider().get_groups()[0].to_int()
 		distance = origin.distance_to(collision) / MAX_DISTANCE
-	return [colliding, distance]  # Return distance and object type
+	return [colliding, distance, object]  # Return distance and object type
 
 # Function to get the current state for the agent
 func get_state() -> Array:
@@ -88,7 +88,7 @@ func reset():
 		resets = 0
 
 	# Randomly reposition the agent on the map
-	global_position = Vector2(randi_range(40, 1100), randi_range(20, 600))
+	global_position = Vector2(randi_range(900, 1150), randi_range(150, 500))
 	prev_distance_to_goal = global_position.distance_to(goodObjPos)
 	#prev_distance_to_goal = global_position.distance_to(goodObjPos)  # Reset the distance to goal
 	$max_life.start()  # Start the timer for the episode
