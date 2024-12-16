@@ -6,11 +6,11 @@ enum actions {UP, DOWN, LEFT, RIGHT}
 
 # Character movement speed and maximum raycast sensing distance
 const speed: int = 200
-@onready var MAX_DISTANCE: float = 150  # Maximum distance for raycasts to detect objects
-@onready var goodObjPos: Vector2 = $"../Map/good/GOOD".global_position  # Position of the goal object (good object)
+@onready var MAX_DISTANCE: float = 250  # Maximum distance for raycasts to detect objects
+#@onready var goodObjPos: Vector2 = $"../Map/good/GOOD".global_position  # Position of the goal object (good object)
 
 # Initialize the Deep Q-Network (DQN) with 24 state inputs and 4 possible actions
-var DQN: SDQN = SDQN.new(24, 4)
+var DQN: SDQN = SDQN.new(24, 4, 0.001)
 var prev_state: Array = []  # Previous state of the environment
 var prev_action: int = -1   # Previous action taken by the agent
 var reward: float = 0  # Current reward for the agent
@@ -28,7 +28,8 @@ var prev_EP: float = 0.0
 # Function called when the scene is ready
 func _ready() -> void:
 	DQN.automatic_decay = false  # Disable automatic decay of exploration probability
-	DQN.exploration_probability = 0.5 # Testing to see smthn
+	DQN.exploration_probability = 0.7 # Testing to see smthn
+	DQN.discount_factor = 0.9
 	reset()
 
 
@@ -154,21 +155,31 @@ func _process(delta: float) -> void:
 
 # Event handlers for different collisions
 # Called when the agent hits a bad object
-func _on_bad_body_entered(_body: Node2D) -> void:
-	reward -= 0.5  # Penalty for hitting a bad object
-	done = true  # End the episode
-
-# Called when the agent hits the boundary of the map
-func _on_boundary_body_entered(body: Node2D) -> void:
-	reward -= 0.7  # Penalty for hitting the boundary
-	done = true  # End the episode
-
-# Called when the agent reaches the goal (good object)
-func _on_good_body_entered(body: Node2D) -> void:
-	reward += 0.8  # Large reward for reaching the goal
-	done = true  # End the episode
+#func _on_bad_body_entered(_body: Node2D) -> void:
+	#reward -= 0.5  # Penalty for hitting a bad object
+	#done = true  # End the episode
+#
+## Called when the agent hits the boundary of the map
+#func _on_boundary_body_entered(body: Node2D) -> void:
+	#reward -= 0.7  # Penalty for hitting the boundary
+	#done = true  # End the episode
+#
+## Called when the agent reaches the goal (good object)
+#func _on_good_body_entered(body: Node2D) -> void:
+	#reward += 2  # Large reward for reaching the goal
+	#done = true  # End the episode
 
 # Called when the timer for the episode runs out
 func _on_max_life_timeout() -> void:
 	#reward -= 0.05  # Small penalty for running out of time
 	done = true  # End the episode
+
+
+func _on_obj_dec_area_entered(area: Area2D) -> void:
+	if area.is_in_group("1"):
+		reward -= 0.25
+		done = true
+	elif area.is_in_group("2"):
+		reward += 0.75
+		done = true
+

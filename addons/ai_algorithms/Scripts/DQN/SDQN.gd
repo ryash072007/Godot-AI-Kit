@@ -7,8 +7,8 @@ var exploration_probability: float = 0.95
 var min_exploration_probability: float = 0.05
 var exploration_decay: float = 0.01
 var batch_size: int = 128
-var max_steps: int = 1024
-var target_update_frequency: int = 8192  # Update target network every 4096 steps
+var max_steps: int = 2048
+var target_update_frequency: int = 4096  # Update target network every 4096 steps
 var max_memory_size: int = 4096  # Max size of replay memory
 var automatic_decay: bool = true
 

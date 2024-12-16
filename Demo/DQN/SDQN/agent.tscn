@@ -1,0 +1,90 @@
+[gd_scene load_steps=4 format=3 uid="uid://se5h873vcxa"]
+
+[ext_resource type="Script" path="res://Demo/DQN/SDQN/agent.gd" id="1_rmrrt"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ii6dy"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mntyu"]
+
+[node name="agent" type="CharacterBody2D"]
+position = Vector2(925, 93)
+collision_layer = 3
+collision_mask = 0
+motion_mode = 1
+script = ExtResource("1_rmrrt")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_ii6dy")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+offset_left = -10.0
+offset_top = -10.0
+offset_right = 10.0
+offset_bottom = 10.0
+color = Color(0.670588, 0.372549, 0.462745, 1)
+
+[node name="raycasts" type="Node2D" parent="."]
+show_behind_parent = true
+
+[node name="RayCast2D" type="RayCast2D" parent="raycasts"]
+target_position = Vector2(0, 250)
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="RayCast2D2" type="RayCast2D" parent="raycasts"]
+rotation = 0.785398
+target_position = Vector2(0, 250)
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="RayCast2D3" type="RayCast2D" parent="raycasts"]
+rotation = 1.5708
+target_position = Vector2(0, 250)
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="RayCast2D4" type="RayCast2D" parent="raycasts"]
+rotation = 2.35619
+target_position = Vector2(0, 250)
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="RayCast2D5" type="RayCast2D" parent="raycasts"]
+rotation = 3.14159
+target_position = Vector2(0, 250)
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="RayCast2D6" type="RayCast2D" parent="raycasts"]
+rotation = 3.92699
+target_position = Vector2(0, 250)
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="RayCast2D7" type="RayCast2D" parent="raycasts"]
+rotation = 4.71239
+target_position = Vector2(0, 250)
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="RayCast2D8" type="RayCast2D" parent="raycasts"]
+rotation = 5.49779
+target_position = Vector2(0, 250)
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="max_life" type="Timer" parent="."]
+wait_time = 10.0
+one_shot = true
+autostart = true
+
+[node name="ObjDec" type="Area2D" parent="."]
+collision_layer = 0
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ObjDec"]
+shape = SubResource("RectangleShape2D_mntyu")
+debug_color = Color(0.779348, 0.345825, 0.690616, 0.42)
+
+[connection signal="timeout" from="max_life" to="." method="_on_max_life_timeout"]
+[connection signal="area_entered" from="ObjDec" to="." method="_on_obj_dec_area_entered"]

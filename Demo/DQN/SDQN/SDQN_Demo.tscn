@@ -1,11 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://cax2dkdgqx4ow"]
+[gd_scene load_steps=3 format=3 uid="uid://cax2dkdgqx4ow"]
 
-[ext_resource type="Script" path="res://Demo/DQN/SDQN/agent.gd" id="1_mihi2"]
+[ext_resource type="Script" path="res://Demo/DQN/SDQN/Agents.gd" id="1_ot8rs"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_lgxib"]
 size = Vector2(40, 40)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_ii6dy"]
 
 [node name="SdqnDemo" type="Node2D"]
 
@@ -233,91 +231,6 @@ shape = SubResource("RectangleShape2D_lgxib")
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Map/boundary"]
 polygon = PackedVector2Array(0, 0, 0, 648, 1154, 648, 1152, 0, -3, 0, -3, -1, 1154, -2, 1158, 653, -4, 653, -3, 0)
 
-[node name="agent" type="CharacterBody2D" parent="."]
-position = Vector2(925, 93)
-collision_layer = 3
-collision_mask = 3
-motion_mode = 1
-script = ExtResource("1_mihi2")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="agent"]
-shape = SubResource("RectangleShape2D_ii6dy")
-
-[node name="ColorRect" type="ColorRect" parent="agent"]
-offset_left = -10.0
-offset_top = -10.0
-offset_right = 10.0
-offset_bottom = 10.0
-color = Color(0.670588, 0.372549, 0.462745, 1)
-
-[node name="raycasts" type="Node2D" parent="agent"]
-show_behind_parent = true
-
-[node name="RayCast2D" type="RayCast2D" parent="agent/raycasts"]
-target_position = Vector2(0, 150)
-collide_with_areas = true
-collide_with_bodies = false
-
-[node name="RayCast2D2" type="RayCast2D" parent="agent/raycasts"]
-rotation = 0.785398
-target_position = Vector2(0, 150)
-collide_with_areas = true
-collide_with_bodies = false
-
-[node name="RayCast2D3" type="RayCast2D" parent="agent/raycasts"]
-rotation = 1.5708
-target_position = Vector2(0, 150)
-collide_with_areas = true
-collide_with_bodies = false
-
-[node name="RayCast2D4" type="RayCast2D" parent="agent/raycasts"]
-rotation = 2.35619
-target_position = Vector2(0, 150)
-collide_with_areas = true
-collide_with_bodies = false
-
-[node name="RayCast2D5" type="RayCast2D" parent="agent/raycasts"]
-rotation = 3.14159
-target_position = Vector2(0, 150)
-collide_with_areas = true
-collide_with_bodies = false
-
-[node name="RayCast2D6" type="RayCast2D" parent="agent/raycasts"]
-rotation = 3.92699
-target_position = Vector2(0, 150)
-collide_with_areas = true
-collide_with_bodies = false
-
-[node name="RayCast2D7" type="RayCast2D" parent="agent/raycasts"]
-rotation = 4.71239
-target_position = Vector2(0, 150)
-collide_with_areas = true
-collide_with_bodies = false
-
-[node name="RayCast2D8" type="RayCast2D" parent="agent/raycasts"]
-rotation = 5.49779
-target_position = Vector2(0, 150)
-collide_with_areas = true
-collide_with_bodies = false
-
-[node name="max_life" type="Timer" parent="agent"]
-wait_time = 10.0
-one_shot = true
-autostart = true
-
-[connection signal="body_entered" from="Map/bad1/BAD" to="agent" method="_on_bad_body_entered"]
-[connection signal="body_entered" from="Map/bad3/BAD" to="agent" method="_on_bad_body_entered"]
-[connection signal="body_entered" from="Map/bad2/BAD" to="agent" method="_on_bad_body_entered"]
-[connection signal="body_entered" from="Map/bad4/BAD" to="agent" method="_on_bad_body_entered"]
-[connection signal="body_entered" from="Map/good/GOOD" to="agent" method="_on_good_body_entered"]
-[connection signal="body_entered" from="Map/good3/GOOD" to="agent" method="_on_good_body_entered"]
-[connection signal="body_entered" from="Map/good4/GOOD" to="agent" method="_on_good_body_entered"]
-[connection signal="body_entered" from="Map/good5/GOOD" to="agent" method="_on_good_body_entered"]
-[connection signal="body_entered" from="Map/good6/GOOD" to="agent" method="_on_good_body_entered"]
-[connection signal="body_entered" from="Map/good7/GOOD" to="agent" method="_on_good_body_entered"]
-[connection signal="body_entered" from="Map/good8/GOOD" to="agent" method="_on_good_body_entered"]
-[connection signal="body_entered" from="Map/good9/GOOD" to="agent" method="_on_good_body_entered"]
-[connection signal="body_entered" from="Map/good10/GOOD" to="agent" method="_on_good_body_entered"]
-[connection signal="body_entered" from="Map/good2/GOOD" to="agent" method="_on_good_body_entered"]
-[connection signal="body_entered" from="Map/boundary" to="agent" method="_on_boundary_body_entered"]
-[connection signal="timeout" from="agent/max_life" to="agent" method="_on_max_life_timeout"]
+[node name="Agents" type="Node2D" parent="."]
+script = ExtResource("1_ot8rs")
+agents_to_spawn = 8
