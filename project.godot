@@ -17,8 +17,7 @@ config/icon="res://addons/ai_algorithms/NeuralNet.png"
 
 [display]
 
-window/stretch/mode="viewport"
-window/stretch/aspect="expand"
+window/size/resizable=false
 
 [editor]
 

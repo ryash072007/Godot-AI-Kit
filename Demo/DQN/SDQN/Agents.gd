@@ -6,4 +6,5 @@ extends Node2D
 func _ready() -> void:
 	for i in range(agents_to_spawn):
 		var agent = agent.instantiate()
+
 		call_deferred("add_child", agent)

@@ -165,3 +165,4 @@ func index_of_max_from_row(_row: int) -> int:
 
 func max_from_row(_row: int) -> float:
 	return data[_row].max()
+

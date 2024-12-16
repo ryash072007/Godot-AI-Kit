@@ -23,15 +23,17 @@ var resets: int = -1  # Number of times the environment has been reset
 var epoch: int = 0
 var max_length_on_screen: float = 1321.0
 
+@export var debug: bool = false
+
 #@onready var prev_distance_to_goal: float = global_position.distance_to(goodObjPos)  # Previous distance to the goal
 
 var prev_EP: float = 0.0
 
 # Function called when the scene is ready
 func _ready() -> void:
+	$ColorRect.color = Color(randf(), randf(), randf())
+	#DQN = SDQN.load_sdqn("user://SDQN_data_Epoch_1.ryash")
 	DQN.automatic_decay = false  # Disable automatic decay of exploration probability
-	DQN.exploration_probability = 0.7 # Testing to see smthn
-	DQN.discount_factor = 0.9
 	reset()
 
 
@@ -63,12 +65,13 @@ func reset():
 	resets += 1
 	total_reward_epoch += total_reward
 
-	print("***************************")
-	print("Epoch: " + str(epoch))
-	print("Total resets this epoch: " + str(resets))
-	print("exploration_probability: " + str(DQN.exploration_probability))
-	print("total_reward this reset: " + str(total_reward))
-	print("average reward this epoch: " + str(total_reward_epoch / resets))
+	if debug:
+		print("***************************")
+		print("Epoch: " + str(epoch))
+		print("Total resets this epoch: " + str(resets))
+		print("exploration_probability: " + str(DQN.exploration_probability))
+		print("total_reward this reset: " + str(total_reward))
+		print("average reward this epoch: " + str(total_reward_epoch / resets))
 
 	# Reset important variables
 	reward = 0
@@ -83,7 +86,11 @@ func reset():
 
 
 	if resets % epoch_reset == 0:
-		#DQN.save("user://SDQN_data_Epoch_" + str(epoch) + ".ryash")
+		print("********- " + str($ColorRect.color) + " -********")
+		print("Epoch: " + str(epoch))
+		print("exploration_probability: " + str(DQN.exploration_probability))
+		print("average reward this epoch: " + str(total_reward_epoch / resets))
+
 
 		DQN.exploration_probability = max(DQN.min_exploration_probability, DQN.exploration_probability - DQN.exploration_decay)
 		epoch += 1
@@ -145,12 +152,14 @@ func _process(delta: float) -> void:
 	# If the episode is done, reset the environment
 
 	# Move the agent based on the chosen action
+	velocity = Vector2.ZERO
 	match current_action:
-		actions.UP: position.y -= speed * delta
-		actions.DOWN: position.y += speed * delta
-		actions.LEFT: position.x -= speed * delta
-		actions.RIGHT: position.x += speed * delta
+		actions.UP: velocity.y -= speed #* delta
+		actions.DOWN: velocity.y += speed #* delta
+		actions.LEFT: velocity.x -= speed #* delta
+		actions.RIGHT: velocity.x += speed #* delta
 
+	move_and_slide()
 	# Update previous state and action
 	prev_state = current_state
 	prev_action = current_action

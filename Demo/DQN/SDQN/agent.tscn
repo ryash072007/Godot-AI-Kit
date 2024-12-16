@@ -21,7 +21,6 @@ offset_left = -10.0
 offset_top = -10.0
 offset_right = 10.0
 offset_bottom = 10.0
-color = Color(0.670588, 0.372549, 0.462745, 1)
 
 [node name="raycasts" type="Node2D" parent="."]
 show_behind_parent = true
