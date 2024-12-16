@@ -3,8 +3,8 @@ class_name SDQN
 # Neural network parameters
 var learning_rate: float = 0.001
 var discount_factor: float = 0.95
-var exploration_probability: float = 0.95
-var min_exploration_probability: float = 0.05
+var exploration_probability: float = 0.9
+var min_exploration_probability: float = 0.2
 var exploration_decay: float = 0.01
 var batch_size: int = 128
 var max_steps: int = 2048

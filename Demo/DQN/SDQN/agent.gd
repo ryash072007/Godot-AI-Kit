@@ -4,6 +4,8 @@ extends CharacterBody2D
 enum objects {NONE, BAD, GOOD}
 enum actions {UP, DOWN, LEFT, RIGHT}
 
+@export var epoch_reset: int = 32
+
 # Character movement speed and maximum raycast sensing distance
 const speed: int = 200
 @onready var MAX_DISTANCE: float = 250  # Maximum distance for raycasts to detect objects
@@ -80,7 +82,7 @@ func reset():
 		#DQN.exploration_probability = max(DQN.min_exploration_probability, DQN.exploration_probability - DQN.exploration_decay)
 
 
-	if resets % 16 == 0:
+	if resets % epoch_reset == 0:
 		#DQN.save("user://SDQN_data_Epoch_" + str(epoch) + ".ryash")
 
 		DQN.exploration_probability = max(DQN.min_exploration_probability, DQN.exploration_probability - DQN.exploration_decay)
