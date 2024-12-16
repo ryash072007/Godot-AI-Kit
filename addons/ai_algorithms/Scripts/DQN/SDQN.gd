@@ -1,14 +1,14 @@
 class_name SDQN
 
 # Neural network parameters
-var learning_rate: float = 0.05
-var discount_factor: float = 0.3
+var learning_rate: float = 0.001
+var discount_factor: float = 0.95
 var exploration_probability: float = 0.95
 var min_exploration_probability: float = 0.05
-var exploration_decay: float = 0.005
+var exploration_decay: float = 0.01
 var batch_size: int = 128
-var max_steps: int = 512
-var target_update_frequency: int = 4096  # Update target network every 4096 steps
+var max_steps: int = 1024
+var target_update_frequency: int = 8192  # Update target network every 4096 steps
 var max_memory_size: int = 4096  # Max size of replay memory
 var automatic_decay: bool = true
 
@@ -23,14 +23,14 @@ var steps: int = 0
 var update_steps: int = 0  # Counter for updating target network
 
 
-func _init(state_space: int, action_space: int, learning_rate: float = 0.01) -> void:
+func _init(state_space: int, action_space: int, learning_rate: float = 0.001) -> void:
 	self.state_space = state_space
 	self.action_space = action_space
 	self.learning_rate = learning_rate
 
 	Q_network = NeuralNetworkAdvanced.new()
 	Q_network.add_layer(state_space)
-	Q_network.add_layer(16, Q_network.ACTIVATIONS["ELU"])
+	Q_network.add_layer(32, Q_network.ACTIVATIONS["ELU"])
 	Q_network.add_layer(16, Q_network.ACTIVATIONS["ELU"])
 	Q_network.add_layer(action_space, Q_network.ACTIVATIONS["LINEAR"])
 	Q_network.learning_rate = learning_rate
@@ -76,9 +76,9 @@ func sample(array: Array) -> Array:
 	var sample: Array = []
 
 	 #Choose a random number of sequential elements (2-4 sequential elements)
-
-	var num_num_sequential = randi_range(0, 2)
-
+#
+	#var num_num_sequential = randi_range(0, 2)
+#
 	#for n in range(num_num_sequential):
 		#var num_sequential = randi_range(4, 8)
 #
@@ -148,5 +148,35 @@ func add_memory(state: Array, action: int, reward: float, next_state: Array) -> 
 	update_steps += 1
 	if update_steps >= target_update_frequency:
 		update_steps = 0
-		print("Copying network into target now")
+		print("Copying QNetwork into Target Network now")
 		target_Q_network = Q_network.copy()
+
+
+func save(file_path: String) -> void:
+	var file := FileAccess.open(file_path, FileAccess.WRITE)
+	var data: Dictionary = {
+		"learning_rate": self.learning_rate,
+		"discount_factor": self.discount_factor,
+		"state_space": self.state_space,
+		"action_space": self.action_space,
+		"Q_network": Q_network.network,
+		"Q_network_structure": Q_network.layer_structure,
+		"target_Q_network": target_Q_network.network,
+		"target_Q_network_structure": target_Q_network.layer_structure
+	}
+	file.store_var(data, true)
+	file.close()
+
+static func load_sdqn(file_path: String) -> SDQN:
+	var file := FileAccess.open(file_path, FileAccess.READ)
+	var data: Dictionary = file.get_var(true)
+	var sdqn: SDQN = SDQN.new(data["state_space"], data["action_space"], data["learning_rate"])
+	sdqn.discount_factor = data["discount_factor"]
+	sdqn.Q_network.network = data["Q_network"]
+	sdqn.Q_network.layer_structure = data["Q_network_structure"]
+	sdqn.target_Q_network.network = data["target_Q_network"]
+	sdqn.target_Q_network.layer_structure = data["target_Q_network_structure"]
+	file.close()
+
+	return sdqn
+

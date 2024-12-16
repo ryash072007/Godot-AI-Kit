@@ -40,7 +40,7 @@ var ACTIVATIONS: Dictionary = {
 }
 
 # Learning rate for training the network
-var learning_rate: float = 0.5
+var learning_rate: float = 0.001
 
 # Array to store the structure of the network (number of nodes in each layer)
 var layer_structure: Array[int] = []
@@ -127,6 +127,12 @@ func train(input_array: Array, target_array: Array):
 
 		# Pass current error to the next layer
 		next_layer_errors = current_error
+
+
+func save(file_path: String) -> void:
+	var file := FileAccess.open(file_path, FileAccess.WRITE)
+	file.store_var(self, true)
+	file.close()
 
 
 # Copy the NNA Completely
