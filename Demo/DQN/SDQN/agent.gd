@@ -4,11 +4,12 @@ extends CharacterBody2D
 enum objects {NONE, BAD, GOOD}
 enum actions {UP, DOWN, LEFT, RIGHT}
 
-@export var epoch_reset: int = 32
+@export var epoch_reset: int = 16
 
 # Character movement speed and maximum raycast sensing distance
 const speed: int = 200
 @onready var MAX_DISTANCE: float = 250 # Maximum distance for raycasts to detect objects
+@export var check_fitness: bool = false
 
 # Initialize the Deep Q-Network (DQN) with 24 state inputs and 4 possible actions
 var DQN: SDQN = SDQN.new(24, 4)
@@ -20,7 +21,7 @@ var total_reward: float = 0 # Cumulative reward for the current episode
 var total_reward_epoch: float = 0
 var resets: int = -1 # Number of times the environment has been reset
 var epoch: int = 0
-var max_length_on_screen: float = 1321.0
+#var max_length_on_screen: float = 1321.0
 
 @export var debug: bool = false
 
@@ -83,13 +84,17 @@ func reset():
 		print("Epoch: " + str(epoch))
 		print("exploration_probability: " + str(DQN.exploration_probability))
 		print("average reward this epoch: " + str(total_reward_epoch / resets))
+		print("Current learning rate: " + str(DQN.learning_rate))
+		print("Checking fitness: " + str(check_fitness))
 
-
-		if total_reward_epoch > best_avg_epoch_reward:
-			best_dqn = DQN.copy()
-			best_avg_epoch_reward = total_reward_epoch
-		else:
-			DQN = best_dqn.copy()
+		if check_fitness and DQN.exploration_probability < 0.5:
+			if resets == 0 or (total_reward_epoch / resets) > best_avg_epoch_reward:
+				print("Better Newer Model")
+				best_dqn = DQN.copy()
+				best_avg_epoch_reward = total_reward_epoch / resets
+			else:
+				print("Older Model perfomed better")
+				DQN = best_dqn.copy()
 
 
 		DQN.exploration_probability = max(DQN.min_exploration_probability, DQN.exploration_probability - DQN.exploration_decay)
@@ -114,13 +119,13 @@ func _process(_delta: float) -> void:
 	# Get the current state
 	var current_state: Array = get_state()
 
-	#if randf() <= 0.3 and not done:
-		#DQN.add_memory(prev_state, prev_action, reward, current_state)
+	if randf() <= 0.3 and not done:
+		DQN.add_memory(prev_state, prev_action, reward, current_state)
 
-	DQN.add_memory(prev_state, prev_action, reward, current_state)
+	#DQN.add_memory(prev_state, prev_action, reward, current_state)
 
 	if done == true:
-		#DQN.add_memory(prev_state, prev_action, reward, current_state)
+		DQN.add_memory(prev_state, prev_action, reward, current_state)
 		reset()
 
 	total_reward += reward
