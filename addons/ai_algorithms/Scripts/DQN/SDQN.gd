@@ -83,23 +83,26 @@ func sample(array: Array) -> Array:
 		#var num_sequential = randi_range(8, 12)
 #
 		## Randomly choose a starting point for the sequential elements
-		#var start_index = randi_range(0, length - num_sequential)
+	var start_index = randi_range(0, length - batch_size)
 #
+	for i in range(start_index, start_index + batch_size):
+		indices.append(i)
+
 		## Add sequential elements to the indices
 		#for i in range(num_sequential):
-			#var index: int = (start_index + i) % length
-			#if index not in indices:
-				#indices.append(index)
+	#var index: int = (start_index + i) % length
+	#if index not in indices:
+		#indices.append(index)
 
 	# Fill the rest with non-sequential random elements
-	while indices.size() < batch_size:
-		var index: int = randi_range(0, length - 1)
-		if index not in indices:
-			indices.append(index)
+	#while indices.size() < batch_size:
+		#var index: int = randi_range(0, length - 1)
+		#if index not in indices:
+			#indices.append(index)
 
 	# Build the final sample from the indices
-	for index in indices:
-		sample.append(array[index])
+	for i in indices:
+		sample.append(array[i])
 
 	return sample
 
@@ -152,3 +155,8 @@ func add_memory(state: Array, action: int, reward: float, next_state: Array) -> 
 		target_Q_network = Q_network.copy()
 
 
+func copy() -> SDQN:
+	var copied_dqn: SDQN = self
+	copied_dqn.Q_network = self.Q_network.copy()
+	copied_dqn.target_Q_network = self.target_Q_network.copy()
+	return copied_dqn
