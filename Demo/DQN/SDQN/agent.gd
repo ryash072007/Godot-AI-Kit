@@ -12,7 +12,7 @@ const speed: int = 200
 #@onready var goodObjPos: Vector2 = $"../Map/good/GOOD".global_position  # Position of the goal object (good object)
 
 # Initialize the Deep Q-Network (DQN) with 24 state inputs and 4 possible actions
-var DQN: SDQN = SDQN.new(24, 4, 0.001)
+var DQN: SDQN = SDQN.new(24, 4)
 var prev_state: Array = []  # Previous state of the environment
 var prev_action: int = -1   # Previous action taken by the agent
 var reward: float = 0  # Current reward for the agent
@@ -122,30 +122,34 @@ func _process(delta: float) -> void:
 	# Get the current state
 	var current_state: Array = get_state()
 
-	DQN.add_memory(prev_state, prev_action, reward, current_state)
-	reward = 0  # Reset reward after applying it
+	if randf() <= 0.3 and not done:
+		DQN.add_memory(prev_state, prev_action, reward, current_state)
+
 	if done == true:
+		DQN.add_memory(prev_state, prev_action, reward, current_state)
 		reset()
+
+	total_reward += reward
+	reward = 0  # Reset reward after applying it
 	# Choose an action using the DQN
 	var current_action: int = DQN.choose_action(current_state)
 
 	# If there was a previous action, update the DQN with the current reward
 
 
-	if current_action == actions.UP and prev_action == actions.DOWN:
-		reward -= 0.05
-	elif current_action == actions.DOWN and prev_action == actions.UP:
-		reward -= 0.05
-	elif current_action == actions.LEFT and prev_action == actions.RIGHT:
-		reward -= 0.05
-	elif current_action == actions.RIGHT and prev_action == actions.LEFT:
-		reward -= 0.05
+	#if current_action == actions.UP and prev_action == actions.DOWN:
+		#reward -= 0.01
+	#elif current_action == actions.DOWN and prev_action == actions.UP:
+		#reward -= 0.01
+	#elif current_action == actions.LEFT and prev_action == actions.RIGHT:
+		#reward -= 0.01
+	#elif current_action == actions.RIGHT and prev_action == actions.LEFT:
+		#reward -= 0.01
 
-	# Small demerit for each step
-	#reward -= 0.01
+	 #Small demerit for each step
+	reward -= 0.001
 
 	#reward += delta / 5
-	total_reward += reward
 
 
 	#prev_distance_to_goal = distance
@@ -191,6 +195,6 @@ func _on_obj_dec_area_entered(area: Area2D) -> void:
 		reward -= 0.25
 		done = true
 	elif area.is_in_group("2"):
-		reward += 0.75
+		reward += 0.1
 		done = true
 

@@ -40,7 +40,7 @@ var ACTIVATIONS: Dictionary = {
 }
 
 # Learning rate for training the network
-var learning_rate: float = 0.001
+var learning_rate: float = 0.01
 
 # Array to store the structure of the network (number of nodes in each layer)
 var layer_structure: Array[int] = []
