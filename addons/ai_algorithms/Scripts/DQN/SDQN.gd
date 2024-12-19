@@ -2,17 +2,17 @@ class_name SDQN
 
 # Neural network parameters
 var learning_rate: float = 0.01
-var discount_factor: float = 0.8
+var discount_factor: float = 0.99
 var exploration_probability: float = 0.9
-var min_exploration_probability: float = 0.1
-var exploration_decay: float = 0.005
-var batch_size: int = 128
-var max_steps: int = 512
+var min_exploration_probability: float = 0.05
+var exploration_decay: float = 0.99999
+var batch_size: int = 96
+var max_steps: int = 64
 var target_update_frequency: int = 2048  # Update target network every 4096 steps
-var max_memory_size: int = 4096  # Max size of replay memory
-var automatic_decay: bool = true
+var max_memory_size: int = 8192  # Max size of replay memory
+var automatic_decay: bool = false
 
-var total_lr_decay_steps: int = 512 * 50 # max steps * no of training episodes
+var total_lr_decay_steps: int = 0 # 512 * 350 # max steps * no of training episodes
 var initial_learning_rate: float = 0.01
 var final_learning_rate: float = 0.0001
 
@@ -27,6 +27,7 @@ var steps: int = 0
 var update_steps: int = 0  # Counter for updating target network
 var lr_decay_steps: int = 0
 
+
 func _init(state_space: int, action_space: int, learning_rate: float = learning_rate) -> void:
 	self.state_space = state_space
 	self.action_space = action_space
@@ -34,17 +35,22 @@ func _init(state_space: int, action_space: int, learning_rate: float = learning_
 
 	Q_network = NeuralNetworkAdvanced.new()
 	Q_network.add_layer(state_space)
-	Q_network.add_layer(16, Q_network.ACTIVATIONS["ELU"])
-	Q_network.add_layer(16, Q_network.ACTIVATIONS["ELU"])
+	Q_network.add_layer(8, Q_network.ACTIVATIONS["ELU"])
+	Q_network.add_layer(8, Q_network.ACTIVATIONS["ELU"])
 	Q_network.add_layer(action_space, Q_network.ACTIVATIONS["LINEAR"])
 	Q_network.learning_rate = learning_rate
 
 	target_Q_network = Q_network.copy()
 
 
+func set_clip_value(clip_value: float) -> void:
+	Q_network.clip_value = clip_value
+
+
 func update_lr_linearly() -> void:
 	if lr_decay_steps <= total_lr_decay_steps:
-		learning_rate = lerp(initial_learning_rate, final_learning_rate, lr_decay_steps / total_lr_decay_steps)
+		self.learning_rate = lerpf(initial_learning_rate, final_learning_rate, float(lr_decay_steps) / float(total_lr_decay_steps))
+		self.Q_network.learning_rate = self.learning_rate
 
 func choose_action(state: Array) -> int:
 	# Epsilon-greedy action selection
@@ -81,27 +87,10 @@ func sample(array: Array) -> Array:
 	var indices: Array[int] = []
 	var sample: Array = []
 
-	 #Choose a random number of sequential elements (2-4 sequential elements)
-#
-	#var num_num_sequential = randi_range(0, 3)
-#
-	#for n in range(num_num_sequential):
-		#var num_sequential = randi_range(8, 12)
-#
-		### Randomly choose a starting point for the sequential elements
-	#var start_index = randi_range(0, length - batch_size)
-##
-	#for i in range(start_index, start_index + batch_size):
-		#indices.append(i)
-
-		## Add sequential elements to the indices
-		#for i in range(num_sequential):
-	#var index: int = (start_index + i) % length
-	#if index not in indices:
-		#indices.append(index)
+	var sample_size: int = min(batch_size, len(memory))
 
 	# Fill the rest with non-sequential random elements
-	while indices.size() < batch_size:
+	while indices.size() < sample_size:
 		var index: int = randi_range(0, length - 1)
 		if index not in indices:
 			indices.append(index)
@@ -151,7 +140,7 @@ func add_memory(state: Array, action: int, reward: float, next_state: Array) -> 
 	if steps >= max_steps:
 		steps = 0
 		if automatic_decay:
-			exploration_probability = max(min_exploration_probability, exploration_probability - exploration_decay)
+			exploration_probability = max(min_exploration_probability, exploration_probability * exploration_decay)
 		train(memory)
 
 	lr_decay_steps += 1

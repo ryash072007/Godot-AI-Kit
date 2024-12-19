@@ -233,4 +233,4 @@ polygon = PackedVector2Array(0, 0, 0, 648, 1154, 648, 1152, 0, -3, 0, -3, -1, 11
 
 [node name="Agents" type="Node2D" parent="."]
 script = ExtResource("1_ot8rs")
-agents_to_spawn = 6
+agents_to_spawn = 4

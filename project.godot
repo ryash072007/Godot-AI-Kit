@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Machine Learning Algorithms"
-run/main_scene="res://Demo/DQN/SDQN/SDQN_Demo.tscn"
+run/main_scene="res://Demo/DQN/SDQN 2/Cartpole attempt 2.tscn"
 config/features=PackedStringArray("4.2")
 config/icon="res://addons/ai_algorithms/NeuralNet.png"
 

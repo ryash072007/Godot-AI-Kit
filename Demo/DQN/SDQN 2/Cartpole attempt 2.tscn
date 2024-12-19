@@ -1,0 +1,81 @@
+[gd_scene load_steps=5 format=3 uid="uid://c4llqcymcrfg0"]
+
+[ext_resource type="Script" path="res://Demo/DQN/SDQN 2/cart.gd" id="1_7oh87"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_po0xa"]
+size = Vector2(40, 40)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3rj1b"]
+size = Vector2(4, 152)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_v0inl"]
+size = Vector2(1152, 12)
+
+[node name="CartpoleAttempt2" type="Node2D"]
+
+[node name="cart" type="RigidBody2D" parent="."]
+position = Vector2(577, 449)
+can_sleep = false
+lock_rotation = true
+linear_damp = 1.0
+angular_damp = 0.2
+script = ExtResource("1_7oh87")
+force_magnitude = 1500.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="cart"]
+shape = SubResource("RectangleShape2D_po0xa")
+
+[node name="sprite" type="ColorRect" parent="cart"]
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+
+[node name="pole" type="RigidBody2D" parent="cart"]
+position = Vector2(0, -20)
+mass = 0.1
+can_sleep = false
+linear_damp = 0.1
+angular_damp = 15.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="cart/pole"]
+position = Vector2(0, -76)
+shape = SubResource("RectangleShape2D_3rj1b")
+
+[node name="sprite" type="ColorRect" parent="cart/pole"]
+offset_left = -2.0
+offset_top = -152.0
+offset_right = 2.0
+
+[node name="PinJoint2D" type="PinJoint2D" parent="cart/pole"]
+node_a = NodePath("../..")
+node_b = NodePath("..")
+
+[node name="existence" type="Timer" parent="cart"]
+wait_time = 20.0
+one_shot = true
+autostart = true
+
+[node name="floor" type="Node2D" parent="."]
+
+[node name="floorbody" type="StaticBody2D" parent="floor"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="floor/floorbody"]
+position = Vector2(576, 475)
+shape = SubResource("RectangleShape2D_v0inl")
+
+[node name="sprite" type="ColorRect" parent="floor/floorbody"]
+offset_top = 469.0
+offset_right = 1152.0
+offset_bottom = 481.0
+color = Color(0, 0, 0, 1)
+
+[node name="CollisionPolygon2D2" type="CollisionPolygon2D" parent="floor/floorbody"]
+position = Vector2(1178, 0)
+polygon = PackedVector2Array(0, 481, 0, 430, -26, 430, -26, 481)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="floor/floorbody"]
+polygon = PackedVector2Array(0, 481, 0, 433, -26, 433, -26, 481)
+
+[connection signal="body_entered" from="cart/pole" to="cart" method="_on_pole_body_entered"]
+[connection signal="timeout" from="cart/existence" to="cart" method="_on_existence_timeout"]

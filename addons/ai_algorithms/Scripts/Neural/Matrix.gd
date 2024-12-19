@@ -32,7 +32,7 @@ static func rand(matrix: Matrix) -> Matrix:
 
 	for row in range(result.rows):
 		for col in range(result.cols):
-			result.data[row][col] = randf_range(-0.5, 0.5)
+			result.data[row][col] = randf_range(-0.15, 0.15)
 	return result
 
 static func add(a: Matrix, b: Matrix) -> Matrix:
@@ -131,6 +131,15 @@ static func map(matrix: Matrix, callback: Callable) -> Matrix:
 	for row in range(result.rows):
 		for col in range(result.cols):
 			result.data[row][col] = callback.call(matrix.data[row][col], row, col)
+
+	return result
+
+static func clamp_matrix(matrix: Matrix, lower_clamp: float, upper_clamp: float) -> Matrix:
+	var result = Matrix.new(matrix.rows, matrix.cols)
+
+	for row in range(result.rows):
+		for col in range(result.cols):
+			result.data[row][col] = clampf(result.data[row][col], lower_clamp, upper_clamp)
 
 	return result
 

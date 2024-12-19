@@ -45,6 +45,8 @@ var learning_rate: float = 0.01
 # Array to store the structure of the network (number of nodes in each layer)
 var layer_structure: Array[int] = []
 
+var clip_value: float = INF
+
 # Function to add a layer to the network
 func add_layer(nodes: int, activation: Dictionary = ACTIVATIONS.SIGMOID):
 	# If there is already a layer, we need to add weights and biases for the new layer
@@ -115,6 +117,7 @@ func train(input_array: Array, target_array: Array):
 		# Gradient calculation
 		var gradients: Matrix = Matrix.map(layer_outputs, layer.activation.derivative)
 		gradients = Matrix.multiply(gradients, current_error)
+		gradients = Matrix.clamp_matrix(gradients, -clip_value, clip_value)
 		gradients = Matrix.scalar(gradients, learning_rate)
 
 		# Weight updates

@@ -119,7 +119,7 @@ func _process(_delta: float) -> void:
 	# Get the current state
 	var current_state: Array = get_state()
 
-	if randf() <= 0.3 and not done:
+	if not done and randf() < 0.3:
 		DQN.add_memory(prev_state, prev_action, reward, current_state)
 
 	#DQN.add_memory(prev_state, prev_action, reward, current_state)
@@ -135,7 +135,7 @@ func _process(_delta: float) -> void:
 
 
 	 #Small demerit for each step
-	reward -= 0.005
+	reward -= 0.01
 
 
 	# Move the agent based on the chosen action
@@ -159,7 +159,7 @@ func _on_max_life_timeout() -> void:
 
 func _on_obj_dec_area_entered(area: Area2D) -> void:
 	if area.is_in_group("1"):
-		reward -= 0.25
+		reward -= 0.4
 		done = true
 	elif area.is_in_group("2"):
 		reward += 0.4
