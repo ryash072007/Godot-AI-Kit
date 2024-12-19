@@ -35,6 +35,32 @@ static func rand(matrix: Matrix) -> Matrix:
 			result.data[row][col] = randf_range(-0.15, 0.15)
 	return result
 
+# preferable for ReLU type activation functions
+static func uniform_he_init(matrix: Matrix, input_nodes: int) -> Matrix:
+	var result: Matrix = Matrix.new(matrix.rows, matrix.cols)
+
+	var limit: float = sqrt(6.0 / float(input_nodes))
+
+	for row in range(result.rows):
+		for col in range(result.cols):
+			result.data[row][col] = randf_range(-limit, limit)
+
+	return result
+
+# Preferable for tanh or sigmoid type activation functions
+static func uniform_glorot_init(matrix: Matrix, input_nodes: int, output_nodes: int) -> Matrix:
+	var result: Matrix = Matrix.new(matrix.rows, matrix.cols)
+
+	# Calculate the range limit for Glorot initialization
+	var limit = sqrt(6.0 / float(input_nodes + output_nodes))
+
+	# Fill the matrix with random values within the range [-limit, limit]
+	for row in range(result.rows):
+		for col in range(result.cols):
+			result.data[row][col] = randf_range(-limit, limit)
+
+	return result
+
 static func add(a: Matrix, b: Matrix) -> Matrix:
 	assert(a.rows == b.rows and a.cols == b.cols)
 

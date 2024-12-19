@@ -47,13 +47,28 @@ var layer_structure: Array[int] = []
 
 var clip_value: float = INF
 
+# Automatically considers type of function
 # Function to add a layer to the network
-func add_layer(nodes: int, activation: Dictionary = ACTIVATIONS.SIGMOID):
+func add_layer(nodes: int, activation: Dictionary = ACTIVATIONS.SIGMOID, random_biases: bool = false):
 	# If there is already a layer, we need to add weights and biases for the new layer
 	if layer_structure.size() != 0:
+
+		var weights: Matrix
+		var bias: Matrix
+
+		if activation in [ACTIVATIONS.RELU, ACTIVATIONS.PRELU, ACTIVATIONS.ELU]:
+			weights = Matrix.uniform_he_init(Matrix.new(nodes, layer_structure[-1]), layer_structure[-1])
+		if activation in [ACTIVATIONS.SIGMOID, ACTIVATIONS.TANH]:
+			weights = Matrix.uniform_glorot_init(Matrix.new(nodes, layer_structure[-1]), layer_structure[-1], nodes)
+
+		if random_biases:
+			bias = Matrix.rand(Matrix.new(nodes, 1))
+		else:
+			bias = Matrix.new(nodes, 1)
+
 		var layer_data: Dictionary = {
-			"weights": Matrix.rand(Matrix.new(nodes, layer_structure[-1])), # Randomly initialize weights
-			"bias": Matrix.rand(Matrix.new(nodes, 1)), # Randomly initialize biases
+			"weights": weights,
+			"bias": bias,
 			"activation": activation # Set activation function for this layer
 		}
 		network.push_back(layer_data) # Add the layer to the network
