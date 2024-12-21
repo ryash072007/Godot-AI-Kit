@@ -27,14 +27,24 @@ var reward: float = 0.0
 var done: bool = false
 var done_last_frame: bool = false
 
+var custom_NNA: NeuralNetworkAdvanced = NeuralNetworkAdvanced.new(false)
+
 # Add memory variable
 var total_reward: float = 0.0
 
-var log_file: FileAccess = FileAccess.open("user://cart1_fuckadam.csv", FileAccess.WRITE)
+var log_file: FileAccess = FileAccess.open("user://cart2_fuckadam.csv", FileAccess.WRITE)
+
 
 func _ready() -> void:
 	$sprite.color = Color(randf(), randf(), randf())
 	$pole/sprite.color = $sprite.color
+
+	custom_NNA.add_layer(4)
+	custom_NNA.add_layer(16, custom_NNA.ACTIVATIONS.PRELU)
+	custom_NNA.add_layer(16, custom_NNA.ACTIVATIONS.PRELU)
+	custom_NNA.add_layer(2, custom_NNA.ACTIVATIONS.LINEAR)
+
+	DQN.set_Q_network(custom_NNA)
 	DQN.automatic_decay = true
 	DQN.set_clip_value(100.0)
 	DQN.set_lr_value(learning_rate)
@@ -133,7 +143,7 @@ func reset_environment() -> void:
 	angular_velocity = 0
 
 	randomize()
-	$pole.rotation = randf_range(-0.02, 0.02)
+	$pole.rotation = randf_range(-0.1, 0.1)
 	$pole.rotation = 0
 	$pole.angular_velocity = 0
 	$pole.linear_velocity = Vector2.ZERO

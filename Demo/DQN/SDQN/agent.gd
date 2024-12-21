@@ -34,7 +34,7 @@ var prev_EP: float = 0.0
 
 func _ready() -> void:
 	$ColorRect.color = Color(randf(), randf(), randf())
-	DQN.automatic_decay = false # Disable automatic decay of exploration probability
+	DQN.automatic_decay = true # Disable automatic decay of exploration probability
 	reset()
 
 
@@ -70,6 +70,7 @@ func reset():
 		print("exploration_probability: " + str(DQN.exploration_probability))
 		print("total_reward this reset: " + str(total_reward))
 		print("average reward this epoch: " + str(total_reward_epoch / resets))
+		print("Current learning rate: " + str(DQN.learning_rate))
 
 	# Reset important variables
 	reward = 0
@@ -80,24 +81,13 @@ func reset():
 
 
 	if resets % epoch_reset == 0:
-		print("********- " + str($ColorRect.color) + " -********")
-		print("Epoch: " + str(epoch))
-		print("exploration_probability: " + str(DQN.exploration_probability))
-		print("average reward this epoch: " + str(total_reward_epoch / resets))
-		print("Current learning rate: " + str(DQN.learning_rate))
-		print("Checking fitness: " + str(check_fitness))
+		#print("********- " + str($ColorRect.color) + " -********")
+		#print("Epoch: " + str(epoch))
+		#print("exploration_probability: " + str(DQN.exploration_probability))
+		#print("average reward this epoch: " + str(total_reward_epoch / resets))
+		#print("Current learning rate: " + str(DQN.learning_rate))
 
-		if check_fitness and DQN.exploration_probability < 0.5:
-			if resets == 0 or (total_reward_epoch / resets) > best_avg_epoch_reward:
-				print("Better Newer Model")
-				best_dqn = DQN.copy()
-				best_avg_epoch_reward = total_reward_epoch / resets
-			else:
-				print("Older Model perfomed better")
-				DQN = best_dqn.copy()
-
-
-		DQN.exploration_probability = max(DQN.min_exploration_probability, DQN.exploration_probability - DQN.exploration_decay)
+		#DQN.exploration_probability = max(DQN.min_exploration_probability, DQN.exploration_probability - DQN.exploration_decay)
 		epoch += 1
 		resets = 0
 		total_reward_epoch = 0
@@ -107,7 +97,7 @@ func reset():
 	$max_life.start() # Start the timer for the episode
 
 # Main loop of the game, called every frame
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	 #For testing: manually adjust exploration probability using keyboard input
 	if Input.is_action_just_pressed("ui_up"):
 		prev_EP = DQN.exploration_probability
@@ -139,14 +129,12 @@ func _process(_delta: float) -> void:
 
 
 	# Move the agent based on the chosen action
-	velocity = Vector2.ZERO
 	match current_action:
-		actions.UP: velocity.y -= speed # * delta
-		actions.DOWN: velocity.y += speed # * delta
-		actions.LEFT: velocity.x -= speed # * delta
-		actions.RIGHT: velocity.x += speed # * delta
+		actions.UP: position.y -= speed * delta
+		actions.DOWN: position.y += speed * delta
+		actions.LEFT: position.x -= speed * delta
+		actions.RIGHT: position.x += speed * delta
 
-	move_and_slide()
 	# Update previous state and action
 	prev_state = current_state
 	prev_action = current_action
@@ -159,8 +147,8 @@ func _on_max_life_timeout() -> void:
 
 func _on_obj_dec_area_entered(area: Area2D) -> void:
 	if area.is_in_group("1"):
-		reward -= 0.4
+		reward -= 10
 		done = true
 	elif area.is_in_group("2"):
-		reward += 0.4
+		reward += 50
 		done = true

@@ -35,6 +35,24 @@ static func rand(matrix: Matrix) -> Matrix:
 			result.data[row][col] = randf_range(-0.15, 0.15)
 	return result
 
+static func square(matrix: Matrix) -> Matrix:
+	var result: Matrix = Matrix.new(matrix.rows, matrix.cols)
+
+	for row in range(result.rows):
+		for col in range(result.cols):
+			result.data[row][col] = pow(matrix.data[row][col], 2)
+
+	return result
+
+static func square_root(matrix: Matrix) -> Matrix:
+	var result: Matrix = Matrix.new(matrix.rows, matrix.cols)
+
+	for row in range(result.rows):
+		for col in range(result.cols):
+			result.data[row][col] = sqrt(matrix.data[row][col])
+
+	return result
+
 # preferable for ReLU type activation functions
 static func uniform_he_init(matrix: Matrix, input_nodes: int) -> Matrix:
 	var result: Matrix = Matrix.new(matrix.rows, matrix.cols)
