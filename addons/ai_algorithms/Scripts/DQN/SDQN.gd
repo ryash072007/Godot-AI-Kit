@@ -2,18 +2,18 @@ class_name SDQN
 
 # Neural network parameters
 var learning_rate: float = 0.01
-var discount_factor: float = 0.9
-var exploration_probability: float = 0.95
-var min_exploration_probability: float = 0.15
-var exploration_decay: float = 0.99999
-var batch_size: int = 1
-var max_steps: int = 4
-var target_update_frequency: int = 1024  # Update target network every 2048 steps
-var max_memory_size: int = 8192  # Max size of replay memory
+var discount_factor: float = 0.95
+var exploration_probability: float = 1
+var min_exploration_probability: float = 0.01
+var exploration_decay: float = 0.999
+var batch_size: int = 196
+var max_steps: int = 128
+var target_update_frequency: int = 256  # Update target network every 2048 steps
+var max_memory_size: int = 60 * 60 * 4  # Max size of replay memory
 var automatic_decay: bool = false
 
-var lr_decay_rate: float = 1
-var final_learning_rate: float = 0.00001
+var lr_decay_rate: float = 0.995
+var final_learning_rate: float = 0.0001
 
 # Variables to hold state and action information
 var state_space: int
@@ -24,6 +24,7 @@ var target_Q_network: NeuralNetworkAdvanced
 var memory: Array[Array] = []
 var steps: int = 0
 var update_steps: int = 0  # Counter for updating target network
+var trainings_done: int = 0
 
 var use_multi_threading: bool = false
 var train_thread: Thread
@@ -38,8 +39,8 @@ func _init(state_space: int, action_space: int, learning_rate: float = learning_
 
 	self.Q_network = NeuralNetworkAdvanced.new(false)
 	self.Q_network.add_layer(self.state_space)
-	self.Q_network.add_layer(32, self.Q_network.ACTIVATIONS.PRELU)
-	self.Q_network.add_layer(32, self.Q_network.ACTIVATIONS.PRELU)
+	self.Q_network.add_layer(16, self.Q_network.ACTIVATIONS.PRELU)
+	self.Q_network.add_layer(16, self.Q_network.ACTIVATIONS.PRELU)
 	self.Q_network.add_layer(self.action_space, self.Q_network.ACTIVATIONS.LINEAR)
 	self.Q_network.learning_rate = self.learning_rate
 
@@ -107,18 +108,11 @@ func sample(array: Array) -> Array:
 	var indices: Array[int] = []
 	var sample: Array = []
 
-	if length > max_memory_size:
-		length = max_memory_size
-
-	var sample_size: int
-
-	if batch_size < max_steps:
-		sample_size = batch_size
-	else:
-		sample_size = min(batch_size, len(memory))
+	if length < batch_size:
+		return array
 
 	# Fill the rest with non-sequential random elements
-	while indices.size() < sample_size:
+	while indices.size() < batch_size:
 		var index: int = randi_range(0, length - 1)
 		if index not in indices:
 			indices.append(index)
@@ -132,7 +126,8 @@ func sample(array: Array) -> Array:
 
 
 func train(replay_memory: Array) -> void:
-	#print("Training Now")
+	#print(str(trainings_done) + " train now")
+	#trainings_done += 1
 	# Sample a minibatch from the replay memory
 	var minibatch: Array = sample(replay_memory)
 
@@ -141,9 +136,16 @@ func train(replay_memory: Array) -> void:
 		var action: int = transition[1]
 		var reward: int = transition[2]
 		var next_state: Array = transition[3]
+		var done: bool = transition[4]
 
 		# Calculate the target Q-value
-		var target = reward + discount_factor * max_q_predict(next_state)  # Predict the max Q-value for next state
+		var target: float  # Predict the max Q-value for next state
+
+		# might be wrong, fix later
+		if done:
+			target = -1
+		else:
+			target = reward + discount_factor * max_q_predict(next_state)
 
 		# Update the Q-network
 		if state.size() != state_space:
@@ -158,39 +160,49 @@ func multithreaded_train() -> void:
 		train_semaphore.wait()
 		if semaphore_exit:
 			break
-		#print("Multi-Threaded Training Now")
+		print(str(trainings_done) + " multi-train now")
+		trainings_done += 1
 		# Sample a minibatch from the replay memory
-		train_mutex.try_lock()
+		#train_mutex.try_lock()
 		var minibatch: Array = sample(memory)
-		train_mutex.unlock()
+		#train_mutex.unlock()
 
 		for transition in minibatch:
 			var state: Array = transition[0]
 			var action: int = transition[1]
 			var reward: int = transition[2]
 			var next_state: Array = transition[3]
+			var done: bool = transition[4]
+
 
 			# Calculate the target Q-value
-			train_mutex.try_lock()
-			var target = reward + discount_factor * max_q_predict(next_state)  # Predict the max Q-value for next state
-			train_mutex.unlock()
+			# Calculate the target Q-value
+			var target: float  # Predict the max Q-value for next state
+
+			# might be wrong, fix later
+			if done:
+				target = -1
+			else:
+				train_mutex.lock()
+				target = reward + discount_factor * max_q_predict(next_state)
+				train_mutex.unlock()
 			# Update the Q-network
 			if state.size() != state_space:
 				print("Erronius state detected, skipping it!")
 				continue
-			train_mutex.try_lock()
+			#train_mutex.try_lock()
 			var target_q_values: Array = Q_network.predict(state)
+			#train_mutex.unlock()
 			target_q_values[action] = target
-			train_mutex.unlock()
 
-			train_mutex.try_lock()
+			train_mutex.lock()
 			Q_network.train(state, target_q_values)
 			train_mutex.unlock()
 		#print("Multi-Threaded Train Over")
 
-func add_memory(state: Array, action: int, reward: float, next_state: Array) -> void:
+func add_memory(state: Array, action: int, reward: float, next_state: Array, done: bool) -> void:
 	# Add new experience to memory
-	memory.append([state, action, reward, next_state])
+	memory.append([state, action, reward, next_state, done])
 
 	# Limit memory size
 	if memory.size() > max_memory_size:
@@ -203,19 +215,24 @@ func add_memory(state: Array, action: int, reward: float, next_state: Array) -> 
 		if automatic_decay:
 			exploration_probability = max(min_exploration_probability, exploration_probability * exploration_decay)
 
+		if lr_decay_rate != 1.0:
+			update_lr_linearly()
+
 		if use_multi_threading:
 			train_semaphore.post()
 		else:
 			train(memory)
 
-	if lr_decay_rate != 1.0:
-		update_lr_linearly()
 
 	update_steps += 1
 	if update_steps >= target_update_frequency:
 		update_steps = 0
 		print("Copying QNetwork into Target Network now")
+		if use_multi_threading:
+			train_mutex.lock()
 		target_Q_network = Q_network.copy()
+		if use_multi_threading:
+			train_mutex.unlock()
 
 func close_threading() -> void:
 	if use_multi_threading:

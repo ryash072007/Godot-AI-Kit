@@ -110,6 +110,13 @@ static func scalar(matrix: Matrix, value: float) -> Matrix:
 
 	return result
 
+static func scalar_add(matrix: Matrix, scalar: float) -> Matrix:
+	var result = Matrix.new(matrix.rows, matrix.cols)
+	for row in range(matrix.rows):
+		for col in range(matrix.cols):
+			result.data[row][col] = matrix.data[row][col] + scalar
+	return result
+
 static func dot_product(a: Matrix, b: Matrix) -> Matrix:
 	assert(a.cols == b.rows)
 

@@ -9,7 +9,7 @@ extends RigidBody2D
 # Toggle to test movement
 @export var human_testing: bool = false
 
-@export_range(0.0001, 0.1, 0.0001) var learning_rate: float = 0.001
+@export_range(0.0001, 0.1, 0.0001) var learning_rate: float = 0.0001
 
 # Action or input to control the cart (2 for none, 1 for right, 0 for left)
 var action: int = 0
@@ -17,7 +17,8 @@ var action: int = 0
 var reset: int = -1
 
 # Enviroment Reset Variables
-var max_angle: float = deg_to_rad(60.0)
+var max_angle: float = deg_to_rad(25.0)
+var threshold_distace: float = 250.0
 
 # DQN variables
 var DQN: SDQN = SDQN.new(4, 2)
@@ -30,9 +31,14 @@ var done_last_frame: bool = false
 # Add memory variable
 var total_reward: float = 0.0
 
-var log_file: FileAccess = FileAccess.open("user://cart1_fuckadam.csv", FileAccess.WRITE)
+var log_file: FileAccess = FileAccess.open("user://cart_data_no_max_pstps.csv", FileAccess.WRITE)
 
 func _ready() -> void:
+
+	Engine.max_fps = 24
+	#Engine.max_physics_steps_per_frame = 1
+
+
 	$sprite.color = Color(randf(), randf(), randf())
 	$pole/sprite.color = $sprite.color
 	DQN.automatic_decay = true
@@ -44,7 +50,7 @@ func _ready() -> void:
 
 	reset_environment()
 
-func _process(_delta):
+func _physics_process(_delta: float) -> void:
 
 	var direction: int
 
@@ -80,7 +86,7 @@ func _process(_delta):
 		else:
 			var reward: float = get_reward()
 			total_reward += reward
-			DQN.add_memory(prev_state, prev_action, reward, state)
+			DQN.add_memory(prev_state, prev_action, reward, state, done)
 		prev_state = state
 		prev_action = action
 
@@ -103,11 +109,11 @@ func get_state() -> Array:
 
 
 func get_reward() -> float:
-	if absf($pole.rotation) > max_angle:
+	if absf($pole.rotation) > max_angle or abs(global_position.x) - initial_cart_position > threshold_distace:
 		done = true
 		return -100.0
 	else:
-		return (max_angle - abs($pole.rotation)) / max_angle
+		return 1.0
 
 
 func reset_environment() -> void:

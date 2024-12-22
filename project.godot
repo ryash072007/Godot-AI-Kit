@@ -18,6 +18,7 @@ config/icon="res://addons/ai_algorithms/NeuralNet.png"
 [display]
 
 window/size/resizable=false
+window/vsync/vsync_mode=0
 
 [editor]
 
