@@ -17,10 +17,13 @@ var prev_state: Array = [] # Previous state of the environment
 var prev_action: int = -1 # Previous action taken by the agent
 var reward: float = 0 # Current reward for the agent
 var done: bool = false # Whether the episode is over
+var done_last_frame: bool = false
 var total_reward: float = 0 # Cumulative reward for the current episode
 var total_reward_epoch: float = 0
 var resets: int = -1 # Number of times the environment has been reset
 var epoch: int = 0
+
+var frame_skips: int = 4
 #var max_length_on_screen: float = 1321.0
 
 @export var debug: bool = false
@@ -34,6 +37,7 @@ var prev_EP: float = 0.0
 
 func _ready() -> void:
 	$ColorRect.color = Color(randf(), randf(), randf())
+	#DQN.use_threading()
 	DQN.automatic_decay = true # Disable automatic decay of exploration probability
 	reset()
 
@@ -78,6 +82,7 @@ func reset():
 	prev_state = []
 	prev_action = -1
 	done = false
+	done_last_frame = true
 
 
 	if resets % epoch_reset == 0:
@@ -109,14 +114,13 @@ func _process(delta: float) -> void:
 	# Get the current state
 	var current_state: Array = get_state()
 
-	if not done and randf() < 0.3:
-		DQN.add_memory(prev_state, prev_action, reward, current_state)
+	if done_last_frame:
+		done_last_frame = false
+	else:
+		DQN.add_memory(prev_state, prev_action, reward, current_state, done)
 
-	#DQN.add_memory(prev_state, prev_action, reward, current_state)
-
-	if done == true:
-		DQN.add_memory(prev_state, prev_action, reward, current_state)
-		reset()
+		if done == true:
+			reset()
 
 	total_reward += reward
 	reward = 0 # Reset reward after applying it
@@ -142,7 +146,7 @@ func _process(delta: float) -> void:
 
 # Called when the timer for the episode runs out
 func _on_max_life_timeout() -> void:
-	done = true # End the episode
+	reset()
 
 
 func _on_obj_dec_area_entered(area: Area2D) -> void:

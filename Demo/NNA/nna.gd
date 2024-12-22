@@ -3,6 +3,7 @@ extends Node2D
 var nnas: NeuralNetworkAdvanced = NeuralNetworkAdvanced.new(NeuralNetworkAdvanced.methods.SGD)
 
 func _ready() -> void:
+	nnas.learning_rate = 0.01
 	nnas.add_layer(2)
 	nnas.add_layer(4, nnas.ACTIVATIONS.PRELU)
 	nnas.add_layer(4, nnas.ACTIVATIONS.PRELU)

@@ -31,20 +31,27 @@ var done_last_frame: bool = false
 # Add memory variable
 var total_reward: float = 0.0
 
-var log_file: FileAccess = FileAccess.open("user://cart_data_no_max_pstps.csv", FileAccess.WRITE)
+var log_file: FileAccess = FileAccess.open("user://cart_data_SGD_multi.csv", FileAccess.WRITE)
 
 func _ready() -> void:
 
 	Engine.max_fps = 24
-	#Engine.max_physics_steps_per_frame = 1
 
+	var Q_network: NeuralNetworkAdvanced = NeuralNetworkAdvanced.new(NeuralNetworkAdvanced.methods.SGD)
+	Q_network.add_layer(4)
+	Q_network.add_layer(16, Q_network.ACTIVATIONS.PRELU)
+	Q_network.add_layer(16, Q_network.ACTIVATIONS.PRELU)
+	Q_network.add_layer(2, Q_network.ACTIVATIONS.LINEAR)
+	Q_network.learning_rate = learning_rate
+	DQN.set_Q_network(Q_network)
 
 	$sprite.color = Color(randf(), randf(), randf())
 	$pole/sprite.color = $sprite.color
 	DQN.automatic_decay = true
 	DQN.set_clip_value(100.0)
+	DQN.lr_decay_rate = 1
 	DQN.set_lr_value(learning_rate)
-	#DQN.use_threading()
+	DQN.use_threading()
 
 	log_file.store_string("Reset, Exploration Probability, Total Reward, Time Alive\n")
 
@@ -151,7 +158,7 @@ func _on_pole_body_entered(body: Node) -> void:
 
 
 func _on_existence_timeout() -> void:
-	done = true
+	reset_environment()
 	print("Timed Out")
 
 
