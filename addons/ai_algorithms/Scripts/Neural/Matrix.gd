@@ -159,7 +159,7 @@ static func multiply(a: Matrix, b: Matrix) -> Matrix:
 static func divide(a: Matrix, b: Matrix) -> Matrix:
 	assert(a.rows == b.rows and a.cols == b.cols)
 
-	var result = Matrix.new(a.rows, a.cols)
+	var result: Matrix = Matrix.new(a.rows, a.cols)
 
 	for row in range(result.rows):
 		for col in range(result.cols):
