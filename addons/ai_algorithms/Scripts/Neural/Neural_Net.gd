@@ -1,27 +1,27 @@
 extends Node2D
 
+# Configuration exports for the neural network setup
 @export var AI_Scene: PackedScene
-
 @export var Batch_Size: int = 50
-
 @export var Generation_Delay: int = 10
-
 @export var show_only_best: bool = false
 
+# Signals for UI updates
 signal gen_changed(_generation: int)
 signal true_batch_size(_size: int)
 
+# State management variables
 var setting_up: bool = true
 var freeing: bool = false
 
+# Neural network architecture parameters
 @export var input_nodes: int
 @export var hidden_nodes: int
 @export var output_nodes: int
 
+# Population control parameters
 @export var random_population: int = 20
-
 @export var use_reproduction: bool = false
-
 @export var reproduced_population: int = 5
 
 var top_value_cutoff
@@ -35,12 +35,12 @@ var current_generation_freed: int = 0
 var first_gen_spawn_size
 var timer: Timer = Timer.new()
 
-
 var prev_best = null
 
 var best_10_nn: Array[NeuralNetwork]
 
 func _ready():
+	# Validation checks for population parameters
 	assert(ceil(Batch_Size / 2) <= reproduced_population, "reproduced_population must be set higher or equal to the Half of the Batch Size as some weird bug arises!")
 	top_value_cutoff = reproduced_population * 2
 	first_gen_spawn_size = Batch_Size + 1 + random_population
@@ -53,27 +53,28 @@ func _ready():
 	timer.wait_time = Generation_Delay
 	timer.timeout.connect(Callable(self, "reload_generation"))
 
-
 	best_nn = NeuralNetwork.new(input_nodes, hidden_nodes, output_nodes)
 
 	spawn()
 
 func spawn():
+	# Handles the creation of a new generation
 	gen_changed.emit(generation)
 	print("Generation: ", generation)
 	spawn_population = []
 
-
 	if generation == 0:
+		# Initial generation: Create completely random neural networks
 		for i in range(first_gen_spawn_size):
 			randomize()
 			var new_ai = AI_Scene.instantiate()
 			new_ai.nn = NeuralNetwork.new(input_nodes, hidden_nodes, output_nodes)
 			spawn_population.append(new_ai)
 	else:
+		# Subsequent generations: Create mutations of the best network
 		for i in range(Batch_Size):
 			var new_ai = AI_Scene.instantiate()
-			new_ai.nn =  NeuralNetwork.copy(NeuralNetwork.mutate(best_nn))
+			new_ai.nn = NeuralNetwork.copy(NeuralNetwork.mutate(best_nn))
 			spawn_population.append(new_ai)
 
 		for i in range(random_population):
@@ -87,6 +88,7 @@ func spawn():
 		spawn_population.append(new_ai)
 
 		if use_reproduction:
+			# Reproduction: Combine traits from best performing networks
 			var first_array: Array[NeuralNetwork]
 			var second_array: Array[NeuralNetwork]
 
@@ -102,7 +104,7 @@ func spawn():
 			for i in range(first_array.size()):
 				if first_array.size() == second_array.size():
 					var _new_ai = AI_Scene.instantiate()
-					_new_ai.nn =  NeuralNetwork.copy(NeuralNetwork.mutate(NeuralNetwork.reproduce(first_array[i], second_array[i])))
+					_new_ai.nn = NeuralNetwork.copy(NeuralNetwork.mutate(NeuralNetwork.reproduce(first_array[i], second_array[i])))
 					spawn_population.append(_new_ai)
 				else:
 					for i2 in range(reproduced_population):
@@ -120,8 +122,8 @@ func spawn():
 	generation += 1
 	best_10_nn = []
 
-
 func _process(_delta):
+	# Updates visibility of networks when show_only_best is enabled
 	if !show_only_best or setting_up: return
 	spawn_population.sort_custom(Callable(self, "custom_sort_visiblity"))
 
@@ -130,6 +132,7 @@ func _process(_delta):
 	prev_best = spawn_population[-1]
 
 func on_ai_exit_tree(node: Node):
+	# Handles cleanup and updates best network when an AI instance is removed
 	if node is Timer: return
 	if use_reproduction: best_10_nn.append(NeuralNetwork.copy(node.nn))
 	if node.nn.fitness > best_nn.fitness:
@@ -141,6 +144,7 @@ func on_ai_exit_tree(node: Node):
 		reload_generation()
 
 func reload_generation():
+	# Prepares and initiates the next generation
 	best_10_nn.sort_custom(Callable(self, "custom_sort"))
 	if use_reproduction: best_10_nn = best_10_nn.slice(best_10_nn.size() - top_value_cutoff, -1)
 
@@ -153,6 +157,7 @@ func reload_generation():
 	spawn()
 	freeing = false
 
+# Sorting functions for fitness comparison
 func custom_sort(a, b):
 	return a.fitness < b.fitness
 

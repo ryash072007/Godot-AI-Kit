@@ -1,28 +1,37 @@
 class_name NeuralNetwork
 
+# Network architecture parameters
 var best: bool = false
-var input_nodes: int
-var hidden_nodes: int
-var output_nodes: int
+var input_nodes: int # Number of input neurons
+var hidden_nodes: int # Number of hidden layer neurons
+var output_nodes: int # Number of output neurons
 
-var weights_input_hidden: Matrix
-var weights_hidden_output: Matrix
+# Weight matrices between layers
+var weights_input_hidden: Matrix # Weights from input to hidden layer
+var weights_hidden_output: Matrix # Weights from hidden to output layer
 
-var bias_hidden: Matrix
-var bias_output: Matrix
+# Bias matrices for each layer
+var bias_hidden: Matrix # Biases for hidden layer
+var bias_output: Matrix # Biases for output layer
 
-var learning_rate: float = 0.15
+# Learning parameters
+var learning_rate: float = 0.15 # Rate at which network learns
 
+# Activation function settings
+var ACTIVATIONS = Activation.new()
+var activation_function: Callable # Function used for neuron activation
+var activation_dfunction: Callable # Derivative of activation function
 
-var activation_function: Callable
-var activation_dfunction: Callable
+# Network performance tracking
+var fitness: float = 0.0 # Fitness score for genetic algorithm
 
-var fitness: float = 0.0
+# Visualization
+var color: Color = Color.TRANSPARENT # Color representation of network weights
 
-var color: Color = Color.TRANSPARENT
+# Input sensors
+var raycasts: Array[RayCast2D] # Array of raycasts for environment sensing
 
-var raycasts: Array[RayCast2D]
-
+# Initialize network with specified architecture
 func _init(_input_nodes: int, _hidden_nodes: int, _output_nodes: int, is_set: bool = false) -> void:
 	if !is_set:
 		randomize()
@@ -39,15 +48,18 @@ func _init(_input_nodes: int, _hidden_nodes: int, _output_nodes: int, is_set: bo
 	set_activation_function()
 	set_nn_color()
 
+# Set network color based on weight values
 func set_nn_color():
 	color = Color(Matrix.average(weights_input_hidden),
 	Matrix.average(weights_hidden_output),
 	Matrix.average(Matrix.dot_product(bias_hidden, bias_output)), 1)
 
-func set_activation_function(callback: Callable = Callable(Activation, "sigmoid"), dcallback: Callable = Callable(Activation, "dsigmoid")) -> void:
+# Configure activation functions for neurons
+func set_activation_function(callback: Callable = Activation.SIGMOID.function, dcallback: Callable = Activation.SIGMOID.derivaive) -> void:
 	activation_function = callback
 	activation_dfunction = dcallback
 
+# Forward propagation - predict output from input
 func predict(input_array: Array[float]) -> Array:
 	var inputs = Matrix.from_array(input_array)
 
@@ -61,7 +73,9 @@ func predict(input_array: Array[float]) -> Array:
 
 	return Matrix.to_array(output)
 
+# Backpropagation - train network using target values
 func train(input_array: Array, target_array: Array):
+	# Forward pass
 	var inputs = Matrix.from_array(input_array)
 	var targets = Matrix.from_array(target_array)
 
@@ -73,8 +87,10 @@ func train(input_array: Array, target_array: Array):
 	outputs = Matrix.add(outputs, bias_output)
 	outputs = Matrix.map(outputs, activation_function)
 
+	# Calculate output layer errors
 	var output_errors = Matrix.subtract(targets, outputs)
 
+	# Update weights and biases for output layer
 	var gradients = Matrix.map(outputs, activation_dfunction)
 	gradients = Matrix.multiply(gradients, output_errors)
 	gradients = Matrix.scalar(gradients, learning_rate)
@@ -85,9 +101,11 @@ func train(input_array: Array, target_array: Array):
 	weights_hidden_output = Matrix.add(weights_hidden_output, weight_ho_deltas)
 	bias_output = Matrix.add(bias_output, gradients)
 
+	# Calculate hidden layer errors
 	var weights_hidden_output_t = Matrix.transpose(weights_hidden_output)
 	var hidden_errors = Matrix.dot_product(weights_hidden_output_t, output_errors)
 
+	# Update weights and biases for hidden layer
 	var hidden_gradient = Matrix.map(hidden, activation_dfunction)
 	hidden_gradient = Matrix.multiply(hidden_gradient, hidden_errors)
 	hidden_gradient = Matrix.scalar(hidden_gradient, learning_rate)
@@ -99,6 +117,7 @@ func train(input_array: Array, target_array: Array):
 
 	bias_hidden = Matrix.add(bias_hidden, hidden_gradient)
 
+# Get sensor inputs from raycasts
 func get_inputs_from_raycasts() -> Array:
 	assert(raycasts.size() != 0, "Can not get inputs from RayCasts that are not set!")
 
@@ -109,6 +128,7 @@ func get_inputs_from_raycasts() -> Array:
 
 	return _input_array
 
+# Get network prediction using raycast inputs
 func get_prediction_from_raycasts(optional_val: Array = []) -> Array:
 	assert(raycasts.size() != 0, "Can not get inputs from RayCasts that are not set!")
 
@@ -116,6 +136,7 @@ func get_prediction_from_raycasts(optional_val: Array = []) -> Array:
 	_array_.append_array(optional_val)
 	return predict(_array_)
 
+# Calculate distance from raycast collision
 func get_distance(_raycast: RayCast2D):
 	var distance: float = 0.0
 	if _raycast.is_colliding():
@@ -127,6 +148,8 @@ func get_distance(_raycast: RayCast2D):
 		distance = sqrt((pow(_raycast.target_position.x, 2) + pow(_raycast.target_position.y, 2)))
 	return distance
 
+# Genetic algorithm functions
+# Combine two neural networks to create offspring
 static func reproduce(a: NeuralNetwork, b: NeuralNetwork) -> NeuralNetwork:
 	var result = NeuralNetwork.new(a.input_nodes, a.hidden_nodes, a.output_nodes)
 	result.weights_input_hidden = Matrix.random(a.weights_input_hidden, b.weights_input_hidden)
@@ -136,7 +159,8 @@ static func reproduce(a: NeuralNetwork, b: NeuralNetwork) -> NeuralNetwork:
 
 	return result
 
-static func mutate(nn: NeuralNetwork, callback: Callable = Callable(NeuralNetwork, "mutate_callable_reproduced")) -> NeuralNetwork:
+# Apply random mutations to network weights
+static func mutate(nn: NeuralNetwork, callback: Callable = NeuralNetwork.mutate_callable_reproduced) -> NeuralNetwork:
 	var result = NeuralNetwork.new(nn.input_nodes, nn.hidden_nodes, nn.output_nodes)
 	result.weights_input_hidden = Matrix.map(nn.weights_input_hidden, callback)
 	result.weights_hidden_output = Matrix.map(nn.weights_hidden_output, callback)
@@ -144,13 +168,15 @@ static func mutate(nn: NeuralNetwork, callback: Callable = Callable(NeuralNetwor
 	result.bias_output = Matrix.map(nn.bias_output, callback)
 	return result
 
+# Mutation function with small changes
 static func mutate_callable_reproduced(value, _row, _col):
 	seed(randi())
 	randomize()
 	value += randf_range(-0.15, 0.15)
 	return value
 
-static func copy(nn : NeuralNetwork) -> NeuralNetwork:
+# Create exact copy of neural network
+static func copy(nn: NeuralNetwork) -> NeuralNetwork:
 	var result = NeuralNetwork.new(nn.input_nodes, nn.hidden_nodes, nn.output_nodes)
 	result.weights_input_hidden = Matrix.copy(nn.weights_input_hidden)
 	result.weights_hidden_output = Matrix.copy(nn.weights_hidden_output)
@@ -160,6 +186,7 @@ static func copy(nn : NeuralNetwork) -> NeuralNetwork:
 	result.fitness = nn.fitness
 	return result
 
+# Mutation function with larger changes
 static func mutate_callable(value, _row, _col):
 	seed(randi())
 	randomize()

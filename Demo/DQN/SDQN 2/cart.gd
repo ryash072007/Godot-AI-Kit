@@ -1,6 +1,6 @@
 extends RigidBody2D
 
-# Force applied to move the cart
+# Configuration for cart movement and physics
 @export var force_magnitude: float = 1000.0
 
 # Initial x-position so that the position of object doesnt change state
@@ -9,18 +9,23 @@ extends RigidBody2D
 # Toggle to test movement
 @export var human_testing: bool = false
 
+# Neural Network configuration
+@export_enum("SGD", "ADAM") var optimiser: int
+
 @export_range(0.0001, 0.1, 0.0001) var learning_rate: float = 0.0001
 
-# Action or input to control the cart (2 for none, 1 for right, 0 for left)
+# Cart control variables
+# 2 = no movement, 1 = right, 0 = left
 var action: int = 0
 
 var reset: int = -1
 
-# Enviroment Reset Variables
-var max_angle: float = deg_to_rad(25.0)
-var threshold_distace: float = 250.0
+# Failure conditions for the simulation
+var max_angle: float = deg_to_rad(25.0) # Cart fails if pole tilts beyond this angle
+var threshold_distace: float = 250.0 # Cart fails if it moves too far from start
 
-# DQN variables
+# Deep Q-Network (DQN) setup
+# 4 inputs (state variables), 2 outputs (actions)
 var DQN: SDQN = SDQN.new(4, 2)
 var prev_state: Array
 var prev_action: int
@@ -29,35 +34,42 @@ var done: bool = false
 var done_last_frame: bool = false
 
 # Add memory variable
-var total_reward: float = 0.0
+var total_reward: float = 0.0 # Tracks cumulative reward for current episode
 
-var log_file: FileAccess = FileAccess.open("user://cart_data_SGD_multi.csv", FileAccess.WRITE)
+# File handling for logging and model saving
+@export var log_file_name: String
+@export var SDQN_file_name: String
+
+var log_file: FileAccess
 
 func _ready() -> void:
 
 	Engine.max_fps = 24
+	log_file = FileAccess.open("user://" + log_file_name, FileAccess.WRITE)
 
-	var Q_network: NeuralNetworkAdvanced = NeuralNetworkAdvanced.new(NeuralNetworkAdvanced.methods.SGD)
+	var Q_network: NeuralNetworkAdvanced = NeuralNetworkAdvanced.new(optimiser)
 	Q_network.add_layer(4)
-	Q_network.add_layer(16, Q_network.ACTIVATIONS.PRELU)
-	Q_network.add_layer(16, Q_network.ACTIVATIONS.PRELU)
-	Q_network.add_layer(2, Q_network.ACTIVATIONS.LINEAR)
+	Q_network.add_layer(16, "LEAKYRELU")
+	Q_network.add_layer(16, "LEAKYRELU")
+	Q_network.add_layer(2, "LINEAR")
 	Q_network.learning_rate = learning_rate
 	DQN.set_Q_network(Q_network)
 
 	$sprite.color = Color(randf(), randf(), randf())
 	$pole/sprite.color = $sprite.color
 	DQN.automatic_decay = true
+	if optimiser == NeuralNetworkAdvanced.methods.SGD:
+		DQN.lr_decay_rate = 0.9999
 	DQN.set_clip_value(100.0)
-	DQN.lr_decay_rate = 1
 	DQN.set_lr_value(learning_rate)
-	DQN.use_threading()
 
 	log_file.store_string("Reset, Exploration Probability, Total Reward, Time Alive\n")
 
 	reset_environment()
 
 func _physics_process(_delta: float) -> void:
+    # The function handles both human testing and AI control modes
+    # Updates DQN memory and applies forces to the cart
 
 	var direction: int
 
@@ -89,9 +101,10 @@ func _physics_process(_delta: float) -> void:
 
 		# DQN adding memory and recycling state and action if not done last step
 		if done_last_frame:
+			total_reward += get_reward()
 			done_last_frame = false
 		else:
-			var reward: float = get_reward()
+			reward = get_reward()
 			total_reward += reward
 			DQN.add_memory(prev_state, prev_action, reward, state, done)
 		prev_state = state
@@ -105,6 +118,9 @@ func _physics_process(_delta: float) -> void:
 
 
 func get_state() -> Array:
+    # Returns current state of the system as an array:
+    # [cart_position, cart_velocity, pole_angle, pole_angular_velocity]
+
 	var cart_position: float = global_position.x - initial_cart_position
 	var cart_velocity: float = linear_velocity.x
 	var pole_angle: float = $pole.rotation
@@ -116,6 +132,9 @@ func get_state() -> Array:
 
 
 func get_reward() -> float:
+    # Returns -100 if cart fails (pole falls or cart moves too far)
+    # Returns 1.0 for each successful step
+
 	if absf($pole.rotation) > max_angle or abs(global_position.x) - initial_cart_position > threshold_distace:
 		done = true
 		return -100.0
@@ -124,8 +143,16 @@ func get_reward() -> float:
 
 
 func reset_environment() -> void:
+    # Resets the simulation:
+    # 1. Saves model every 16 resets
+    # 2. Updates display information
+    # 3. Logs performance metrics
+    # 4. Resets cart and pole to initial positions with slight randomization
 
 	reset += 1
+
+	if reset % 16:
+		DQN.save("user://" + SDQN_file_name)
 
 	#print("_______________ " + str($sprite.color) + " _______________")
 	var info: String = "Reset: " + str(reset) + "\nLearning Rate: " + str(DQN.learning_rate) + "\nExploration Rate: " + str(DQN.exploration_probability) + "\nTotal reward: " + str(total_reward) + "\nTime Alive: " + str(20 - $existence.time_left)
@@ -152,16 +179,23 @@ func reset_environment() -> void:
 	$pole.linear_velocity = Vector2.ZERO
 
 
-# Incase get_reward misses it
-func _on_pole_body_entered(body: Node) -> void:
+# Event handlers
+func _on_pole_body_entered(_body: Node) -> void:
+    # Fail-safe to catch pole collisions
+    # Incase get_reward misses it
+
 	done = true
 
 
 func _on_existence_timeout() -> void:
+    # Handles timeout of current episode
+
 	reset_environment()
 	print("Timed Out")
 
 
 func _on_tree_exiting() -> void:
+    # Cleanup when scene exits
+
 	log_file.close()
 	DQN.close_threading()
