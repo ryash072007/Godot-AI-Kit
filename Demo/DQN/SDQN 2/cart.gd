@@ -37,19 +37,28 @@ var done_last_frame: bool = false
 var total_reward: float = 0.0 # Tracks cumulative reward for current episode
 
 # File handling for logging and model saving
+
+@export var log_data: bool = true
+
 @export var log_file_name: String
 
 @export var SDQN_file_name: String
 
 @export var enabled: bool = true
 
+@export var is_learning: bool = true
+
 var log_file: FileAccess
 
 func _ready() -> void:
+	Engine.max_fps = 24
+
 	if not enabled:
 		get_parent().remove_child.call_deferred(get_node("."))
-	Engine.max_fps = 24
-	log_file = FileAccess.open("user://" + log_file_name, FileAccess.WRITE)
+
+	if log_data:
+		log_file = FileAccess.open("user://" + log_file_name, FileAccess.WRITE)
+		log_file.store_string("Reset, Exploration Probability, Total Reward, Time Alive\n")
 
 
 	#var Q_network: NeuralNetworkAdvanced = NeuralNetworkAdvanced.new(optimiser)
@@ -59,15 +68,15 @@ func _ready() -> void:
 	#Q_network.add_layer(2, "LINEAR")
 	#Q_network.learning_rate = learning_rate
 	#DQN.set_Q_network(Q_network)
+	#DQN.set_clip_value(10)
+	#DQN.automatic_decay = true
+	#DQN.set_lr_value(learning_rate)
+	DQN.load("user://ADAM_001_ELU - Copy (3).ryash")
+
 
 	$sprite.color = Color(randf(), randf(), randf())
 	$pole/sprite.color = $sprite.color
-	DQN.automatic_decay = true
-	#DQN.set_clip_value(10)
 
-	#DQN.set_lr_value(learning_rate)
-	DQN.load("user://ADAM_001_ELU - Copy (3).ryash")
-	log_file.store_string("Reset, Exploration Probability, Total Reward, Time Alive\n")
 
 	reset_environment()
 
@@ -75,9 +84,10 @@ func _physics_process(_delta: float) -> void:
 	# The function handles both human testing and AI control modes
 	# Updates DQN memory and applies forces to the cart
 
+	if not is_learning:
+		done_last_frame = true
+
 	var direction: int
-	#if name == "cart2":
-		#free()
 
 	# For human testing
 	if human_testing:
@@ -138,7 +148,7 @@ func get_state() -> Array:
 
 
 func get_reward() -> float:
-	# Returns -100 if cart fails (pole falls or cart moves too far)
+	# Returns -100 if cart fails (pole falls below a set angle or cart moves too far)
 	# Returns 1.0 for each successful step
 
 	if absf($pole.rotation) > max_angle or abs(global_position.x) - initial_cart_position > threshold_distace:
@@ -157,16 +167,18 @@ func reset_environment() -> void:
 
 	reset += 1
 
-	if reset % 16:
-		DQN.save("user://" + SDQN_file_name)
+	if log_data:
+		if reset % 16:
+			DQN.save("user://" + SDQN_file_name)
 
 	#print("_______________ " + str($sprite.color) + " _______________")
 	var info: String = "Reset: " + str(reset) + "\nLearning Rate: " + str(DQN.learning_rate) + "\nExploration Rate: " + str(DQN.exploration_probability) + "\nTotal reward: " + str(total_reward) + "\nTime Alive: " + str(5 - $existence.time_left)
 	#print(info)
 	$info.text = info
 
-	log_file.store_string(str(reset) + ', ' + str(DQN.exploration_probability) + ", " + str(total_reward) + ", " + str(5 - $existence.time_left) + '\n')
-	log_file.flush()
+	if log_data:
+		log_file.store_string(str(reset) + ', ' + str(DQN.exploration_probability) + ", " + str(total_reward) + ", " + str(5 - $existence.time_left) + '\n')
+		log_file.flush()
 
 	done = false
 	done_last_frame = true

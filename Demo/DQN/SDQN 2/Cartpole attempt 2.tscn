@@ -21,8 +21,10 @@ script = ExtResource("1_7oh87")
 force_magnitude = 2000.0
 optimiser = 1
 learning_rate = 0.001
+log_data = false
 log_file_name = "DIS_ADAM_001_ELU.csv"
 SDQN_file_name = "DIS_ADAM_001_ELU.ryash"
+is_learning = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="cart"]
 shape = SubResource("RectangleShape2D_po0xa")
