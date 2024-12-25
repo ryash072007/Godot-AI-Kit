@@ -144,7 +144,7 @@ func train(replay_memory: Array) -> void:
 
 		# might be wrong, fix later
 		if done:
-			target = -1
+			target = reward
 		else:
 			target = reward + discount_factor * max_q_predict(next_state)
 
@@ -180,7 +180,7 @@ func multithreaded_train() -> void:
 
 			# might be wrong, fix later
 			if done:
-				target = -1
+				target = reward
 			else:
 				train_mutex.lock()
 				target = reward + discount_factor * max_q_predict(next_state)
@@ -251,9 +251,9 @@ func to_dict() -> Dictionary:
 		if property.name.to_lower() in ["q_network_multi", "semaphore_exit", "train_semaphore", "train_mutex", "train_thread", "use_multi_threading", "update_steps", "steps", "memory"]:
 			continue
 
-		var data_to_store
+		var data_to_store = self.get(property.name)
 		if property.name.to_lower() in ["q_network", "target_q_network"]:
-			data_to_store = self.get(property.name).to_dict()
+			data_to_store = data_to_store.to_dict()
 		data[property.name] = data_to_store
 	return data
 
@@ -269,11 +269,20 @@ func from_dict(dict: Dictionary) -> void:
 
 func save(file_path: String) -> void:
 	var file: FileAccess = FileAccess.open(file_path, FileAccess.WRITE)
-	file.store_var(self.to_dict())
+	file.store_string(JSON.stringify(self.to_dict()))
 	file.close()
 
 func load(file_path: String) -> void:
 	var file: FileAccess = FileAccess.open(file_path, FileAccess.READ)
-	var data: Dictionary = file.get_var()
+	var data_string: String = file.get_as_text()
+	var data: Dictionary = JSON.parse_string(data_string)
 	file.close()
 	self.from_dict(data)
+
+static func convert(file_path: String) -> void:
+	var file: FileAccess = FileAccess.open(file_path, FileAccess.READ)
+	var data: Dictionary = file.get_var()
+	file.close()
+	var new_file: FileAccess = FileAccess.open(file_path, FileAccess.WRITE)
+	new_file.store_string(JSON.stringify(data))
+	new_file.close()

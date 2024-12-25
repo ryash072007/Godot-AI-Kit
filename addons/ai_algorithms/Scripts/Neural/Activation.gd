@@ -11,7 +11,7 @@ class RELU:
 	static func function(value: float, _row: int, _col: int) -> float:
 		return max(0.0, value)
 
-	static func derivaive(value: float, _row: int, _col: int) -> float:
+	static func derivative(value: float, _row: int, _col: int) -> float:
 		return 1.0 if value > 0 else 0.0
 
 class TANH:

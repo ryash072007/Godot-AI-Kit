@@ -95,16 +95,16 @@ func predict(input_array: Array) -> Array:
 	return Matrix.to_array(inputs)
 
 # Training dispatcher: Choose between SGD and ADAM optimization
-func train(input_array: Array, target_array: Array) -> void:
+func train(input_array: Array, target_array: Array, cross_with_gradient: bool = false) -> void:
 	match bp_method:
 		methods.SGD:
-			self.SGD(input_array, target_array)
+			self.SGD(input_array, target_array, cross_with_gradient)
 		methods.ADAM:
-			self.ADAM(input_array, target_array)
+			self.ADAM(input_array, target_array, cross_with_gradient)
 
 # Stochastic Gradient Descent (SGD) implementation
 # Performs one forward pass and one backward pass to update weights
-func SGD(input_array: Array, target_array: Array) -> void:
+func SGD(input_array: Array, target_array: Array, cross_with_gradient: bool = false) -> void:
 	# Convert input and target arrays to matrices
 	var inputs: Matrix = Matrix.from_array(input_array)
 	var targets: Matrix = Matrix.from_array(target_array)
@@ -133,6 +133,7 @@ func SGD(input_array: Array, target_array: Array) -> void:
 		var layer_outputs: Matrix = outputs[layer_index]
 		var layer_unactivated_output: Matrix = unactivated_outputs[layer_index]
 		var current_error: Matrix
+
 		# Determine current errors
 		if next_layer_errors == null:
 			# Output layer error
@@ -146,9 +147,10 @@ func SGD(input_array: Array, target_array: Array) -> void:
 		# Gradient calculation
 		var gradients: Matrix = Matrix.map(layer_outputs, ACTIVATIONS.get(layer.activation).derivative)
 		gradients = Matrix.multiply(gradients, current_error) # this becomes gradient
+		gradients = Matrix.scalar(gradients, learning_rate)
 		if clip_value != INF:
 			gradients = Matrix.clamp_matrix(gradients, -clip_value, clip_value)
-		gradients = Matrix.scalar(gradients, learning_rate)
+
 
 		# Weight updates
 		var inputs_t: Matrix = Matrix.transpose(inputs) if layer_index == 0 else Matrix.transpose(outputs[layer_index - 1])
@@ -163,7 +165,7 @@ func SGD(input_array: Array, target_array: Array) -> void:
 
 # ADAM optimizer implementation
 # Adaptive Moment Estimation - combines benefits of AdaGrad and RMSProp
-func ADAM(input_array: Array, target_array: Array) -> void:
+func ADAM(input_array: Array, target_array: Array, cross_with_gradient: bool = false) -> void:
 	# Convert input and target arrays to matrices
 	var inputs: Matrix = Matrix.from_array(input_array)
 	var targets: Matrix = Matrix.from_array(target_array)
@@ -212,7 +214,7 @@ func ADAM(input_array: Array, target_array: Array) -> void:
 		var weight_gradients: Matrix = Matrix.dot_product(gradients, inputs_t)
 		var bias_gradient: Matrix = gradients
 
-	
+
 		# Update Adam variables
 		m_weights[layer_index] = Matrix.add(Matrix.scalar(m_weights[layer_index], beta1), Matrix.scalar(weight_gradients, 1.0 - beta1))
 		v_weights[layer_index] = Matrix.add(Matrix.scalar(v_weights[layer_index], beta2), Matrix.scalar(Matrix.square(weight_gradients), 1.0 - beta2))
@@ -314,12 +316,13 @@ func from_dict(dict: Dictionary) -> void:
 # Save the neural network state to a file
 func save(file_path: String) -> void:
 	var file: FileAccess = FileAccess.open(file_path, FileAccess.WRITE)
-	file.store_var(self.to_dict())
+	file.store_string(JSON.stringify(self.to_dict()))
 	file.close()
 
 # Load the neural network state from a file
 func load(file_path: String) -> void:
 	var file: FileAccess = FileAccess.open(file_path, FileAccess.READ)
-	var data: Dictionary = file.get_var()
+	var data_string: String = file.get_as_text()
+	var data: Dictionary = JSON.parse_string(data_string)
 	file.close()
 	self.from_dict(data)
