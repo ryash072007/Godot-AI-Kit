@@ -18,6 +18,7 @@ The goal of this project is to provide a variety of AI Algorithms in Godot 4 nat
 2. [Neural Network Advanced (Multi-Layered Neural Network)](#NNA)
 3. [Q-Learning Algorithm (and SARSA)](#q-learning-algorithm)
 4. [Minimax Algorithm](#minimax-algorithm)
+5. [SDQN (Simple Deep Q-Network)](#sdqn-simple-deep-q-network)
 
 ## Simple Neural Network and Neural Net Plugin for Godot 4
 
