@@ -61,17 +61,20 @@ func _ready() -> void:
 		log_file.store_string("Reset, Exploration Probability, Total Reward, Time Alive\n")
 
 
-	#var Q_network: NeuralNetworkAdvanced = NeuralNetworkAdvanced.new(optimiser)
-	#Q_network.add_layer(4)
-	#Q_network.add_layer(16, "ELU")
-	#Q_network.add_layer(16, "ELU")
-	#Q_network.add_layer(2, "LINEAR")
-	#Q_network.learning_rate = learning_rate
-	#DQN.set_Q_network(Q_network)
-	#DQN.set_clip_value(10)
-	#DQN.automatic_decay = true
-	#DQN.set_lr_value(learning_rate)
-	DQN.load("user://ADAM_001_ELU - Copy (3).ryash")
+	var Q_network: NeuralNetworkAdvanced = NeuralNetworkAdvanced.new(optimiser)
+	Q_network.use_amsgrad = false
+	Q_network.add_layer(4)
+	Q_network.add_layer(16, "LEAKYRELU")
+	Q_network.add_layer(16, "LEAKYRELU")
+	Q_network.add_layer(2, "LINEAR")
+	Q_network.learning_rate = learning_rate
+	DQN.set_Q_network(Q_network)
+	if Q_network.bp_method == NeuralNetworkAdvanced.methods.SGD:
+		DQN.lr_decay_rate = 0.995
+		DQN.set_clip_value(10.0)
+	DQN.automatic_decay = true
+	DQN.set_lr_value(learning_rate)
+	#DQN.load("user://ADAM_001_ELU - Copy.ryash")
 
 
 	$sprite.color = Color(randf(), randf(), randf())
@@ -153,7 +156,7 @@ func get_reward() -> float:
 
 	if absf($pole.rotation) > max_angle or abs(global_position.x) - initial_cart_position > threshold_distace:
 		done = true
-		return -100.0
+		return -1.0
 	else:
 		return 1.0
 
@@ -168,8 +171,8 @@ func reset_environment() -> void:
 	reset += 1
 
 	if log_data:
-		if reset % 16:
-			DQN.save("user://" + SDQN_file_name)
+		if reset % 64 == 0:
+			DQN.save("user://MIT/" + str(reset) + '_' + SDQN_file_name)
 
 	#print("_______________ " + str($sprite.color) + " _______________")
 	var info: String = "Reset: " + str(reset) + "\nLearning Rate: " + str(DQN.learning_rate) + "\nExploration Rate: " + str(DQN.exploration_probability) + "\nTotal reward: " + str(total_reward) + "\nTime Alive: " + str(5 - $existence.time_left)
@@ -215,5 +218,6 @@ func _on_existence_timeout() -> void:
 func _on_tree_exiting() -> void:
 	# Cleanup when scene exits
 
-	log_file.close()
+	if log_data:
+		log_file.close()
 	DQN.close_threading()

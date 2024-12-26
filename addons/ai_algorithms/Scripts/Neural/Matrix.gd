@@ -225,3 +225,31 @@ func index_of_max_from_row(_row: int) -> int:
 func max_from_row(_row: int) -> float:
 	return data[_row].max()
 
+static func max_matrix(a: Matrix, b: Matrix) -> Matrix:
+	assert(a.rows == b.rows and a.cols == b.cols)
+
+	var result: Matrix = Matrix.new(a.rows, b.cols)
+	for row in range(result.rows):
+		for col in range(result.cols):
+			result.data[row][col] = max(a.data[row][col], b.data[row][col])
+
+	return result
+
+static func min_matrix(a: Matrix, b: Matrix) -> Matrix:
+	assert(a.rows == b.rows and a.cols == b.cols)
+
+	var result: Matrix = Matrix.new(a.rows, b.cols)
+	for row in range(result.rows):
+		for col in range(result.cols):
+			result.data[row][col] = min(a.data[row][col], b.data[row][col])
+
+	return result
+
+static func norm(matrix: Matrix) -> float:
+	var sum_of_squares: float = 0.0
+
+	for row in range(matrix.rows):
+		for col in range(matrix.cols):
+			sum_of_squares += pow(matrix.data[row][col], 2)
+
+	return sqrt(sum_of_squares)

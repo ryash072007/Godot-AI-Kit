@@ -3,13 +3,14 @@ extends Node2D
 var nnas: NeuralNetworkAdvanced = NeuralNetworkAdvanced.new(NeuralNetworkAdvanced.methods.SGD)
 
 func _ready() -> void:
-	nnas.learning_rate = 0.01
+	#nnas.use_amsgrad = true
+	nnas.learning_rate = 0.001
 	nnas.add_layer(2)
-	nnas.add_layer(4, nnas.ACTIVATIONS.PRELU)
-	nnas.add_layer(4, nnas.ACTIVATIONS.PRELU)
-	nnas.add_layer(1, nnas.ACTIVATIONS.LINEAR)
+	nnas.add_layer(4, "LEAKYRELU")
+	nnas.add_layer(4, "LEAKYRELU")
+	nnas.add_layer(1, "LINEAR")
 
-	#nnas.clip_value = 1000.0
+	nnas.clip_value = 10.0
 
 
 func _physics_process(delta: float) -> void:

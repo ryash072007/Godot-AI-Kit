@@ -279,8 +279,11 @@ position = Vector2(688, 208)
 [node name="block21631" parent="track" instance=ExtResource("2_iyiel")]
 position = Vector2(688, 240)
 
+[node name="dieBlock21633" parent="track" instance=ExtResource("3_4mem1")]
+position = Vector2(1376, 800)
+
 [node name="dieBlock21632" parent="track" instance=ExtResource("3_4mem1")]
-position = Vector2(688, 400)
+position = Vector2(393, 370)
 
 [node name="block21633" parent="track" instance=ExtResource("2_iyiel")]
 position = Vector2(688, 496)
@@ -2497,12 +2500,13 @@ shape = SubResource("RectangleShape2D_mgyl3")
 position = Vector2(64, 384)
 script = ExtResource("5_tewmy")
 AI_Scene = ExtResource("6_qs1wj")
-Batch_Size = 13
-Generation_Delay = 8
+Batch_Size = 10
+Generation_Delay = 6
 input_nodes = 9
 hidden_nodes = 5
 output_nodes = 1
-random_population = 24
+random_population = 12
+use_reproduction = true
 reproduced_population = 7
 
 [node name="gen" type="RichTextLabel" parent="."]
@@ -2516,12 +2520,12 @@ zoom = Vector2(0.8, 0.85)
 
 [connection signal="tree_exiting" from="." to="." method="_on_demo_tree_exiting"]
 [connection signal="area_entered" from="track/kill" to="track/kill" method="_on_kill_area_entered"]
-[connection signal="area_entered" from="track/@Area2D@31619" to="track/@Area2D@31619" method="_on_kill_area_entered"]
-[connection signal="area_entered" from="track/@Area2D@31620" to="track/@Area2D@31620" method="_on_kill_area_entered"]
-[connection signal="area_entered" from="track/@Area2D@31621" to="track/@Area2D@31621" method="_on_kill_area_entered"]
-[connection signal="area_entered" from="track/@Area2D@31622" to="track/@Area2D@31622" method="_on_kill_area_entered"]
-[connection signal="area_entered" from="track/@Area2D@31623" to="track/@Area2D@31623" method="_on_kill_area_entered"]
-[connection signal="area_entered" from="track/@Area2D@31624" to="track/@Area2D@31624" method="_on_kill_area_entered"]
+[connection signal="area_entered" from="track/@Area2D@29203" to="track/@Area2D@29203" method="_on_kill_area_entered"]
+[connection signal="area_entered" from="track/@Area2D@29204" to="track/@Area2D@29204" method="_on_kill_area_entered"]
+[connection signal="area_entered" from="track/@Area2D@29205" to="track/@Area2D@29205" method="_on_kill_area_entered"]
+[connection signal="area_entered" from="track/@Area2D@29206" to="track/@Area2D@29206" method="_on_kill_area_entered"]
+[connection signal="area_entered" from="track/@Area2D@29207" to="track/@Area2D@29207" method="_on_kill_area_entered"]
+[connection signal="area_entered" from="track/@Area2D@29208" to="track/@Area2D@29208" method="_on_kill_area_entered"]
 [connection signal="body_entered" from="won" to="won" method="_on_won_body_entered"]
 [connection signal="gen_changed" from="Neural_Net" to="won" method="_on_neural_net_gen_changed"]
 [connection signal="true_batch_size" from="Neural_Net" to="won" method="_on_neural_net_true_batch_size"]

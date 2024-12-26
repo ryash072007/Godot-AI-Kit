@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://Demo/QL/QL_demo.gd" id="1_0okm1"]
 
 [node name="QL_demo" type="Node2D"]
-position = Vector2(64, 32)
+position = Vector2(294, 37)
 script = ExtResource("1_0okm1")
 
 [node name="bck" type="Node2D" parent="."]
@@ -46,7 +46,7 @@ metadata/_edit_use_anchors_ = true
 offset_top = 480.0
 offset_right = 96.0
 offset_bottom = 576.0
-color = Color(0, 0, 1, 1)
+color = Color(0, 0, 0, 1)
 metadata/_edit_use_anchors_ = true
 
 [node name="normal7" type="ColorRect" parent="bck"]

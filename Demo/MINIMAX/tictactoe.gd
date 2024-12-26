@@ -10,7 +10,7 @@ Callable(possible_actions)
 # Game state variables
 var turn = "X"  # Current player's turn
 var _board = [[null, null, null], [null, null, null], [null, null, null]]  # 3x3 game board
-var _is_adversary: bool = true  # Whether AI plays as O (true) or X (false)
+@export var _is_adversary: bool = true  # Whether AI plays as O (true) or X (false)
 
 # Initialize the game
 func _ready():
@@ -43,20 +43,20 @@ func utility(board: Array, is_adversary: bool) -> float:
 	for row in board:
 		if row[0] == row[1] and row[1] == row[2] and row[0] != null:
 			return 1 if not is_adversary else -1
-	
+
 	# Check columns for win
 	for col_index in range(3):
 		if board[0][col_index] == board[1][col_index] and board[1][col_index] == board[2][col_index] and board[0][col_index] != null:
 			return 1 if not is_adversary else -1
-	
+
 	# Check diagonal (top-left to bottom-right)
 	if board[0][0] == board[1][1] and board[1][1] == board[2][2] and board[0][0] != null:
 		return 1 if not is_adversary else -1
-	
+
 	# Check diagonal (top-right to bottom-left)
 	if board[0][2] == board[1][1] and board[1][1] == board[2][0] and board[0][2] != null:
 		return 1 if not is_adversary else -1
-	
+
 	return 0
 
 # Get all possible valid moves on the current board
@@ -88,7 +88,7 @@ func grid_cell_clicked(pos: Vector2i) -> void:
 	grid_cell.text = turn
 	change_turn()
 	check_game_over()
-	
+
 	ai_minimax()
 
 # Check if the game has ended (win/draw)

@@ -22,8 +22,8 @@ window/vsync/vsync_mode=0
 
 [editor]
 
-movie_writer/movie_file="C:/Users/ryash/Documents/Godot 4 - Projects/Plugins/Godot Neural Network Plugin/learning_cubes.avi"
-movie_writer/fps=30
+movie_writer/movie_file="E:/GitHub/Godot-4-Neural-Network/videos/DQN_initial.avi"
+movie_writer/fps=24
 
 [editor_plugins]
 

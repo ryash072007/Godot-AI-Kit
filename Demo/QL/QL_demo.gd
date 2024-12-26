@@ -14,13 +14,14 @@ var done: bool = false
 
 # Initialize Q-Learning network with 36 states (6x6 grid) and 4 possible actions (movement directions)
 func _ready() -> void:
+	Engine.max_fps = 24
 	qnet = QLearning.new(36, 4)
 	qnet.decay_per_steps = 75
 
 # Handle input for controlling simulation speed
 func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("predict"):
-		$control.wait_time = 0.5
+		$control.wait_time = 0.2
 	elif Input.is_action_just_pressed("ui_down"):
 		$control.wait_time = 0.05
 
@@ -43,8 +44,9 @@ func is_out_bound(action: int) -> bool:
 
 # Reset agent to starting position
 func reset() -> void:
-	row = 0
-	column = 0
+	$player.color = Color(randf_range(0.3, 1), randf_range(0.3, 1), randf_range(0.3, 1))
+	row = randi_range(1, 2)
+	column = randi_range(0, 5)
 	done = false
 	$player.position = Vector2(96 * column + 16, 512 - (96 * row + 16))
 
@@ -53,13 +55,14 @@ func _on_control_timeout() -> void:
 	if done:
 		reset()
 		return
-	
+
 	# Calculate current state from grid position
 	current_state = row * 6 + column
 	# Get next action from Q-Learning network
 	var action_to_do: int = qnet.predict(current_state, previous_reward)
 	previous_reward = 0.0
-	
+
+
 	# Apply rewards/punishments based on action results
 	if is_out_bound(action_to_do):
 		previous_reward -= 0.75  # Penalize for hitting boundaries
@@ -72,7 +75,9 @@ func _on_control_timeout() -> void:
 		done = true
 	else:
 		previous_reward -= 0.05  # Small penalty for each move to encourage efficiency
-	
+
+	var tween := create_tween()
+	tween.tween_property($player, "position", Vector2(96 * column + 16, 512 - (96 * row + 16)), 0.05)
 	# Update agent position on screen
-	$player.position = Vector2(96 * column + 16, 512 - (96 * row + 16))
+	#$player.position = Vector2(96 * column + 16, 512 - (96 * row + 16))
 	$lr.text = str(qnet.exploration_probability)

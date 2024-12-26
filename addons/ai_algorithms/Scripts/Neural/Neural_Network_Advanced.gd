@@ -28,6 +28,9 @@ var v_weights: Array[Matrix] = [] # Second moment for weights
 var m_biases: Array[Matrix] = [] # First moment for biases
 var v_biases: Array[Matrix] = [] # Second moment for biases
 var t: int = 0 # Time step
+var training_gradient_threshold: float = 1e-6
+var use_amsgrad: bool = false
+
 
 # Initialize the neural network with specified backpropagation method
 func _init(_bp_method: int = methods.SGD) -> void:
@@ -95,16 +98,16 @@ func predict(input_array: Array) -> Array:
 	return Matrix.to_array(inputs)
 
 # Training dispatcher: Choose between SGD and ADAM optimization
-func train(input_array: Array, target_array: Array, cross_with_gradient: bool = false) -> void:
+func train(input_array: Array, target_array: Array) -> void:
 	match bp_method:
 		methods.SGD:
-			self.SGD(input_array, target_array, cross_with_gradient)
+			self.SGD(input_array, target_array)
 		methods.ADAM:
-			self.ADAM(input_array, target_array, cross_with_gradient)
+			self.ADAM(input_array, target_array)
 
 # Stochastic Gradient Descent (SGD) implementation
 # Performs one forward pass and one backward pass to update weights
-func SGD(input_array: Array, target_array: Array, cross_with_gradient: bool = false) -> void:
+func SGD(input_array: Array, target_array: Array) -> void:
 	# Convert input and target arrays to matrices
 	var inputs: Matrix = Matrix.from_array(input_array)
 	var targets: Matrix = Matrix.from_array(target_array)
@@ -147,11 +150,17 @@ func SGD(input_array: Array, target_array: Array, cross_with_gradient: bool = fa
 		# Gradient calculation
 		var gradients: Matrix = Matrix.map(layer_outputs, ACTIVATIONS.get(layer.activation).derivative)
 		gradients = Matrix.multiply(gradients, current_error) # this becomes gradient
-		gradients = Matrix.scalar(gradients, learning_rate)
+
 		if clip_value != INF:
-			gradients = Matrix.clamp_matrix(gradients, -clip_value, clip_value)
+			# This was value clipping
+			#gradients = Matrix.clamp_matrix(gradients, -clip_value, clip_value)
 
+			# This is norm scaling
+			var norm = Matrix.norm(gradients) # Calculate the L2 norm of the gradients
+			if norm > clip_value:
+				gradients = Matrix.scalar(gradients, clip_value / norm) # Scale gradients to the threshold
 
+		gradients = Matrix.scalar(gradients, learning_rate)
 		# Weight updates
 		var inputs_t: Matrix = Matrix.transpose(inputs) if layer_index == 0 else Matrix.transpose(outputs[layer_index - 1])
 		var weight_delta: Matrix = Matrix.dot_product(gradients, inputs_t)
@@ -165,7 +174,7 @@ func SGD(input_array: Array, target_array: Array, cross_with_gradient: bool = fa
 
 # ADAM optimizer implementation
 # Adaptive Moment Estimation - combines benefits of AdaGrad and RMSProp
-func ADAM(input_array: Array, target_array: Array, cross_with_gradient: bool = false) -> void:
+func ADAM(input_array: Array, target_array: Array) -> void:
 	# Convert input and target arrays to matrices
 	var inputs: Matrix = Matrix.from_array(input_array)
 	var targets: Matrix = Matrix.from_array(target_array)
@@ -185,6 +194,7 @@ func ADAM(input_array: Array, target_array: Array, cross_with_gradient: bool = f
 		unactivated_outputs.append(sum) # Store the unactivated output for later use
 
 	t += 1
+
 	# Start backpropagation by calculating output errors
 	var expected_output: Matrix = targets
 	var next_layer_errors: Matrix = null
@@ -209,26 +219,44 @@ func ADAM(input_array: Array, target_array: Array, cross_with_gradient: bool = f
 		var gradients: Matrix = Matrix.map(layer_outputs, ACTIVATIONS.get(layer.activation).derivative)
 		gradients = Matrix.multiply(gradients, current_error) # this becomes gradient
 
+		if Matrix.norm(gradients) < training_gradient_threshold:
+			print("breaking")
+			break
+
 		# Weight updates
 		var inputs_t: Matrix = Matrix.transpose(inputs) if layer_index == 0 else Matrix.transpose(outputs[layer_index - 1])
 		var weight_gradients: Matrix = Matrix.dot_product(gradients, inputs_t)
 		var bias_gradient: Matrix = gradients
 
 
-		# Update Adam variables
 		m_weights[layer_index] = Matrix.add(Matrix.scalar(m_weights[layer_index], beta1), Matrix.scalar(weight_gradients, 1.0 - beta1))
-		v_weights[layer_index] = Matrix.add(Matrix.scalar(v_weights[layer_index], beta2), Matrix.scalar(Matrix.square(weight_gradients), 1.0 - beta2))
-
-		# Bias updates -> needs to be computed with gradients wrt biases
 		m_biases[layer_index] = Matrix.add(Matrix.scalar(m_biases[layer_index], beta1), Matrix.scalar(bias_gradient, 1.0 - beta1))
-		v_biases[layer_index] = Matrix.add(Matrix.scalar(v_biases[layer_index], beta2), Matrix.scalar(Matrix.square(bias_gradient), 1.0 - beta2))
-
-		# Bias correction
 		var m_hat_w: Matrix = Matrix.scalar(m_weights[layer_index], 1.0 / (1 - pow(beta1, t)))
-		var v_hat_w: Matrix = Matrix.scalar(v_weights[layer_index], 1.0 / (1 - pow(beta2, t)))
-
 		var m_hat_b: Matrix = Matrix.scalar(m_biases[layer_index], 1.0 / (1 - pow(beta1, t)))
-		var v_hat_b: Matrix = Matrix.scalar(v_biases[layer_index], 1.0 / (1 - pow(beta2, t)))
+
+		var v_hat_w: Matrix
+		var v_hat_b: Matrix
+
+		if use_amsgrad:
+			var new_v_weights: Matrix = Matrix.add(Matrix.scalar(v_weights[layer_index], beta2), Matrix.scalar(Matrix.square(weight_gradients), 1.0 - beta2))
+			var new_v_biases: Matrix = Matrix.add(Matrix.scalar(v_biases[layer_index], beta2), Matrix.scalar(Matrix.square(bias_gradient), 1.0 - beta2))
+
+			v_weights[layer_index] = Matrix.max_matrix(v_weights[layer_index], new_v_weights)
+			v_biases[layer_index] = Matrix.max_matrix(v_biases[layer_index], new_v_biases)
+
+			v_hat_w = v_weights[layer_index]
+			v_hat_b = v_biases[layer_index]
+
+		else:
+			# Update Adam variables
+			v_weights[layer_index] = Matrix.add(Matrix.scalar(v_weights[layer_index], beta2), Matrix.scalar(Matrix.square(weight_gradients), 1.0 - beta2))
+
+			# Bias updates -> needs to be computed with gradients wrt biases
+			v_biases[layer_index] = Matrix.add(Matrix.scalar(v_biases[layer_index], beta2), Matrix.scalar(Matrix.square(bias_gradient), 1.0 - beta2))
+
+			# Bias correction
+			v_hat_w = Matrix.scalar(v_weights[layer_index], 1.0 / (1 - pow(beta2, t)))
+			v_hat_b = Matrix.scalar(v_biases[layer_index], 1.0 / (1 - pow(beta2, t)))
 
 		# Update weights and biases
 		network[layer_index].weights = Matrix.subtract(network[layer_index].weights, Matrix.divide(Matrix.scalar(m_hat_w, learning_rate), Matrix.scalar_add(Matrix.square_root(v_hat_w), epsilon)))
