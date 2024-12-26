@@ -33,10 +33,6 @@ var train_semaphore: Semaphore
 var semaphore_exit: bool = false
 var Q_network_multi: NeuralNetworkAdvanced
 
-var is_logging: bool = false
-var log_file: FileAccess
-var log_count: int = 0
-
 
 func _init(state_space: int, action_space: int, learning_rate: float = learning_rate) -> void:
 	self.state_space = state_space

@@ -1,415 +1,522 @@
-
 TODO:
 
 ~~1. Multi-Layer Neural Network Support (more than a single hidden network)~~ [Completed]
 
-~~2. PPO Support (Unrealistic but will try!)~~ [On Hold]
+~~2. PPO Support (Unrealistic but will try!)~~ [Might start soon]
 
-3. Simple DQN Support [Ongoing]
+~~3. Simple DQN Support~~ [Completed]
 
-</p>
 
-NOTE: DQN algorithm is theoretically done, just need to perfect the demo for it.
 
-<h1  id="ai-algorithm-for-godot-4">AI Algorithm for Godot 4</h1>
+# AI Algorithm for Godot 4
 
-<p>The goal of this project is to provide a variety of AI Algorithms in Godot 4 natively using GDscript.</p>
+The goal of this project is to provide a variety of AI Algorithms in Godot 4 natively using GDscript.
 
-<h2  id="index">Index</h2>
+## Index
 
-<ol>
+1. [Simple Neural Network and Neural Net](#simple-neural-network-and-neural-net-plugin-for-godot-4)
+2. [Neural Network Advanced (Multi-Layered Neural Network)](#NNA)
+3. [Q-Learning Algorithm (and SARSA)](#q-learning-algorithm)
+4. [Minimax Algorithm](#minimax-algorithm)
 
-<li><a  href="#simple-neural-network-and-neural-net-plugin-for-godot-4">Simple Neural Network and Neural Net</a></li>
+## Simple Neural Network and Neural Net Plugin for Godot 4
 
-<li><a  href="#NNA">Neural Network Advanced (Multi-Layered Neural Network)</a></li>
+This part of the plugin allows you to create a Multi Layer Neural Network and also provides a NeuralNet by which you can easily automatically train the network (which can be found under Node2D Section in the add node window).  
+This plugin is intended for creating AIs that can complete a game level.
 
-<li><a  href="#q-learning-algorithm">Q-Learning Algorithm (and SARSA)</a></li>
+### Rules to be followed if using Neural Net
 
-<li><a  href="#minimax-algorithm">Minimax Algorithm</a></li>
+1. If using Neural Net, the identifier or name of the variable of the Neural Network used in your code has to be `nn`. Like this:
 
-</ol>
+    ```gdscript
+    var nn: NeuralNetwork
+    ```
 
-<h2  id="simple-neural-network-and-neural-net-plugin-for-godot-4">Simple Neural Network and Neural Net Plugin for Godot 4</h2>
+    This is because the Neural Net only works when the Neural Network is named as `nn`.
 
-<p>This part of the plugin allows you to create a Multi Layer Neural Network and also provides a NeuralNet by which you can easily automatically train the network (which can be found under Node2D Section in the add node window).<br>
+2. If using Neural Net, make sure you do not assign your Neural Network Variable `nn` anything. All you are supposed to do is declare it like this:
 
-This plugin is intended for creating AIs that can complete a game level.</p>
+    ```gdscript
+    var nn: NeuralNetwork
+    ```
 
-<h3  id="rules-to-be-followed-if-using-neural-net">Rules to be followed if using Neural Net</h3>
+    This is because the Neural Net depends on the fact that `nn` is not assigned anything.
 
-<ol>
+3. When your AI or player has to be killed or removed, always use the `queue_free()` method. This is because the Neural Net relies on the signal emitted by the node when exiting the tree to receive the fitness and Neural Network of that node. Example:
 
-<li>If using Neural Net, the identifier or name of the variable of the Neural Network used in your code has to be <code>nn</code>. Like this:</li>
+    ```gdscript
+    Object.queue_free()
+    ```
 
-</ol>
+### What each variable means and how to use them
 
-<pre><code>var nn: NeuralNetwork
+1. **Ai Scene**: This is where you will assign the AI or Player scene by clicking on the drop down arrow on the right side, clicking `quick load` and selecting your scene.
+2. **Batch Size**: This is the informal Batch Size of each generation. The actual batch size of each generation is emitted by the `true_batch_size` signal. This controls the base amount of AIs spawned.
+3. **Generation Delay**: This is the time limit (in seconds) for any generation. Once a generation has lived longer than the amount specified in this, the generation is reset and the next generation comes.
+4. **Input Nodes**: This is where the input nodes for the `nn` will be set. Input Nodes means how many different inputs will the `nn` receive.
+5. **Hidden Nodes**: This is where the hidden nodes for the `nn` will be set. Hidden Nodes means how many nodes will process the data given by the input nodes. You should experiment with this amount.
+6. **Output Nodes**: This is where you will set how many outputs you want to receive by the `nn`.
+7. **Random Population**: This determines how many AIs with random `nn` will be spawned after the first generation (after the 0 generation). It is a good idea to set this to a value greater than 10 as it allows for more possibilities to be explored by the Neural Net.
+8. **Use Reproduction**: This determines whether reproduction will also be used to create new AIs for the next generations. This enables for combination of different traits of different `nn`s. However, you will most probably not need this as Random and Mutated Population will suffice.
+9. **Reproduced Population**: If “Use Reproduction” is checked, this will determine how many AIs will be spawned with reproduced `nn`s. Note: This value must always be greater than half of the value of Batch Size if you have checked “Use Reproduction” as true.
 
-</code></pre>
+### How to use Neural Net
 
-<p>This is because the Neural Net only works when the Neural Network is named as <code>nn</code>.</p>
+Just ensure that all the variables/properties mentioned above are correctly set. The position of this node is where all the AIs will be spawned, meaning, the position of this node = position of AI when spawned.
 
-<ol  start="2">
+### How to use Neural Network
 
-<li>If using Neural Net, make sure you do not assign your Neural Network Variable <code>nn</code> anything. All you are supposed to do is declare it like this:</li>
+```gdscript
+var nn: NeuralNetwork = NeuralNetwork.new(input_nodes, hidden_nodes, output_nodes)
+```
 
-</ol>
+1. **Input Nodes**: This is where the input nodes for the `nn` will be set. Input Nodes means how many different inputs will the `nn` receive.
+2. **Hidden Nodes**: This is where the hidden nodes for the `nn` will be set. Hidden Nodes means how many nodes will process the data given by the input nodes. You should experiment with this amount.
+3. **Output Nodes**: This is where you will set how many outputs you want to receive by the `nn`.
+4. If the Neural Network depends mostly on inputs from raycasts, you can use the `get_prediction_from_raycasts(optional_val: Array = [])`. This function returns an array of floats which are the outputs. The `optional_val` is optional can be used to give more custom inputs in addition to the raycasts. Example:
 
-<pre><code>var nn: NeuralNetwork
+    ```gdscript
+    var output = nn.get_prediction_from_raycasts()
 
-</code></pre>
+    # or
 
-<p>This is because the Neural Net depends on the fact that <code>nn</code> is not assigned anything.</p>
+    var output = nn.get_prediction_from_raycasts([0, 0.4, 2])
+    ```
 
-<ol  start="3">
+5. You can use the `predict(input_array: Array[float])` function also to get predictions. Example:
 
-<li>When your AI or player has to be killed or removed, always use the <code>queue_free()</code> method. This is because the Neural Net relies on the signal emitted by the node when exiting the tree to recieve the fitness and Neural Network of that node. Example:</li>
+    ```gdscript
+    var output = nn.predict([0.0, 6, 0.2])
+    ```
 
-</ol>
+6. If you know the expected output of an input, you can use the `train(input_array: Array, target_array: Array)` function in a loop. Example:
 
-<pre><code>Object.queue_free()
+    ```gdscript
+    for epoch in range(2000):
+        nn.train([0, 1], [1])
+        nn.train([1, 1], [1])
+        nn.train([0, 0], [0])
+        nn.train([1, 1], [0])
+    ```
 
-</code></pre>
+7. If you want to mutate your Neural Network, you can do so by:
 
-<h3  id="what-each-variable-means-and-how-to-use-them">What each variable means and how to use them</h3>
+    ```gdscript
+    nn = NeuralNetwork.mutate(nn)
+    ```
 
-<ol>
+    where `nn` is your Neural Network.
 
-<li>Ai Scene: This is where you will assign the AI or Player scene by clicking on the drop down arrow on the right side, clicking <code>quick load</code> and selecting your scene.</li>
+8. If you want to copy your Neural Network, you can do so by:
 
-<li>Batch Size: This is the informal Batch Size of each generation. The actual batch size of each generation is emitted by the <code>true_batch_size</code> signal. This controls the base amount of AIs spawned.</li>
+    ```gdscript
+    new_nn = NeuralNetwork.copy(nn)
+    ```
 
-<li>Generation Delay: This is the time limit (in seconds) for any generation. Once a generation has lived longer than the amount specified in this, the generation is reset and the next generation comes.</li>
+    where `nn` is your Neural Network and `new_nn` is the new one to which you are copying the `nn` to.
 
-<li>Input Nodes: This is where the input nodes for the <code>nn</code> will be set. Input Nodes means how many different inputs will the <code>nn</code> recieve.</li>
+9. If you want to reproduce your Neural Network with another, you can do so by:
 
-<li>Hidden Nodes: This is where the hidden nodes for the <code>nn</code> will be set. Hidden Nodes means how many nodes will process the data given by the input nodes. You should experiment with this amount.</li>
+    ```gdscript
+    reproduced_nn = NeuralNetwork.reproduce(nn_1, nn_2)
+    ```
 
-<li>Output Nodes: This is where you will set how many outputs you want to recieve by the <code>nn</code>.</li>
+    where `nn_1` and `nn_2` are the parent Neural Networks.
 
-<li>Random Population: This determines how many AIs with random <code>nn</code> will be spawned after the first generation (after the 0 generation). It is a good idea to set this to a value greater than 10 as it allows for more possibilites to be explored by the Neural Net.</li>
+## Neural Network Advanced
 
-<li>Use Reproduction: This determines whether reproduction will also be used to create new AIs for the next generations. This enables for combination of different traits of different <code>nn</code>s. However, you will most probably not need this as Random and Mutated Population will suffice.</li>
+**Note:** Support for this in the Neural Net has not been implemented yet.
 
-<li>Reproduced Population: If “Use Reproduction” is checked, this will determine how many AIs will be spawned with reproduced <code>nn</code>s. Note: This value must always be greater than half of the value of Batch Size if you have checked “Use Reproduction” as true.</li>
+### How to use NeuralNetworkAdvanced class
 
-</ol>
+1. Initialising the NNA variable
 
-<h3  id="how-to-use-neural-net">How to use Neural Net</h3>
+    ```gdscript
+    var nnas: NeuralNetworkAdvanced = NeuralNetworkAdvanced.new()
+    ```
 
-<p>Just ensure that all the variables/properties mentioned above are correctly set. The position of this node is where all the AIs will be spawned, meaning, the position of this node = position of AI when spawned.</p>
+2. Add the first layer to the network. Here you should only specify the number of nodes needed in this layer.
 
-<h3  id="how-to-use-neural-network">How to use Neural Network</h3>
+    ```gdscript
+    nnas.add_layer(2)
+    ```
 
-<pre><code>var nn: NeuralNetwork = NeuralNetwork.new(input_nodes, hidden_nodes, output_nodes)
+3. Add the remaining layers to the network. Here you can also specify which activation function to use. Eg:
 
-</code></pre>
+    ```gdscript
+    nnas.add_layer(4, Activation.ARCTAN)
+    nnas.add_layer(6, Activation.ARCTAN)
+    nnas.add_layer(1, Activation.SIGMOID)
+    ```
 
-<ol>
+	Currently available activation functions are listed in this file: [Activation.gd](https://github.com/ryash072007/Godot-AI-Kit/blob/main/addons/ai_algorithms/Scripts/Neural/Activation.gd)
 
-<li>
 
-<p>Input Nodes: This is where the input nodes for the <code>nn</code> will be set. Input Nodes means how many different inputs will the <code>nn</code> recieve.</p>
+4. To train the network, you can call the `train()` function on the NNA. The first argument has to be the **input array of size same as that of the first layer** and the **second argument has to be the output array of size same as the last layer of the network.**  
+    Note: This only runs a single train call. You need to do a lot of these to train your NNA to be accurate. Eg: Training for an XOR Gate. In the demo, you can see that this code is placed in the `_physics_process` function so that it is ran many times a second.
 
-</li>
+    ```gdscript
+    nnas.train([0,0], [0])
+    nnas.train([1,0], [1])
+    nnas.train([0,1], [1])
+    nnas.train([1,1], [0])
+    ```
 
-<li>
+5. To get a prediction/output from the NNA. You have to call the `predict` function on the NNA. The first and only argument has to be input array for the network. It will return an array of the same size as that of the last/output layer. Eg:
 
-<p>Hidden Nodes: This is where the hidden nodes for the <code>nn</code> will be set. Hidden Nodes means how many nodes will process the data given by the input nodes. You should experiment with this amount.</p>
+    ```gdscript
+    print(nnas.predict([1,0]))
+    ```
 
-</li>
+    will return `[1]` when trained.
 
-<li>
 
-<p>Output Nodes: This is where you will set how many outputs you want to recieve by the <code>nn</code>.</p>
 
-</li>
+### Configurable parameters in NeuralNetworkAdvanced
 
-<li>
+1. Learning Rate: Default value is `0.001`
+	```gdscript
+	nnas.learning_rate = 0.001 # Or any other float
+	```
 
-<p>If the Neural Network depends mostly on inputs from raycasts, you can use the “get_prediction_from_raycasts(optional_val: Array = [])”. This function returns an array of floats which are the outputs. The “optional_val” is optional can be used to give more custom inputs in addition to the raycasts. Example:</p>
+2. Backward Propagation Optimiser Method: Currently available methods are SGD (Scholastic Gradient Descent) [<- DEFAULT] and ADAM (Adaptive Moment Estimation). Has to be given as the argument during NeuralNetworkAdvanced.new() call.
+	```gdscript
+	var nnas := NeuralNetworkAdvanced.new(NeuralNetworkAdvanced.methods.SGD)
+	--or--
+	var nnas := NeuralNetworkAdvanced.new(NeuralNetworkAdvanced.methods.ADAM)
+	```
 
-</li>
+3. Clip Value: Only if optimiser method is chosen as SGD. Default value is `INF`.
+	```gdscript
+	nnas.clip_value = 10.0 # Or any other value you want to normalise/clip the gradients to
+	```
 
-</ol>
+4. Use AmsGrad: Only if optimiser method is chosen as ADAM. Set to true if you want more stable training. Default value is `false`.
+	```gdscript
+	nnas.use_amsgrad = true
+	```
 
-<pre><code>var output = nn.get_prediction_from_raycasts()
+### Additional Methods in NeuralNetworkAdvanced
 
-# or
+1. **copy(all: bool = false)**: Creates a deep copy of the neural network. If `all` is true, copies all properties; if false, copies only essential properties.
+    ```gdscript
+    var copied_nna: NeuralNetworkAdvanced = nnas.copy()
+    ```
 
-var output = nn.get_prediction_from_raycasts([0, 0.4, 2])
+2. **to_dict()**: Serializes the neural network to a dictionary. Used for saving the network state.
+    ```gdscript
+    var data: Dictionary = nnas.to_dict()
+    ```
 
-</code></pre>
+3. **from_dict(dict: Dictionary)**: Deserializes the neural network from a dictionary. Used for loading the network state.
+    ```gdscript
+    nnas.from_dict(dict)
+    ```
 
-<ol  start="8">
+4. **save(file_path: String)**: Saves the neural network state to a file.
+    ```gdscript
+    nnas.save("res://path/to/save/file.json")
+    ```
 
-<li>You can use the <code>predict(input_array: Array[float])</code> function also to get predictions. Example:</li>
+### Note
 
-</ol>
+1. Addition of layers should only happen once and so `_ready()` is an appropriate place to put them.
+2. For more detailed ADAM hyperparameters, check [Neural_Network_Advanced.gd](https://github.com/ryash072007/Godot-AI-Kit/blob/main/addons/ai_algorithms/Scripts/Neural/Neural_Network_Advanced.gd)
 
-<pre><code>var output = nn.predict([0.0, 6, 0.2])
 
-</code></pre>
 
-<ol  start="9">
 
-<li>If you know the expected output of an input, you can use the <code>train(input_array: Array, target_array: Array)</code> function in a loop. Example:</li>
+## Q-Learning Algorithm
 
-</ol>
+This algorithm implements Q-Learning algorithm using Q-Table natively in Godot.
 
-<pre><code>for epoch in range(2000):
+### How to use QLearning class
 
-nn.train([0, 1], [1])
+1. Initialise a QLearning variable
 
-nn.train([1, 1], [1])
+    ```gdscript
+    var qnet: QLearning = QLearning.new(observation_space, action_space, is_learning, not_sarsa)
+    ```
 
-nn.train([0, 0], [0])
+    Both the `observation_space` and `action_space` have to be natural numbers representing the possible states the agent can be in and the possible actions choices the agent can take in any given state. `is_learning` is a boolean value of whether the agent should be learning or not, and `not_sarsa` set to `true` will disable sarsa (on-policy). I would recommend sarsa if you want a safer route to the final path.
 
-nn.train([1, 1], [0])
+2. Get a prediction from the QLearning variable:
 
-</code></pre>
+    ```gdscript
+    qnet.predict(current_state, reward_of_previous_state)
+    ```
 
-<ol  start="10">
+    The above method returns an whole number that lies between `0` and `action_space - 1`. The value returned corresponds to an action the agent can take.  
+    You can assign the returned value to variable by:
 
-<li>If you want to mutate your Neural Network, you can do so by:</li>
+    ```gdscript
+    var action_to_do: int = qnet.predict(current_state, previous_reward)
+    ```
 
-</ol>
+### Configurable Values
 
-<pre><code>nn = NeuralNetwork.mutate(nn)
+1. `qnet.exploration_probability` -> has to be a float value  
+    **Default Value: `1.0`**  
+    The probability that the agent will take a random action or exploit the data it has learned.  
+    Do not change unless you know what you are doing.
 
-</code></pre>
+2. `qnet.exploration_decreasing_decay` -> has to be a float value  
+    **Default Value: `0.01`**  
+    Changes how the value by which the `qnet.exploration_probability` decreases every `qnet.decay_per_steps` steps.
 
-<p>where <code>nn</code> is your Neural Network.<br>
+3. `qnet.min_exploration_probability` -> has to be a float value  
+    **Default Value: `0.01`**  
+    The minimum value the `exploration_probability` can take.
 
-11. If you want to mutate your Neural Network, you can do so by:</p>
+4. `qnet.learning_rate` -> has to be a float  
+    **Default Value: `0.2`**  
+    The rate at which the agent learns.
 
-<pre><code>new_nn = NeuralNetwork.copy(nn)
+5. `qnet.decay_per_steps` -> has to be natural number  
+    **Default Value: `100`**  
+    After how many steps does the `qnet.exploration_probability` decrease by `qnet.exploration_decreasing_decay` value.
 
-</code></pre>
+6. `qnet.is_learning` -> has to be a bool value  
+    **Default Value: `true`**  
+    To be set to false only when the `qnet.QTable.data` is set manually.
 
-<p>where <code>nn</code> is your Neural Network and <code>new_nn</code> is the new one to which you are copying the <code>nn</code> to.<br>
+7. `print_debug_info` -> has to be a bool value  
+    **Default Value: `false`**  
+    This can be set to `true` if you want to print debug info - total steps completed and current exploration probability - every `qnet.decay_per_steps`.
 
-12. IF you want to reproduce your Neural Network with another, you can do so by:</p>
+### Things to keep in mind when using QLearning
 
-<pre><code>reproduced_nn = NeuralNetwork.reproduce(nn_1, nn_2)
+1. The predict method of the QLearning class takes two compulsory arguments:
 
-</code></pre>
+    ```gdscript
+    qnet.predict(current_state, previous_state_reward)
+    ```
 
-<p>where <code>nn_1</code> and <code>nn_2</code> are the parent Neural Networks.</p>
+    The `current_state` has to be a whole number representing the state it is currently in, while the `previous_state_reward` has to a float representing the reward it got for the previous action it took.
 
-<h2 id="NNA">Neural Network Advanced </h2>
-<p> <b>Note:</b> Support for this in the Neural Net has not been implemented yet.</p>
-<h3> How to use NeuralNetworkAdvanced class</h3>
-<ol>
-<li> Initialising the NNA variable
+## Minimax Algorithm
 
-	var nnas: NeuralNetworkAdvanced = NeuralNetworkAdvanced.new()
-</li>
-<li>Add the first layer to the network. Here you should only specify the number of nodes needed in this layer.
+Alpha-Beta Pruning has been implemented!  
+If the AI is playing the role of the adversary, then set `minimax.is_adversary` to `true` else `false`.
 
-	nnas.add_layer(2)
-  </li>
-<li> Add the remaining layers to the network. Here you can also specify which activation function to use. Eg:
+### How to use Minimax class
 
-	nnas.add_layer(4, nnas.ACTIVATIONS.ARCTAN)
-	nnas.add_layer(6, nnas.ACTIVATIONS.ARCTAN)
-	nnas.add_layer(1, nnas.ACTIVATIONS.SIGMOID)
-</li>
-<li> To train the network, you can call the <code>train()</code> function on the NNA. The first argument has to be the <b>input array of size same as that of the first layer</b> and the <b>second argument has to be the output array of size same as the last layer of the network.</b>
-Note: This only runs a single train call. You need to do a lot of these to train your NNA to be accurate. Eg: Training for an XOR Gate. In the demo, you can see that this code is placed in the <code>_physics_process</code> function so that it is ran many times a second.
+1. Initialise the Minimax class with 4 arguments:
 
-	nnas.train([0,0], [0])
-	nnas.train([1,0], [1])
-	nnas.train([0,1], [1])
-	nnas.train([1,1], [0])
-</li>
-<li> To get a prediction/output from the NNA. You have to call the <code>predict</code> function on the NNA. The first and only argument has to be input  array for the network. It will return an array of the same size as that of the last/output layer. Eg:
+    ```gdscript
+    var minimax: Minimax = Minimax.new(Callable(result), Callable(terminal), Callable(utility), Callable(possible_actions))
+    ```
 
-	print(nnas.predict([1,0]))
-will return <code>[1]</code> when trained.
-</ol>
-<h3>Note</h3>
-<ol>
-<li>
-Addition of layers should only happen once and so <code>_ready()</code> is an appropriate place to put them.
-</li>
-<li>
-All the possible activations functions can be seen here: [NeuralNetworkAdvanced.gd](https://github.com/ryash072007/Godot-AI-Kit/blob/main/addons/ai_algorithms/Scripts/Neural/Neural_Network_Advanced.gd) under the <code>ACTIVATION</code> dictionary.
-</li>
-</ol>
-<h2  id="q-learning-algorithm">Q-Learning Algorithm</h2>
+    1. `result_func: Callable`: This callable argument must link to the function in your code that returns the state of the environment after a particular action is performed.
+    2. `terminal_func: Callable`: This callable argument must link to the function in your code that returns `true` if the game is over and `false` if the game can continue for a given state.
+    3. `utility_func: Callable`: This callable argument must link to the function in your code that returns the value of the given state. Currently this function only runs when the game is a terminal state. Losing states should have lesser value than winning states.
+    4. `possible_actions_func: Callable`: This callable argument must link to the function in your code that returns all the possible actions for a given state.
 
-<p>This algorithm implements Q-Learning algorithm using Q-Table natively in Godot.</p>
+2. Every time the AI needs to perform an action, call the `action(state)` on the minimax variable.
 
-<h3  id="how-to-use-qlearning-class">How to use QLearning class</h3>
+    ```gdscript
+    var action_to_do: Array = minimax.action(_board)
+    ```
 
-<ol>
+### Structure of the 4 arguments specified above
 
-<li>
-
-<p>Initialise a QLearning variable</p>
-
-<pre><code>var qnet: QLearning = QLearning.new(observation_space, action_space, is_learning, not_sarsa)
-
-</code></pre>
-
-<p>Both the <code>observation_space</code> and <code>action_space</code> have to be natural numbers representing the possible states the agent can be in and the possible actions choices the agent can take in any given state. <code>is_learning</code> is a boolean value of whether the agent should be learning or not, and <code>not_sarsa</code> set to <code>true</code> will disable sarsa (on-policy). I would recommend sarsa if you want a safer route to the final path.</p>
-
-</li>
-
-<li>
-
-<p>Get a prediction from the QLearning variable:</p>
-
-<pre><code>qnet.predict(current_state, reward_of_previous_state)
-
-</code></pre>
-
-<p>The above method returns an whole number that lies between <code>0</code> and <code>action_space - 1</code>. The value returned corresponds to an action the agent can take.<br>
-
-You can assign the returned value to variable by:</p>
-
-<pre><code>var action_to_do: int = qnet.predict(current_state, previous_reward)
-
-</code></pre>
-
-</li>
-
-</ol>
-
-<h3  id="configurable-values">Configurable Values</h3>
-
-<ol>
-
-<li>
-
-<p><code>qnet.exploration_probability</code> -&gt; has to be a float value<br>
-
-<mark>Default Value: <code>1.0</code></mark><br>
-
-The probability that the agent will take a random action or exploit the data it has learned.<br>
-
-Do not change unless you know what you are doing.</p>
-
-</li>
-
-<li>
-
-<p><code>qnet.exploration_decreasing_decay</code> -&gt; has to be a float value<br>
-
-<mark>Default Value: <code>0.01</code></mark><br>
-
-Changes how the value by which the <code>qnet.exploration_probability</code> decreases every ```qnet.decay_per_steps`` steps.</p>
-
-</li>
-
-<li>
-
-<p><code>qnet.min_exploration_probability</code> -&gt; has to be a float value<br>
-
-<mark>Default Value: <code>0.01</code></mark><br>
-
-The minimum value the <code>exploration_probability</code> can take.</p>
-
-</li>
-
-<li>
-
-<p><code>qnet.learning_rate</code> -&gt; has to be a float<br>
-
-<mark>Default Value:<code>0.2</code></mark><br>
-
-The rate at which the agent learns.</p>
-
-</li>
-
-<li>
-
-<p><code>qnet.decay_per_steps</code> -&gt; has to be natural number<br>
-
-<mark>Default Value: <code>100</code></mark><br>
-
-After how many steps does the <code>qnet.exploration_probability</code> decrease by <code>qnet.exploration_decreasing_decay</code> value.</p>
-
-</li>
-
-<li>
-
-<p><code>qnet.is_learning</code> -&gt; has to be a bool value<br>
-
-<mark>Default Value: <code>true</code></mark><br>
-
-To be set to false only when the <code>qnet.QTable.data</code> is set manually.</p>
-
-</li>
-
-<li>
-
-<p><code>print_debug_info</code> -&gt; has to be a bool value<br>
-
-<mark>Default Value: <code>false</code></mark><br>
-
-This can be set to <code>true</code> if you want to print debug info - total steps completed and current exploration probability - every <code>qnet.decay_per_steps</code>.</p>
-
-</li>
-
-</ol>
-
-<h3  id="things-to-keep-in-mind-when-using-qlearning">Things to keep in mind when using QLearning</h3>
-
-<ol>
-
-<li>The predict method of the QLearning class takes two compulsory arguments:<pre><code>qnet.predict(current_state, previous_state_reward)
-
-</code></pre>
-
-The <code>current_state</code> has to be a whole number representing the state it is currently in, while the <code>previous_state_reward</code> has to a float representing the reward it got for the previous action it took.</li>
-
-</ol>
-<h2  id="minimax-algorithm">Minimax Algorithm</h2>
-Alpha-Beta Pruning has been implemented!
-<br>
-If the AI is playing the role of the adversary, then set <code>minimax.is_adversary</code> to <code>true</code> else <code> false</code>.
-<h3  id="how-to-use-minimax-class">How to use Minimax class</h3>
-<ol>
-<li> Initialise the Minimax class with 4 arguments:
-<br>
-<code>var  minimax: Minimax  =  Minimax.new(Callable(result),
-Callable(terminal),
-Callable(utility),
-Callable(possible_actions))
-</code>
-<ol>
-<li><code>result_func: Callable</code>: This callable argument must link to the function in your code that returns the state of the environment after a particular action is performed.
-</li>
-<li> <code>terminal_func: Callable</code>: This callable argument must link to the function in your code that returns <code>true</code> if the game is over and <code>false</code> if the game can continue for a given state.
-</li>
-<li><code>utility_func: Callable</code>: This callable argument must link to the function in your code that returns the value of the given state. Currently this function only runs when the game is a terminal state. Losing states should have lesser value than winning states.
-</li>
-<li><code>possible_actions_func: Callable</code>: This callable argument must link to the function in your code that returns all the possible actions for a given state.
-</li>
-</li>
-<li> Every time the AI needs to perform an action, call the <code>action(state)</code> on the minimax variable.<br>
-<code>var  action_to_do: Array  =  minimax.action(_board)</code>
-</li>
-</ol>
-<h3  id="structure-arguments-minimax">Structure of the 4 arguments specified above</h3>
 These functions have to be implemented by the user themselves as it is dependent on the game.
-<ol>
-<li>
-<code>func  result(state: Array, action: Array, is_adversary: bool) ->  Array:</code><br>
-Should return the resultant state from performing the action.
-</li>
-<li>
-<code>func  terminal(state: Array) ->  bool:</code><br>
-Should return <code>true</code> if the no further action can take place, otherwise, it should return <code>false</code>.
-</li>
-<li><code>func  utility(state: Array, is_adversary: bool) ->  float:</code><br>
-Should return the value of the given state. Usually positive for states in which the AI wins and negative for states in which the AI lose.
-</li>
-<li>
-<code>func  possible_actions(state: Array) ->  Array[Array]:</code><br>
-Should return all the possible actions that can happen in the given state. Each action is an array item inside the array that is being returned.
-</li>
-</ol>
+
+1. `func result(state: Array, action: Array, is_adversary: bool) -> Array:`  
+    Should return the resultant state from performing the action.
+
+2. `func terminal(state: Array) -> bool:`  
+    Should return `true` if the no further action can take place, otherwise, it should return `false`.
+
+3. `func utility(state: Array, is_adversary: bool) -> float:`  
+    Should return the value of the given state. Usually positive for states in which the AI wins and negative for states in which the AI lose.
+
+4. `func possible_actions(state: Array) -> Array[Array]:`  
+    Should return all the possible actions that can happen in the given state. Each action is an array item inside the array that is being returned.
+
 Look into the tictactoe demo to gain a better understanding.
+
+## SDQN (Simple Deep Q-Network)
+
+This class implements a Simple Deep Q-Network (SDQN) for reinforcement learning in Godot using the NeuralNetworkAdvanced class.
+
+### How to use SDQN class
+
+1. Initialise the SDQN class with state and action space dimensions:
+
+    ```gdscript
+    var sdqn: SDQN = SDQN.new(state_space, action_space, learning_rate)
+    ```
+
+2. Set the Q-network for the SDQN:
+
+    ```gdscript
+    var neural_network: NeuralNetworkAdvanced = NeuralNetworkAdvanced.new()
+    --code to change neural network properties--
+	sdqn.set_Q_network(neural_network)
+    ```
+
+3. Choose an action based on the current state using epsilon-greedy policy:
+
+    ```gdscript
+    var action: int = sdqn.choose_action(state)
+    ```
+
+4. Add a new experience to the replay memory and train the network:
+
+    ```gdscript
+    sdqn.add_memory(state, action, reward, next_state, done)
+    ```
+
+5. Save the SDQN model to a file:
+
+    ```gdscript
+    sdqn.save("res://path/to/save/file.json")
+    ```
+
+6. Load the SDQN model from a file:
+
+    ```gdscript
+    sdqn.load("res://path/to/save/file.json")
+    ```
+
+### Configurable Parameters in SDQN
+
+1. **Discount Factor**: Default value is `0.95`
+    ```gdscript
+    sdqn.discount_factor = 0.95  # Or any other float
+    ```
+
+2. **Exploration Probability**: Default value is `1`
+    ```gdscript
+    sdqn.exploration_probability = 1  # Or any other float
+    ```
+
+3. **Minimum Exploration Probability**: Default value is `0.01`
+    ```gdscript
+    sdqn.min_exploration_probability = 0.01  # Or any other float
+    ```
+
+4. **Exploration Decay**: Default value is `0.999`
+    ```gdscript
+    sdqn.exploration_decay = 0.999  # Or any other float
+    ```
+
+5. **Batch Size**: Default value is `196`
+    ```gdscript
+    sdqn.batch_size = 196  # Or any other integer
+    ```
+
+    Batch size is the number of elements taken from memory to train on after `max_steps` steps have been done. Each call to `add_memory` is considered one step.
+
+6. **Max Steps**: Default value is `128`
+    ```gdscript
+    sdqn.max_steps = 128  # Or any other integer
+    ```
+
+7. **Target Update Frequency**: Default value is `1024`
+    ```gdscript
+    sdqn.target_update_frequency = 1024  # Or any other integer
+    ```
+
+    Target update frequency is the number of steps after which the target network is replaced with the current network.
+
+8. **Max Memory Size**: Default value is `60 * 60 * 4`
+    ```gdscript
+    sdqn.max_memory_size = 60 * 60 * 4  # Or any other integer
+    ```
+
+9. **Automatic Decay**: Default value is `false`
+    ```gdscript
+    sdqn.automatic_decay = false  # Or true
+    ```
+
+    If `automatic_decay` is enabled, the current exploration probability and learning rate (if decaying) are multiplied with their respective decay values after `max_steps` steps.
+
+10. **Learning Rate Decay Rate**: Default value is `1`
+    ```gdscript
+    sdqn.lr_decay_rate = 1  # Or any other float
+    ```
+
+11. **Final Learning Rate**: Default value is `0.0001`
+    ```gdscript
+    sdqn.final_learning_rate = 0.0001  # Or any other float
+    ```
+
+12. **Use Multi-Threading**: Default value is `false`. Currently not working 100% of the time.
+    ```gdscript
+    sdqn.use_multi_threading = false  # Or true
+    ```
+
+
+### Methods in SDQN
+
+1. **use_threading()**: Enables multi-threading for training.
+    ```gdscript
+    sdqn.use_threading()
+    ```
+
+2. **set_Q_network(neural_network: NeuralNetworkAdvanced)**: Sets the Q-network for the SDQN.
+    ```gdscript
+    sdqn.set_Q_network(neural_network)
+    ```
+
+3. **set_clip_value(clip_value: float)**: Sets the clip value for the Q-network.
+    ```gdscript
+    sdqn.set_clip_value(clip_value)
+    ```
+
+4. **set_lr_value(lr: float)**: Sets the learning rate for the Q-network.
+    ```gdscript
+    sdqn.set_lr_value(lr)
+    ```
+
+5. **update_lr_linearly()**: Updates the learning rate linearly.
+    ```gdscript
+    sdqn.update_lr_linearly()
+    ```
+
+6. **choose_action(state: Array)**: Chooses an action based on the current state using epsilon-greedy policy.
+    ```gdscript
+    var action: int = sdqn.choose_action(state)
+    ```
+
+7. **add_memory(state: Array, action: int, reward: float, next_state: Array, done: bool)**: Adds a new experience to the replay memory.
+    ```gdscript
+    sdqn.add_memory(state, action, reward, next_state, done)
+    ```
+
+8. **close_threading()**: Closes the multi-threading.
+    ```gdscript
+    sdqn.close_threading()
+    ```
+
+9. **copy()**: Copies the SDQN instance.
+    ```gdscript
+    var copied_sdqn: SDQN = sdqn.copy()
+    ```
+
+10. **to_dict()**: Converts the SDQN instance to a dictionary.
+    ```gdscript
+    var data: Dictionary = sdqn.to_dict()
+    ```
+
+11. **from_dict(dict: Dictionary)**: Loads the SDQN instance from a dictionary.
+    ```gdscript
+    sdqn.from_dict(dict)
+    ```
+
+12. **save(file_path: String)**: Saves the SDQN instance to a file.
+    ```gdscript
+    sdqn.save("res://path/to/save/file.json")
+    ```
+
+13. **load(file_path: String)**: Loads the SDQN instance from a file.
+    ```gdscript
+    sdqn.load("res://path/to/save/file.json")
+    ```
+
+### Note
+
+1. To change the clip value, learning rate, and Q-network, the respective functions (`set_clip_value`, `set_lr_value`, `set_Q_network`) must be called instead of directly setting the variable.
+2. To learn more, check out the SDQN Demo available in the Demos folder.
