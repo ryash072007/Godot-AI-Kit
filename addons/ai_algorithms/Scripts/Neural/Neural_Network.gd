@@ -1,3 +1,4 @@
+# Creation of Greaby (https://github.com/Greaby/godot-neuroevolution/blob/main/lib/neural_network.gd) from here till line 160
 class_name NeuralNetwork
 
 # Network architecture parameters
@@ -117,6 +118,47 @@ func train(input_array: Array, target_array: Array):
 
 	bias_hidden = Matrix.add(bias_hidden, hidden_gradient)
 
+
+# Genetic algorithm functions
+# Combine two neural networks to create offspring
+static func reproduce(a: NeuralNetwork, b: NeuralNetwork) -> NeuralNetwork:
+	var result = NeuralNetwork.new(a.input_nodes, a.hidden_nodes, a.output_nodes)
+	result.weights_input_hidden = Matrix.random(a.weights_input_hidden, b.weights_input_hidden)
+	result.weights_hidden_output = Matrix.random(a.weights_hidden_output, b.weights_hidden_output)
+	result.bias_hidden = Matrix.random(a.bias_hidden, b.bias_hidden)
+	result.bias_output = Matrix.random(a.bias_output, b.bias_output)
+
+	return result
+
+# Apply random mutations to network weights
+static func mutate(nn: NeuralNetwork, callback: Callable = NeuralNetwork.mutate_callable_reproduced) -> NeuralNetwork:
+	var result = NeuralNetwork.new(nn.input_nodes, nn.hidden_nodes, nn.output_nodes)
+	result.weights_input_hidden = Matrix.map(nn.weights_input_hidden, callback)
+	result.weights_hidden_output = Matrix.map(nn.weights_hidden_output, callback)
+	result.bias_hidden = Matrix.map(nn.bias_hidden, callback)
+	result.bias_output = Matrix.map(nn.bias_output, callback)
+	return result
+
+# Mutation function with small changes
+static func mutate_callable_reproduced(value, _row, _col):
+	randomize()
+	value += randf_range(-0.15, 0.15)
+	return value
+
+# Create exact copy of neural network
+static func copy(nn: NeuralNetwork) -> NeuralNetwork:
+	var result = NeuralNetwork.new(nn.input_nodes, nn.hidden_nodes, nn.output_nodes)
+	result.weights_input_hidden = Matrix.copy(nn.weights_input_hidden)
+	result.weights_hidden_output = Matrix.copy(nn.weights_hidden_output)
+	result.bias_hidden = Matrix.copy(nn.bias_hidden)
+	result.bias_output = Matrix.copy(nn.bias_output)
+	result.color = nn.color
+	result.fitness = nn.fitness
+	return result
+
+
+# Creation of ryash072007 from here onwards
+
 # Get sensor inputs from raycasts
 func get_inputs_from_raycasts() -> Array:
 	assert(raycasts.size() != 0, "Can not get inputs from RayCasts that are not set!")
@@ -147,48 +189,3 @@ func get_distance(_raycast: RayCast2D):
 	else:
 		distance = sqrt((pow(_raycast.target_position.x, 2) + pow(_raycast.target_position.y, 2)))
 	return distance
-
-# Genetic algorithm functions
-# Combine two neural networks to create offspring
-static func reproduce(a: NeuralNetwork, b: NeuralNetwork) -> NeuralNetwork:
-	var result = NeuralNetwork.new(a.input_nodes, a.hidden_nodes, a.output_nodes)
-	result.weights_input_hidden = Matrix.random(a.weights_input_hidden, b.weights_input_hidden)
-	result.weights_hidden_output = Matrix.random(a.weights_hidden_output, b.weights_hidden_output)
-	result.bias_hidden = Matrix.random(a.bias_hidden, b.bias_hidden)
-	result.bias_output = Matrix.random(a.bias_output, b.bias_output)
-
-	return result
-
-# Apply random mutations to network weights
-static func mutate(nn: NeuralNetwork, callback: Callable = NeuralNetwork.mutate_callable_reproduced) -> NeuralNetwork:
-	var result = NeuralNetwork.new(nn.input_nodes, nn.hidden_nodes, nn.output_nodes)
-	result.weights_input_hidden = Matrix.map(nn.weights_input_hidden, callback)
-	result.weights_hidden_output = Matrix.map(nn.weights_hidden_output, callback)
-	result.bias_hidden = Matrix.map(nn.bias_hidden, callback)
-	result.bias_output = Matrix.map(nn.bias_output, callback)
-	return result
-
-# Mutation function with small changes
-static func mutate_callable_reproduced(value, _row, _col):
-	seed(randi())
-	randomize()
-	value += randf_range(-0.15, 0.15)
-	return value
-
-# Create exact copy of neural network
-static func copy(nn: NeuralNetwork) -> NeuralNetwork:
-	var result = NeuralNetwork.new(nn.input_nodes, nn.hidden_nodes, nn.output_nodes)
-	result.weights_input_hidden = Matrix.copy(nn.weights_input_hidden)
-	result.weights_hidden_output = Matrix.copy(nn.weights_hidden_output)
-	result.bias_hidden = Matrix.copy(nn.bias_hidden)
-	result.bias_output = Matrix.copy(nn.bias_output)
-	result.color = nn.color
-	result.fitness = nn.fitness
-	return result
-
-# Mutation function with larger changes
-static func mutate_callable(value, _row, _col):
-	seed(randi())
-	randomize()
-	value += randf_range(-0.5, 0.5)
-	return value

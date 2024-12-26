@@ -1,3 +1,4 @@
+# Creation of Greaby (https://github.com/Greaby/godot-neuroevolution/blob/main/lib/matrix.gd) from here till line 124
 class_name Matrix
 
 var rows: int
@@ -10,7 +11,7 @@ func _init(_rows: int, _cols: int, value: float = 0.0) -> void:
 	rows = _rows
 	cols = _cols
 	for row in range(rows):
-		data.insert(row , [])
+		data.insert(row, [])
 		for col in range(cols):
 			data[row].insert(col, value)
 
@@ -34,6 +35,157 @@ static func rand(matrix: Matrix) -> Matrix:
 		for col in range(result.cols):
 			result.data[row][col] = randf_range(-0.15, 0.15)
 	return result
+
+
+static func add(a: Matrix, b: Matrix) -> Matrix:
+	assert(a.rows == b.rows and a.cols == b.cols)
+
+	var result = Matrix.new(a.rows, a.cols)
+
+	for row in range(result.rows):
+		for col in range(result.cols):
+			result.data[row][col] = a.data[row][col] + b.data[row][col]
+
+	return result
+
+static func subtract(a: Matrix, b: Matrix) -> Matrix:
+	assert(a.rows == b.rows and a.cols == b.cols)
+
+	var result = Matrix.new(a.rows, a.cols)
+
+	for row in range(result.rows):
+		for col in range(result.cols):
+			result.data[row][col] = a.data[row][col] - b.data[row][col]
+
+	return result
+
+static func scalar(matrix: Matrix, value: float) -> Matrix:
+	var result = Matrix.new(matrix.rows, matrix.cols)
+
+	for row in range(result.rows):
+		for col in range(result.cols):
+			result.data[row][col] = matrix.data[row][col] * value
+
+	return result
+
+
+static func dot_product(a: Matrix, b: Matrix) -> Matrix:
+	assert(a.cols == b.rows)
+
+	var result = Matrix.new(a.rows, b.cols)
+
+	for row in range(result.rows):
+		for col in range(result.cols):
+			result.data[row][col] = 0.0
+			for k in range(a.cols):
+				result.data[row][col] += a.data[row][k] * b.data[k][col]
+
+	return result
+
+
+static func multiply(a: Matrix, b: Matrix) -> Matrix:
+	assert(a.rows == b.rows and a.cols == b.cols)
+
+	var result = Matrix.new(a.rows, a.cols)
+
+	for row in range(result.rows):
+		for col in range(result.cols):
+			result.data[row][col] = a.data[row][col] * b.data[row][col]
+
+	return result
+
+static func copy(matrix: Matrix) -> Matrix:
+	var result = Matrix.new(matrix.rows, matrix.cols)
+	for row in range(result.rows):
+		for col in range(result.cols):
+			result.data[row][col] = matrix.data[row][col]
+	return result
+
+
+static func transpose(matrix: Matrix) -> Matrix:
+	var result = Matrix.new(matrix.cols, matrix.rows)
+
+	for row in range(result.rows):
+		for col in range(result.cols):
+			result.data[row][col] = matrix.data[col][row]
+
+	return result
+
+static func map(matrix: Matrix, callback: Callable) -> Matrix:
+	var result = Matrix.new(matrix.rows, matrix.cols)
+
+	for row in range(result.rows):
+		for col in range(result.cols):
+			result.data[row][col] = callback.call(matrix.data[row][col], row, col)
+
+	return result
+
+
+# Sole creation of ryash072007 from here onwards
+
+static func clamp_matrix(matrix: Matrix, lower_clamp: float, upper_clamp: float) -> Matrix:
+	var result = Matrix.new(matrix.rows, matrix.cols)
+
+	for row in range(result.rows):
+		for col in range(result.cols):
+			result.data[row][col] = clampf(result.data[row][col], lower_clamp, upper_clamp)
+
+	return result
+
+static func random(a: Matrix, b: Matrix) -> Matrix:
+	var result = Matrix.new(a.rows, a.cols)
+	for row in range(result.rows):
+		for col in range(result.cols):
+			randomize()
+			var _random = randf_range(0, 1)
+			result.data[row][col] = a.data[row][col] if _random > 0.5 else b.data[row][col]
+
+	return result
+
+
+static func average(matrix: Matrix) -> float:
+	var average_value: float = 0.0
+	for row in range(matrix.rows):
+		for col in range(matrix.cols):
+			average_value += matrix.data[row][col]
+	average_value = average_value / matrix.rows * matrix.cols
+	return average_value
+
+func index_of_max_from_row(_row: int) -> int:
+	return data[_row].find(data[_row].max())
+
+func max_from_row(_row: int) -> float:
+	return data[_row].max()
+
+static func max_matrix(a: Matrix, b: Matrix) -> Matrix:
+	assert(a.rows == b.rows and a.cols == b.cols)
+
+	var result: Matrix = Matrix.new(a.rows, b.cols)
+	for row in range(result.rows):
+		for col in range(result.cols):
+			result.data[row][col] = max(a.data[row][col], b.data[row][col])
+
+	return result
+
+static func min_matrix(a: Matrix, b: Matrix) -> Matrix:
+	assert(a.rows == b.rows and a.cols == b.cols)
+
+	var result: Matrix = Matrix.new(a.rows, b.cols)
+	for row in range(result.rows):
+		for col in range(result.cols):
+			result.data[row][col] = min(a.data[row][col], b.data[row][col])
+
+	return result
+
+static func norm(matrix: Matrix) -> float:
+	var sum_of_squares: float = 0.0
+
+	for row in range(matrix.rows):
+		for col in range(matrix.cols):
+			sum_of_squares += pow(matrix.data[row][col], 2)
+
+	return sqrt(sum_of_squares)
+
 
 static func square(matrix: Matrix) -> Matrix:
 	var result: Matrix = Matrix.new(matrix.rows, matrix.cols)
@@ -79,55 +231,12 @@ static func uniform_glorot_init(matrix: Matrix, input_nodes: int, output_nodes: 
 
 	return result
 
-static func add(a: Matrix, b: Matrix) -> Matrix:
-	assert(a.rows == b.rows and a.cols == b.cols)
-
-	var result = Matrix.new(a.rows, a.cols)
-
-	for row in range(result.rows):
-		for col in range(result.cols):
-			result.data[row][col] = a.data[row][col] + b.data[row][col]
-
-	return result
-
-static func subtract(a: Matrix, b: Matrix) -> Matrix:
-	assert(a.rows == b.rows and a.cols == b.cols)
-
-	var result = Matrix.new(a.rows, a.cols)
-
-	for row in range(result.rows):
-		for col in range(result.cols):
-			result.data[row][col] = a.data[row][col] - b.data[row][col]
-
-	return result
-
-static func scalar(matrix: Matrix, value: float) -> Matrix:
-	var result = Matrix.new(matrix.rows, matrix.cols)
-
-	for row in range(result.rows):
-		for col in range(result.cols):
-			result.data[row][col] = matrix.data[row][col] * value
-
-	return result
 
 static func scalar_add(matrix: Matrix, scalar: float) -> Matrix:
 	var result = Matrix.new(matrix.rows, matrix.cols)
 	for row in range(matrix.rows):
 		for col in range(matrix.cols):
 			result.data[row][col] = matrix.data[row][col] + scalar
-	return result
-
-static func dot_product(a: Matrix, b: Matrix) -> Matrix:
-	assert(a.cols == b.rows)
-
-	var result = Matrix.new(a.rows, b.cols)
-
-	for row in range(result.rows):
-		for col in range(result.cols):
-			result.data[row][col] = 0.0
-			for k in range(a.cols):
-				result.data[row][col] += a.data[row][k] * b.data[k][col]
-
 	return result
 
 static func dot_divide(a: Matrix, b: Matrix) -> Matrix:
@@ -143,19 +252,6 @@ static func dot_divide(a: Matrix, b: Matrix) -> Matrix:
 
 	return result
 
-
-static func multiply(a: Matrix, b: Matrix) -> Matrix:
-	assert(a.rows == b.rows and a.cols == b.cols)
-
-	var result = Matrix.new(a.rows, a.cols)
-
-	for row in range(result.rows):
-		for col in range(result.cols):
-			result.data[row][col] = a.data[row][col] * b.data[row][col]
-
-	return result
-
-
 static func divide(a: Matrix, b: Matrix) -> Matrix:
 	assert(a.rows == b.rows and a.cols == b.cols)
 
@@ -166,90 +262,3 @@ static func divide(a: Matrix, b: Matrix) -> Matrix:
 			result.data[row][col] = a.data[row][col] / b.data[row][col]
 
 	return result
-
-static func transpose(matrix: Matrix) -> Matrix:
-	var result = Matrix.new(matrix.cols, matrix.rows)
-
-	for row in range(result.rows):
-		for col in range(result.cols):
-			result.data[row][col] = matrix.data[col][row]
-
-	return result
-
-static func map(matrix: Matrix, callback: Callable) -> Matrix:
-	var result = Matrix.new(matrix.rows, matrix.cols)
-
-	for row in range(result.rows):
-		for col in range(result.cols):
-			result.data[row][col] = callback.call(matrix.data[row][col], row, col)
-
-	return result
-
-static func clamp_matrix(matrix: Matrix, lower_clamp: float, upper_clamp: float) -> Matrix:
-	var result = Matrix.new(matrix.rows, matrix.cols)
-
-	for row in range(result.rows):
-		for col in range(result.cols):
-			result.data[row][col] = clampf(result.data[row][col], lower_clamp, upper_clamp)
-
-	return result
-
-static func random(a: Matrix, b: Matrix) -> Matrix:
-	var result = Matrix.new(a.rows, a.cols)
-	for row in range(result.rows):
-		for col in range(result.cols):
-			randomize()
-			var _random = randf_range(0, 1)
-			result.data[row][col] = a.data[row][col] if _random > 0.5 else b.data[row][col]
-
-	return result
-
-static func copy(matrix: Matrix) -> Matrix:
-	var result = Matrix.new(matrix.rows, matrix.cols)
-	for row in range(result.rows):
-		for col in range(result.cols):
-			result.data[row][col] = matrix.data[row][col]
-	return result
-
-static func average(matrix: Matrix) -> float:
-	var average_value: float = 0.0
-	for row in range(matrix.rows):
-		for col in range(matrix.cols):
-			average_value += matrix.data[row][col]
-	average_value = average_value / matrix.rows * matrix.cols
-	return average_value
-
-func index_of_max_from_row(_row: int) -> int:
-	return data[_row].find(data[_row].max())
-
-func max_from_row(_row: int) -> float:
-	return data[_row].max()
-
-static func max_matrix(a: Matrix, b: Matrix) -> Matrix:
-	assert(a.rows == b.rows and a.cols == b.cols)
-
-	var result: Matrix = Matrix.new(a.rows, b.cols)
-	for row in range(result.rows):
-		for col in range(result.cols):
-			result.data[row][col] = max(a.data[row][col], b.data[row][col])
-
-	return result
-
-static func min_matrix(a: Matrix, b: Matrix) -> Matrix:
-	assert(a.rows == b.rows and a.cols == b.cols)
-
-	var result: Matrix = Matrix.new(a.rows, b.cols)
-	for row in range(result.rows):
-		for col in range(result.cols):
-			result.data[row][col] = min(a.data[row][col], b.data[row][col])
-
-	return result
-
-static func norm(matrix: Matrix) -> float:
-	var sum_of_squares: float = 0.0
-
-	for row in range(matrix.rows):
-		for col in range(matrix.cols):
-			sum_of_squares += pow(matrix.data[row][col], 2)
-
-	return sqrt(sum_of_squares)
