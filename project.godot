@@ -22,7 +22,7 @@ window/vsync/vsync_mode=0
 
 [editor]
 
-movie_writer/movie_file="E:/GitHub/Godot-4-Neural-Network/videos/DQN_initial.avi"
+movie_writer/movie_file="E:/GitHub/Godot-4-Neural-Network/videos/DQN_9088.avi"
 movie_writer/fps=24
 
 [editor_plugins]

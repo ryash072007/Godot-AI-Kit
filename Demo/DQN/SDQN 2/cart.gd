@@ -35,6 +35,7 @@ var done_last_frame: bool = false
 
 # Add memory variable
 var total_reward: float = 0.0 # Tracks cumulative reward for current episode
+var total_epoch_reward: float = 0.0
 
 # File handling for logging and model saving
 
@@ -47,6 +48,8 @@ var total_reward: float = 0.0 # Tracks cumulative reward for current episode
 @export var enabled: bool = true
 
 @export var is_learning: bool = true
+
+@export var use_pretrained_model: bool = false
 
 var log_file: FileAccess
 
@@ -61,21 +64,22 @@ func _ready() -> void:
 		log_file.store_string("Reset, Exploration Probability, Total Reward, Time Alive\n")
 
 
-	var Q_network: NeuralNetworkAdvanced = NeuralNetworkAdvanced.new(optimiser)
-	Q_network.use_amsgrad = false
-	Q_network.add_layer(4)
-	Q_network.add_layer(16, "LEAKYRELU")
-	Q_network.add_layer(16, "LEAKYRELU")
-	Q_network.add_layer(2, "LINEAR")
-	Q_network.learning_rate = learning_rate
-	DQN.set_Q_network(Q_network)
-	if Q_network.bp_method == NeuralNetworkAdvanced.methods.SGD:
-		DQN.lr_decay_rate = 0.995
-		DQN.set_clip_value(10.0)
-	DQN.automatic_decay = true
-	DQN.set_lr_value(learning_rate)
-	#DQN.load("user://ADAM_001_ELU - Copy.ryash")
-
+	if not use_pretrained_model:
+		var Q_network: NeuralNetworkAdvanced = NeuralNetworkAdvanced.new(optimiser)
+		Q_network.use_amsgrad = false
+		Q_network.add_layer(4)
+		Q_network.add_layer(16, "ELU")
+		Q_network.add_layer(16, "ELU")
+		Q_network.add_layer(2, "LINEAR")
+		Q_network.learning_rate = learning_rate
+		DQN.set_Q_network(Q_network)
+		if Q_network.bp_method == NeuralNetworkAdvanced.methods.SGD:
+			DQN.lr_decay_rate = 0.995
+			DQN.set_clip_value(10.0)
+		DQN.automatic_decay = true
+		DQN.set_lr_value(learning_rate)
+	else:
+		DQN.load("res://Demo/DQN/SDQN 2/9088_ADAM_001_ELU.json")
 
 	$sprite.color = Color(randf(), randf(), randf())
 	$pole/sprite.color = $sprite.color
@@ -156,7 +160,7 @@ func get_reward() -> float:
 
 	if absf($pole.rotation) > max_angle or abs(global_position.x) - initial_cart_position > threshold_distace:
 		done = true
-		return -1.0
+		return -100.0
 	else:
 		return 1.0
 
@@ -171,20 +175,25 @@ func reset_environment() -> void:
 	reset += 1
 
 	if log_data:
-		if reset % 64 == 0:
+		if reset % 16 == 0:
+			if total_epoch_reward / 16.0 > 200:
+				DQN.save("user://MIT/" + str(reset) + '_BEST_' + SDQN_file_name)
+				get_tree().quit()
 			DQN.save("user://MIT/" + str(reset) + '_' + SDQN_file_name)
+			total_epoch_reward = 0.0
 
 	#print("_______________ " + str($sprite.color) + " _______________")
-	var info: String = "Reset: " + str(reset) + "\nLearning Rate: " + str(DQN.learning_rate) + "\nExploration Rate: " + str(DQN.exploration_probability) + "\nTotal reward: " + str(total_reward) + "\nTime Alive: " + str(5 - $existence.time_left)
+	var info: String = "Reset: " + str(reset) + "\nLearning Rate: " + str(DQN.learning_rate) + "\nExploration Rate: " + str(DQN.exploration_probability) + "\nTotal reward: " + str(total_reward) + "\nTime Alive: " + str(10 - $existence.time_left)
 	#print(info)
 	$info.text = info
 
 	if log_data:
-		log_file.store_string(str(reset) + ', ' + str(DQN.exploration_probability) + ", " + str(total_reward) + ", " + str(5 - $existence.time_left) + '\n')
+		log_file.store_string(str(reset) + ', ' + str(DQN.exploration_probability) + ", " + str(total_reward) + ", " + str(10 - $existence.time_left) + '\n')
 		log_file.flush()
 
 	done = false
 	done_last_frame = true
+	total_epoch_reward += total_reward
 	total_reward = 0
 	$existence.stop()
 	$existence.start()

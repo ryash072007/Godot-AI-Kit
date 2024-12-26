@@ -14,7 +14,7 @@ size = Vector2(1152, 12)
 [node name="CartpoleAttempt2" type="Node2D"]
 
 [node name="cart" type="RigidBody2D" parent="."]
-position = Vector2(850, 459)
+position = Vector2(576, 459)
 can_sleep = false
 lock_rotation = true
 script = ExtResource("1_7oh87")
@@ -22,9 +22,8 @@ force_magnitude = 2000.0
 optimiser = 1
 learning_rate = 0.01
 log_data = false
-log_file_name = "MIT/ADAM/AMSADAM_001_ELU.csv"
-SDQN_file_name = "AMSADAM_001_ELU.ryash"
-enabled = false
+log_file_name = "MIT/ADAM/ADAM_001_ELU.csv"
+SDQN_file_name = "ADAM_001_ELU.json"
 is_learning = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="cart"]
@@ -56,64 +55,11 @@ node_a = NodePath("../..")
 node_b = NodePath("..")
 
 [node name="existence" type="Timer" parent="cart"]
-wait_time = 5.0
+wait_time = 10.0
 one_shot = true
 autostart = true
 
 [node name="info" type="RichTextLabel" parent="cart"]
-offset_left = -184.0
-offset_top = -419.0
-offset_right = 197.0
-offset_bottom = -198.0
-theme_override_font_sizes/normal_font_size = 20
-fit_content = true
-scroll_active = false
-shortcut_keys_enabled = false
-
-[node name="cart2" type="RigidBody2D" parent="."]
-position = Vector2(270, 459)
-can_sleep = false
-lock_rotation = true
-script = ExtResource("1_7oh87")
-force_magnitude = 2000.0
-learning_rate = 0.001
-log_file_name = "MIT/SGD/SGD_0001_ELU.csv"
-SDQN_file_name = "MIT_SGD_0001_ELU.ryash"
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="cart2"]
-shape = SubResource("RectangleShape2D_po0xa")
-
-[node name="sprite" type="ColorRect" parent="cart2"]
-offset_left = -25.0
-offset_top = -10.0
-offset_right = 25.0
-offset_bottom = 10.0
-
-[node name="pole" type="RigidBody2D" parent="cart2"]
-position = Vector2(0, -10)
-mass = 0.1
-can_sleep = false
-angular_damp = 5.0
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="cart2/pole"]
-position = Vector2(0, -48)
-shape = SubResource("RectangleShape2D_3rj1b")
-
-[node name="sprite" type="ColorRect" parent="cart2/pole"]
-offset_left = -5.0
-offset_top = -96.0
-offset_right = 5.0
-
-[node name="PinJoint2D" type="PinJoint2D" parent="cart2/pole"]
-node_a = NodePath("../..")
-node_b = NodePath("..")
-
-[node name="existence" type="Timer" parent="cart2"]
-wait_time = 5.0
-one_shot = true
-autostart = true
-
-[node name="info" type="RichTextLabel" parent="cart2"]
 offset_left = -184.0
 offset_top = -419.0
 offset_right = 197.0
@@ -145,28 +91,15 @@ polygon = PackedVector2Array(0, 481, 0, 451, -26, 451, -26, 481)
 polygon = PackedVector2Array(0, 481, 0, 452, -26, 452, -26, 481)
 
 [node name="RichTextLabel" type="RichTextLabel" parent="."]
-offset_left = 746.0
+offset_left = 470.0
 offset_top = 507.0
-offset_right = 970.0
+offset_right = 681.0
 offset_bottom = 603.0
 theme_override_font_sizes/normal_font_size = 70
 text = "ADAM"
 fit_content = true
 scroll_active = false
 
-[node name="RichTextLabel2" type="RichTextLabel" parent="."]
-offset_left = 200.0
-offset_top = 507.0
-offset_right = 347.0
-offset_bottom = 603.0
-theme_override_font_sizes/normal_font_size = 70
-text = "SGD"
-fit_content = true
-scroll_active = false
-
 [connection signal="tree_exiting" from="cart" to="cart" method="_on_tree_exiting"]
 [connection signal="body_entered" from="cart/pole" to="cart" method="_on_pole_body_entered"]
 [connection signal="timeout" from="cart/existence" to="cart" method="_on_existence_timeout"]
-[connection signal="tree_exiting" from="cart2" to="cart2" method="_on_tree_exiting"]
-[connection signal="body_entered" from="cart2/pole" to="cart2" method="_on_pole_body_entered"]
-[connection signal="timeout" from="cart2/existence" to="cart2" method="_on_existence_timeout"]

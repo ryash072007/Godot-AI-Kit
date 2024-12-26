@@ -5,10 +5,10 @@ var learning_rate: float = 0.001
 var discount_factor: float = 0.95
 var exploration_probability: float = 1
 var min_exploration_probability: float = 0.01
-var exploration_decay: float = 0.9995
+var exploration_decay: float = 0.999
 var batch_size: int = 196
 var max_steps: int = 128
-var target_update_frequency: int = 512  # Update target network every 2048 steps
+var target_update_frequency: int = 1024  # Update target network every 2048 steps
 var max_memory_size: int = 60 * 60 * 4  # Max size of replay memory
 var automatic_decay: bool = false
 
@@ -37,6 +37,7 @@ var is_logging: bool = false
 var log_file: FileAccess
 var log_count: int = 0
 
+
 func _init(state_space: int, action_space: int, learning_rate: float = learning_rate) -> void:
 	self.state_space = state_space
 	self.action_space = action_space
@@ -56,6 +57,7 @@ func set_Q_network(neural_network: NeuralNetworkAdvanced) -> void:
 	self.Q_network = neural_network.copy(true)
 	self.Q_network.learning_rate = self.learning_rate
 	self.target_Q_network = self.Q_network.copy()
+
 
 func set_clip_value(clip_value: float) -> void:
 	self.Q_network.clip_value = clip_value
@@ -131,6 +133,7 @@ func sample(array: Array) -> Array:
 func train(replay_memory: Array) -> void:
 	# Sample a minibatch from the replay memory
 	var minibatch: Array = sample(replay_memory)
+
 
 	for transition in minibatch:
 		var state: Array = transition[0]
@@ -275,7 +278,13 @@ func save(file_path: String) -> void:
 func load(file_path: String) -> void:
 	var file: FileAccess = FileAccess.open(file_path, FileAccess.READ)
 	var data_string: String = file.get_as_text()
+	if "inf" in data_string:
+		data_string = data_string.replace("inf", "null")
 	var data: Dictionary = JSON.parse_string(data_string)
+	if data["target_Q_network"]["clip_value"] == null:
+		data["target_Q_network"]["clip_value"] = INF
+	if data["Q_network"]["clip_value"] == null:
+		data["Q_network"]["clip_value"] = INF
 	file.close()
 	self.from_dict(data)
 
