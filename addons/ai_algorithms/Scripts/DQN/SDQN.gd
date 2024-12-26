@@ -105,18 +105,19 @@ func max_q_predict(state: Array) -> float:
 	return max_value
 
 
-func sample(array: Array) -> Array:
-	var length: int = array.size()
+func sample() -> Array:
+	var length: int = memory.size()
 	var indices: Array[int] = []
 	var sample: Array = []
 
 	if length < batch_size:
-		return array
+		return memory
 
 	if length > max_memory_size:
 		length = max_memory_size
 
 	# Fill the rest with non-sequential random elements
+	randomize()
 	while indices.size() < batch_size:
 		var index: int = randi_range(0, length - 1)
 		if index not in indices:
@@ -124,15 +125,19 @@ func sample(array: Array) -> Array:
 
 	# Build the final sample from the indices
 	for i in indices:
-		sample.append(array[i])
+		sample.append(memory[i])
 
+	indices.sort()
+	indices.reverse()
+	for i in indices:
+		memory.remove_at(i)
 	return sample
 
 
 
 func train(replay_memory: Array) -> void:
 	# Sample a minibatch from the replay memory
-	var minibatch: Array = sample(replay_memory)
+	var minibatch: Array = sample()
 
 
 	for transition in minibatch:
@@ -169,7 +174,7 @@ func multithreaded_train() -> void:
 		print("multi-train now")
 		# Sample a minibatch from the replay memory
 		train_mutex.try_lock()
-		var minibatch: Array = sample(memory)
+		var minibatch: Array = sample()
 		train_mutex.unlock()
 		for transition in minibatch:
 			var state: Array = transition[0]
