@@ -521,3 +521,23 @@ This class implements a Simple Deep Q-Network (SDQN) for reinforcement learning 
 
 1. To change the clip value, learning rate, and Q-network, the respective functions (`set_clip_value`, `set_lr_value`, `set_Q_network`) must be called instead of directly setting the variable.
 2. To learn more, check out the SDQN Demo available in the Demos folder.
+
+## SDQN Node
+
+The `SDQN_Node` can be added to the agent node by searching for "Simple DQN" under the nodes list in the "Add Node" window. All the customizable parameters can be set using the Inspector tab to the right.
+
+You still need to call `set_Q_network` on the node to set the Q_network using your own `NeuralNetworkAdvanced` instance.
+
+Example of referencing this node:
+
+```gdscript
+@onready var DQN = $"Simple DQN"
+
+// Set the Q_network
+DQN.set_q_network(your_neural_network)
+
+// Use the DQN node
+DQN.add_memory(state, action, reward, next_state, done)
+var action = DQN.choose_action(state)
+```
+
