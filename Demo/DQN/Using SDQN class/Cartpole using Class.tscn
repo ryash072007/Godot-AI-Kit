@@ -1,0 +1,103 @@
+[gd_scene load_steps=5 format=3 uid="uid://c4llqcymcrfg0"]
+
+[ext_resource type="Script" path="res://Demo/DQN/Using SDQN class/cart.gd" id="1_6opgl"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_po0xa"]
+size = Vector2(50, 20)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3rj1b"]
+size = Vector2(10, 96)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_v0inl"]
+size = Vector2(1152, 12)
+
+[node name="CartpoleAttempt2" type="Node2D"]
+
+[node name="cart" type="RigidBody2D" parent="."]
+position = Vector2(576, 459)
+can_sleep = false
+lock_rotation = true
+script = ExtResource("1_6opgl")
+force_magnitude = 2000.0
+optimiser = 1
+log_file_name = "MIT/ADAM/ADAM_001_ELU.csv"
+SDQN_file_name = "ADAM_0001_ELU.json"
+use_pretrained_model = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="cart"]
+shape = SubResource("RectangleShape2D_po0xa")
+
+[node name="sprite" type="ColorRect" parent="cart"]
+offset_left = -25.0
+offset_top = -10.0
+offset_right = 25.0
+offset_bottom = 10.0
+
+[node name="pole" type="RigidBody2D" parent="cart"]
+position = Vector2(0, -10)
+mass = 0.1
+can_sleep = false
+angular_damp = 5.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="cart/pole"]
+position = Vector2(0, -48)
+shape = SubResource("RectangleShape2D_3rj1b")
+
+[node name="sprite" type="ColorRect" parent="cart/pole"]
+offset_left = -5.0
+offset_top = -96.0
+offset_right = 5.0
+
+[node name="PinJoint2D" type="PinJoint2D" parent="cart/pole"]
+node_a = NodePath("../..")
+node_b = NodePath("..")
+
+[node name="existence" type="Timer" parent="cart"]
+wait_time = 20.0
+one_shot = true
+autostart = true
+
+[node name="info" type="RichTextLabel" parent="cart"]
+offset_left = -184.0
+offset_top = -419.0
+offset_right = 197.0
+offset_bottom = -198.0
+theme_override_font_sizes/normal_font_size = 20
+fit_content = true
+scroll_active = false
+shortcut_keys_enabled = false
+
+[node name="floor" type="Node2D" parent="."]
+
+[node name="floorbody" type="StaticBody2D" parent="floor"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="floor/floorbody"]
+position = Vector2(576, 475)
+shape = SubResource("RectangleShape2D_v0inl")
+
+[node name="sprite" type="ColorRect" parent="floor/floorbody"]
+offset_top = 469.0
+offset_right = 1152.0
+offset_bottom = 663.0
+color = Color(0, 0, 0, 1)
+
+[node name="CollisionPolygon2D2" type="CollisionPolygon2D" parent="floor/floorbody"]
+position = Vector2(1178, 0)
+polygon = PackedVector2Array(0, 481, 0, 451, -26, 451, -26, 481)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="floor/floorbody"]
+polygon = PackedVector2Array(0, 481, 0, 452, -26, 452, -26, 481)
+
+[node name="RichTextLabel" type="RichTextLabel" parent="."]
+offset_left = 470.0
+offset_top = 507.0
+offset_right = 681.0
+offset_bottom = 603.0
+theme_override_font_sizes/normal_font_size = 70
+text = "ADAM"
+fit_content = true
+scroll_active = false
+
+[connection signal="tree_exiting" from="cart" to="cart" method="_on_tree_exiting"]
+[connection signal="body_entered" from="cart/pole" to="cart" method="_on_pole_body_entered"]
+[connection signal="timeout" from="cart/existence" to="cart" method="_on_existence_timeout"]

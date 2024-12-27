@@ -1,6 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://c4llqcymcrfg0"]
+[gd_scene load_steps=6 format=3 uid="uid://yojh2nnjqsgq"]
 
-[ext_resource type="Script" path="res://Demo/DQN/SDQN 2/cart.gd" id="1_7oh87"]
+[ext_resource type="Script" path="res://Demo/DQN/Using SDQN Node/cart.gd" id="1_ut6kb"]
+[ext_resource type="Script" path="res://addons/ai_algorithms/Scripts/DQN/SDQN_Node.gd" id="2_so2dv"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_po0xa"]
 size = Vector2(50, 20)
@@ -17,13 +18,10 @@ size = Vector2(1152, 12)
 position = Vector2(576, 459)
 can_sleep = false
 lock_rotation = true
-script = ExtResource("1_7oh87")
+script = ExtResource("1_ut6kb")
 force_magnitude = 2000.0
 optimiser = 1
 log_data = false
-log_file_name = "MIT/ADAM/ADAM_001_ELU.csv"
-SDQN_file_name = "ADAM_001_ELU.json"
-use_pretrained_model = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="cart"]
 shape = SubResource("RectangleShape2D_po0xa")
@@ -54,7 +52,7 @@ node_a = NodePath("../..")
 node_b = NodePath("..")
 
 [node name="existence" type="Timer" parent="cart"]
-wait_time = 10.0
+wait_time = 20.0
 one_shot = true
 autostart = true
 
@@ -67,6 +65,13 @@ theme_override_font_sizes/normal_font_size = 20
 fit_content = true
 scroll_active = false
 shortcut_keys_enabled = false
+
+[node name="Simple DQN" type="Node2D" parent="cart"]
+script = ExtResource("2_so2dv")
+state_space = 4
+action_space = 2
+load_file = "res://Demo/DQN/9088_ADAM_001_ELU.json"
+exploration_probability = 0.9
 
 [node name="floor" type="Node2D" parent="."]
 

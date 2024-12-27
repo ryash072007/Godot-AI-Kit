@@ -12,8 +12,6 @@ extends RigidBody2D
 # Neural Network configuration
 @export_enum("SGD", "ADAM") var optimiser: int
 
-@export_range(0.0001, 0.1, 0.0001) var learning_rate: float = 0.0001
-
 # Cart control variables
 # 2 = no movement, 1 = right, 0 = left
 var action: int = 0
@@ -25,8 +23,10 @@ var max_angle: float = deg_to_rad(25.0) # Cart fails if pole tilts beyond this a
 var threshold_distace: float = 250.0 # Cart fails if it moves too far from start
 
 # Deep Q-Network (DQN) setup
+
+@onready var DQN = $"Simple DQN"
+
 # 4 inputs (state variables), 2 outputs (actions)
-var DQN: SDQN = SDQN.new(4, 2)
 var prev_state: Array
 var prev_action: int
 var reward: float = 0.0
@@ -37,19 +37,12 @@ var done_last_frame: bool = false
 var total_reward: float = 0.0 # Tracks cumulative reward for current episode
 var total_epoch_reward: float = 0.0
 
+
 # File handling for logging and model saving
-
 @export var log_data: bool = true
-
 @export var log_file_name: String
-
 @export var SDQN_file_name: String
-
 @export var enabled: bool = true
-
-@export var is_learning: bool = true
-
-@export var use_pretrained_model: bool = false
 
 var log_file: FileAccess
 
@@ -64,22 +57,14 @@ func _ready() -> void:
 		log_file.store_string("Reset, Exploration Probability, Total Reward, Time Alive\n")
 
 
-	if not use_pretrained_model:
-		var Q_network: NeuralNetworkAdvanced = NeuralNetworkAdvanced.new(optimiser)
-		Q_network.use_amsgrad = false
-		Q_network.add_layer(4)
-		Q_network.add_layer(16, "ELU")
-		Q_network.add_layer(16, "ELU")
-		Q_network.add_layer(2, "LINEAR")
-		Q_network.learning_rate = learning_rate
-		DQN.set_Q_network(Q_network)
-		if Q_network.bp_method == NeuralNetworkAdvanced.methods.SGD:
-			DQN.lr_decay_rate = 0.995
-			DQN.set_clip_value(10.0)
-		DQN.automatic_decay = true
-		DQN.set_lr_value(learning_rate)
-	else:
-		DQN.load("res://Demo/DQN/SDQN 2/9088_ADAM_001_ELU.json")
+	var Q_network: NeuralNetworkAdvanced = NeuralNetworkAdvanced.new(optimiser)
+	Q_network.use_amsgrad = false
+	Q_network.add_layer(4)
+	Q_network.add_layer(16, "ELU")
+	Q_network.add_layer(16, "ELU")
+	Q_network.add_layer(2, "LINEAR")
+	DQN.set_Q_network(Q_network)
+	DQN.set_clip_value(10.0)
 
 	$sprite.color = Color(randf(), randf(), randf())
 	$pole/sprite.color = $sprite.color
@@ -90,9 +75,6 @@ func _ready() -> void:
 func _physics_process(_delta: float) -> void:
 	# The function handles both human testing and AI control modes
 	# Updates DQN memory and applies forces to the cart
-
-	if not is_learning:
-		done_last_frame = true
 
 	var direction: int
 
@@ -123,13 +105,9 @@ func _physics_process(_delta: float) -> void:
 			done_last_frame = true
 
 		# DQN adding memory and recycling state and action if not done last step
-		if done_last_frame:
-			total_reward += get_reward()
-			done_last_frame = false
-		else:
-			reward = get_reward()
-			total_reward += reward
-			DQN.add_memory(prev_state, prev_action, reward, state, done)
+		reward = get_reward()
+		total_reward += reward
+		DQN.add_memory(prev_state, prev_action, reward, state, done)
 		prev_state = state
 		prev_action = action
 
@@ -176,7 +154,7 @@ func reset_environment() -> void:
 
 	if log_data:
 		if reset % 16 == 0:
-			if total_epoch_reward / 16.0 > 200:
+			if total_epoch_reward / 16.0 > 300:
 				DQN.save("user://MIT/" + str(reset) + '_BEST_' + SDQN_file_name)
 				get_tree().quit()
 			DQN.save("user://MIT/" + str(reset) + '_' + SDQN_file_name)
@@ -192,7 +170,6 @@ func reset_environment() -> void:
 		log_file.flush()
 
 	done = false
-	done_last_frame = true
 	total_epoch_reward += total_reward
 	total_reward = 0
 	$existence.stop()
@@ -229,4 +206,3 @@ func _on_tree_exiting() -> void:
 
 	if log_data:
 		log_file.close()
-	DQN.close_threading()
