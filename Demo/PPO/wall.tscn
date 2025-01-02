@@ -6,7 +6,6 @@ size = Vector2(64, 64)
 [node name="Obstacle" type="Node2D"]
 
 [node name="Area2D" type="Area2D" parent="."]
-collision_layer = 4
 collision_mask = 0
 monitoring = false
 

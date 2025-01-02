@@ -1,9 +1,10 @@
-[gd_scene load_steps=10 format=3 uid="uid://cwhep14njs57"]
+[gd_scene load_steps=11 format=3 uid="uid://cwhep14njs57"]
 
 [ext_resource type="Script" path="res://Demo/PPO/ppo_demo.gd" id="1_ab8bs"]
 [ext_resource type="PackedScene" uid="uid://dct4lf201mpkb" path="res://Demo/PPO/obstacle.tscn" id="1_ejxwt"]
 [ext_resource type="PackedScene" uid="uid://dw0gpkhp4olc5" path="res://Demo/PPO/goal.tscn" id="2_4dd1v"]
 [ext_resource type="PackedScene" uid="uid://ccc61bxvqbc63" path="res://Demo/PPO/wall.tscn" id="4_orpwb"]
+[ext_resource type="Script" path="res://Demo/PPO/agent.gd" id="5_immtb"]
 
 [sub_resource type="TileSetScenesCollectionSource" id="TileSetScenesCollectionSource_bwyam"]
 resource_name = "obstacle"
@@ -36,6 +37,7 @@ layer_0/tile_data = PackedInt32Array(4, 2, 65536, 65540, 2, 65536, 131076, 2, 65
 
 [node name="agent" type="Node2D" parent="."]
 position = Vector2(576, 324)
+script = ExtResource("5_immtb")
 
 [node name="body" type="Area2D" parent="agent"]
 
@@ -48,3 +50,109 @@ offset_top = -16.0
 offset_right = 16.0
 offset_bottom = 16.0
 color = Color(0.507263, 0.427859, 1, 1)
+
+[node name="ObstaclesAndWalls" type="Node2D" parent="agent"]
+
+[node name="RayCast2D" type="RayCast2D" parent="agent/ObstaclesAndWalls"]
+target_position = Vector2(0, 200)
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="RayCast2D2" type="RayCast2D" parent="agent/ObstaclesAndWalls"]
+rotation = 0.785398
+target_position = Vector2(0, 200)
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="RayCast2D3" type="RayCast2D" parent="agent/ObstaclesAndWalls"]
+rotation = 1.5708
+target_position = Vector2(0, 200)
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="RayCast2D4" type="RayCast2D" parent="agent/ObstaclesAndWalls"]
+rotation = 2.35619
+target_position = Vector2(0, 200)
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="RayCast2D5" type="RayCast2D" parent="agent/ObstaclesAndWalls"]
+rotation = 3.14159
+target_position = Vector2(0, 200)
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="RayCast2D6" type="RayCast2D" parent="agent/ObstaclesAndWalls"]
+rotation = 3.92699
+target_position = Vector2(0, 200)
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="RayCast2D7" type="RayCast2D" parent="agent/ObstaclesAndWalls"]
+rotation = 4.71239
+target_position = Vector2(0, 200)
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="RayCast2D8" type="RayCast2D" parent="agent/ObstaclesAndWalls"]
+rotation = 5.49779
+target_position = Vector2(0, 200)
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="Goals" type="Node2D" parent="agent"]
+
+[node name="RayCast2D" type="RayCast2D" parent="agent/Goals"]
+target_position = Vector2(0, 200)
+collision_mask = 2
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="RayCast2D2" type="RayCast2D" parent="agent/Goals"]
+rotation = 0.785398
+target_position = Vector2(0, 200)
+collision_mask = 2
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="RayCast2D3" type="RayCast2D" parent="agent/Goals"]
+rotation = 1.5708
+target_position = Vector2(0, 200)
+collision_mask = 2
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="RayCast2D4" type="RayCast2D" parent="agent/Goals"]
+rotation = 2.35619
+target_position = Vector2(0, 200)
+collision_mask = 2
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="RayCast2D5" type="RayCast2D" parent="agent/Goals"]
+rotation = 3.14159
+target_position = Vector2(0, 200)
+collision_mask = 2
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="RayCast2D6" type="RayCast2D" parent="agent/Goals"]
+rotation = 3.92699
+target_position = Vector2(0, 200)
+collision_mask = 2
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="RayCast2D7" type="RayCast2D" parent="agent/Goals"]
+rotation = 4.71239
+target_position = Vector2(0, 200)
+collision_mask = 2
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="RayCast2D8" type="RayCast2D" parent="agent/Goals"]
+rotation = 5.49779
+target_position = Vector2(0, 200)
+collision_mask = 2
+collide_with_areas = true
+collide_with_bodies = false
