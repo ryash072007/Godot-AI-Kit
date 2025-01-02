@@ -12,10 +12,15 @@ TODO:
 
 The goal of this project is to provide a variety of AI Algorithms in Godot 4 natively using GDscript.
 
+
+https://github.com/user-attachments/assets/013f31c1-d4e4-429a-8ea1-62c760061884
+
+
+
 ## Index
 
 1. [Simple Neural Network and Neural Net](#simple-neural-network-and-neural-net-plugin-for-godot-4)
-2. [Neural Network Advanced (Multi-Layered Neural Network)](#NNA)
+2. [Neural Network Advanced (Multi-Layered Neural Network)](#neural-network-advanced)
 3. [Q-Learning Algorithm (and SARSA)](#q-learning-algorithm)
 4. [Minimax Algorithm](#minimax-algorithm)
 5. [SDQN (Simple Deep Q-Network)](#sdqn-simple-deep-q-network)
@@ -524,7 +529,7 @@ This class implements a Simple Deep Q-Network (SDQN) for reinforcement learning 
 
 ## SDQN Node
 
-The `SDQN_Node` can be added to the agent node by searching for "Simple DQN" under the nodes list in the "Add Node" window. All the customizable parameters can be set using the Inspector tab to the right.
+The `SDQN_Node` can be added to the agent node by searching for "Simple DQN" under the nodes list in the "Add Node" window. All the customizable parameters can be set using the Inspector tab to the right. If you are installing this addon from github, you will have to take the addon folder and drop it into your games main folder, then enable the addon in project settings and reload the project/editor.
 
 You still need to call `set_Q_network` on the node to set the Q_network using your own `NeuralNetworkAdvanced` instance.
 
@@ -533,10 +538,10 @@ Example of referencing this node:
 ```gdscript
 @onready var DQN = $"Simple DQN"
 
-// Set the Q_network
+# Set the Q_network
 DQN.set_q_network(your_neural_network)
 
-// Use the DQN node
+# Use the DQN node
 DQN.add_memory(state, action, reward, next_state, done)
 var action = DQN.choose_action(state)
 ```
