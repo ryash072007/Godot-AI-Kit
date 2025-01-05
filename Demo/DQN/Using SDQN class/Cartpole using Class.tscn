@@ -20,7 +20,7 @@ lock_rotation = true
 script = ExtResource("1_6opgl")
 force_magnitude = 2000.0
 optimiser = 1
-log_file_name = "MIT/ADAM/ADAM_001_ELU.csv"
+log_file_name = "ADAM_001_ELU.csv"
 SDQN_file_name = "ADAM_0001_ELU.json"
 use_pretrained_model = true
 

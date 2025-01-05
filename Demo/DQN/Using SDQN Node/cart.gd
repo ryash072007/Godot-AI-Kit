@@ -155,9 +155,9 @@ func reset_environment() -> void:
 	if log_data:
 		if reset % 16 == 0:
 			if total_epoch_reward / 16.0 > 300:
-				DQN.save("user://MIT/" + str(reset) + '_BEST_' + SDQN_file_name)
+				DQN.save("user://" + str(reset) + '_BEST_' + SDQN_file_name)
 				get_tree().quit()
-			DQN.save("user://MIT/" + str(reset) + '_' + SDQN_file_name)
+			DQN.save("user://" + str(reset) + '_' + SDQN_file_name)
 			total_epoch_reward = 0.0
 
 	#print("_______________ " + str($sprite.color) + " _______________")
