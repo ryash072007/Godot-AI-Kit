@@ -240,3 +240,7 @@ func cross_entropy_loss(y_pred: Matrix, y_true: Matrix) -> float:
 	var loss_matrix: Matrix = Matrix.multiply(y_true, y_pred)
 	loss = -Matrix.sum(loss_matrix)
 	return loss
+
+func gradient_cross_entropy_loss(y_pred: Matrix, y_true: Matrix) -> Matrix:
+	return Matrix.subtract(y_pred, y_true)
+
