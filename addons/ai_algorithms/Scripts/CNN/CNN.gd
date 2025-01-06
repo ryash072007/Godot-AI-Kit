@@ -10,6 +10,8 @@ class Layer:
         var output_shape: Vector2i = Vector2(0, 0)
         var output: Matrix
 
+        var input: Matrix
+
         var activationFunction := Activation.RELU
 
         func _init(_input_shape: Vector2i, _output_shape: Vector2i, _filter_shape: Vector2i = Vector2i(3,3), _stride: int = 1) -> void:
@@ -18,6 +20,19 @@ class Layer:
             filter_shape = _filter_shape
             stride = _stride
             filter = Matrix.uniform_he_init(Matrix.new(filter_shape.x, filter_shape.y), filter_shape.x * filter_shape.y)
+        
+        func forward(_input: Matrix) -> Matrix:
+            input = _input
+            output = Matrix.new(output_shape.x, output_shape.y)
+            for i in range(0, input_shape.x - filter_shape.x + 1, stride):
+                for j in range(0, input_shape.y - filter_shape.y + 1, stride):
+                    var sum = 0.0
+                    for x in range(filter_shape.x):
+                        for y in range(filter_shape.y):
+                            sum += input.data[i + x][j + y] * filter.data[x][y]
+                    output.data[i / stride][j / stride] = sum + bias
+            output = Matrix.map(output, activationFunction.function)
+            return output
     
     class Pooling:
         var stride: int = 1
@@ -77,6 +92,9 @@ class Layer:
         var output_shape: int = 0
         var output: Matrix
 
+        # Storing the input from the last forward pass
+        var input: Matrix
+
         var ACTIVATIONS: Activation = Activation.new()
         var activationFunction
 
@@ -97,7 +115,8 @@ class Layer:
             biases = Matrix.new(output_shape, 1)
         
         # Different from NNA as there input was transposed and so dot product was used
-        func forward(input: Matrix) -> Matrix:
+        func forward(_input: Matrix) -> Matrix:
+            input = _input
             output = Matrix.add(Matrix.multiply(input, weights), biases)
             output = Matrix.map(output, activationFunction.function)
             return output
