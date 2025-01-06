@@ -233,5 +233,10 @@ func forward(input: Matrix) -> Matrix:
 		output = layer.forward(output)
 	return output
 
-func loss(output: Matrix, target: Matrix) -> float:
-	return Matrix.average(Matrix.subtract(output, target))
+func cross_entropy_loss(y_pred: Matrix, y_true: Matrix) -> float:
+	var loss: float = 0.0
+	var epsilon: float = 1e-12
+	y_pred = Matrix.map(y_pred, func(value: float, _row: int, _col: int): return log(value + epsilon))
+	var loss_matrix: Matrix = Matrix.multiply(y_true, y_pred)
+	loss = -Matrix.sum(loss_matrix)
+	return loss
