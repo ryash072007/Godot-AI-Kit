@@ -2,10 +2,11 @@ TODO:
 
 ~~1. Multi-Layer Neural Network Support (more than a single hidden network)~~ [Completed]
 
-~~2. PPO Support (Unrealistic but will try!)~~ [Might start soon]
+~~2. PPO Support (Unrealistic but will try!)~~ [On Hold again]
 
 ~~3. Simple DQN Support~~ [Completed]
 
+4. Convolutional  Neural Network [Ongoing]
 
 
 # AI Algorithm for Godot 4
