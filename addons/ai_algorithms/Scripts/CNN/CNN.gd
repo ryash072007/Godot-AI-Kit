@@ -121,7 +121,13 @@ class Layer:
             output = Matrix.map(output, activationFunction.function)
             return output
         
-        func backward(dout: Matrix) -> Matrix:
-            var dW: Matrix = Matrix.dot_divide(weights, dout)
-            return dW
+        func backward(dout: Matrix) -> Dictionary:
+            var dW: Matrix = Matrix.outer_product(dout, input)
+            var dB: Matrix = dout
+            var dX: Matrix = Matrix.multiply(weights, dout)
+            return {
+                "dW": dW,
+                "dB": dB,
+                "dX": dX
+            }
 
