@@ -262,3 +262,14 @@ static func divide(a: Matrix, b: Matrix) -> Matrix:
 			result.data[row][col] = a.data[row][col] / b.data[row][col]
 
 	return result
+
+static func outer_product(a: Matrix, b: Matrix) -> Matrix:
+	assert(a.cols == 1 and b.cols == 1)  # Ensure both are column vectors
+
+	var result = Matrix.new(a.rows, b.rows)
+
+	for i in range(a.rows):
+		for j in range(b.rows):
+			result.data[i][j] = a.data[i][0] * b.data[j][0]
+
+	return result

@@ -121,5 +121,7 @@ class Layer:
             output = Matrix.map(output, activationFunction.function)
             return output
         
-        
+        func backward(dout: Matrix) -> Matrix:
+            var dW: Matrix = Matrix.dot_divide(weights, dout)
+            return dW
 
