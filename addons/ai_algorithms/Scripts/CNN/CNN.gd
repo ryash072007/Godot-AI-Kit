@@ -26,6 +26,9 @@ class Layer:
         var output_shape: Vector2i = Vector2i(0, 0)
         var output: Matrix
 
+        # Storing the input from the last forward pass
+        var input: Matrix
+
         func _init(_input_shape: Vector2i, _pool_size: Vector2i = Vector2i(2, 2), _stride: int = 2) -> void:
             input_shape = _input_shape
             pool_size = _pool_size
@@ -37,7 +40,8 @@ class Layer:
             )
         
         # Max pooling
-        func forward(input: Matrix) -> Matrix:
+        func forward(_input: Matrix) -> Matrix:
+            input = _input
             output = Matrix.new(output_shape.x, output_shape.y)
             for i in range(0, input_shape.x - pool_size.x + 1, stride):
                 for j in range(0, input_shape.y - pool_size.y + 1, stride):
@@ -47,6 +51,22 @@ class Layer:
                             max_val = max(max_val, input.data[i + x][j + y])
                     output.data[i / stride][j / stride] = max_val
             return output
+        
+        func backward(dout: Matrix) -> Matrix:
+            var dx = Matrix.new(input_shape.x, input_shape.y)
+            for i in range(0, input_shape.x - pool_size.x + 1, stride):
+                for j in range(0, input_shape.y - pool_size.y + 1, stride):
+                    var max_val = -INF
+                    var max_x = 0
+                    var max_y = 0
+                    for x in range(pool_size.x):
+                        for y in range(pool_size.y):
+                            if input.data[i + x][j + y] > max_val:
+                                max_val = input.data[i + x][j + y]
+                                max_x = i + x
+                                max_y = j + y
+                    dx.data[max_x][max_y] = dout.data[i / stride][j / stride]
+            return dx
 
     
     class Dense:
