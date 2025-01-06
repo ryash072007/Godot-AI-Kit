@@ -273,3 +273,10 @@ static func outer_product(a: Matrix, b: Matrix) -> Matrix:
 			result.data[i][j] = a.data[i][0] * b.data[j][0]
 
 	return result
+
+static func sum(matrix: Matrix) -> float:
+	var sum_value: float = 0.0
+	for row in range(matrix.rows):
+		for col in range(matrix.cols):
+			sum_value += matrix.data[row][col]
+	return sum_value

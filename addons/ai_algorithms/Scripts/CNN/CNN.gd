@@ -138,7 +138,6 @@ class Layer:
 
 			biases = Matrix.new(output_shape.x, 1)
 
-		# Different from NNA as there input was transposed and so dot product was used
 		func forward(_input: Matrix) -> Matrix:
 			input = _input
 			output = Matrix.add(Matrix.dot_product(weights, input), biases)
@@ -181,6 +180,48 @@ class Layer:
 				for j in range(input_shape.y):
 					dx.data[i][j] = dout.data[i * input_shape.y + j][0]
 			return dx
+    
+	class SoftmaxDense:
+		var weights: Matrix
+		var biases: Matrix
+		var activation: String = "SOFTMAX"
+		var input_shape: int = 0
+		var output_shape: Vector2i
+		var output: Matrix
+
+		# Storing the input from the last forward pass
+		var input: Matrix
+
+		func _init(_input_shape: Vector2i, _output_shape: int) -> void:
+			input_shape = _input_shape.x
+			output_shape = Vector2i(_output_shape, 1)
+
+			weights = Matrix.uniform_glorot_init(Matrix.new(output_shape.x, input_shape), input_shape, output_shape.x)
+			biases = Matrix.new(output_shape.x, 1)
+
+		func forward(_input: Matrix) -> Matrix:
+			input = _input
+			output = Matrix.add(Matrix.dot_product(weights, input), biases)
+			output = softmax(output)
+			return output
+
+		func backward(dout: Matrix) -> Dictionary:
+			var dW: Matrix = Matrix.outer_product(dout, input)
+			var dB: Matrix = dout
+			var dX: Matrix = Matrix.multiply(weights, dout)
+			return {
+				"dW": dW,
+				"dB": dB,
+				"dX": dX
+			}
+        
+		func softmax(x: Matrix) -> Matrix:
+			var max_val: float = x.data.max()
+			var x_stable: Matrix = Matrix.scalar_add(x, -max_val)
+			var exps: Matrix = Matrix.map(x_stable, func(value: float, _row: int, _col: int): return exp(value))
+			var sum_exp: float = Matrix.sum(exps)
+			return Matrix.scalar(exps, 1 / sum_exp)
+
 
 func add_layer(layer) -> Vector2i:
 	layers.append(layer)
@@ -191,3 +232,6 @@ func forward(input: Matrix) -> Matrix:
 	for layer in layers:
 		output = layer.forward(output)
 	return output
+
+func loss(output: Matrix, target: Matrix) -> float:
+	return Matrix.average(Matrix.subtract(output, target))
