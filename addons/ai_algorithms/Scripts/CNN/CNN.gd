@@ -8,7 +8,7 @@ var labels: Dictionary = {}
 class Layer:
 	class SingleFilterConvolutional1D:
 		var filter: Matrix
-		var bias: float = 0.0
+		var biases: Matrix = Matrix.new(1, 1)
 		var stride: int = 1
 		var input_shape: Vector2i
 		var filter_shape: Vector2i = Vector2i(3, 3)
@@ -40,13 +40,13 @@ class Layer:
 					for x in range(filter_shape.x):
 						for y in range(filter_shape.y):
 							sum += input.data[i + x][j + y] * filter.data[x][y]
-					output.data[i / stride][j / stride] = sum + bias
+					output.data[i / stride][j / stride] = sum + biases.data[0][0]
 			output = Matrix.map(output, activationFunction.function)
 			return output
 
 		func backward(dout: Matrix) -> Dictionary:
 			var dW: Matrix = Matrix.new(filter_shape.x, filter_shape.y)
-			var dB: float = 0.0
+			var dB: Matrix = Matrix.new(1, 1)
 			var dX: Matrix = Matrix.new(input_shape.x, input_shape.y)
 			for i in range(0, input_shape.x - filter_shape.x + 1, stride):
 				for j in range(0, input_shape.y - filter_shape.y + 1, stride):
@@ -54,11 +54,12 @@ class Layer:
 						for y in range(filter_shape.y):
 							dW.data[x][y] += input.data[i + x][j + y] * dout.data[i / stride][j / stride]
 							dX.data[i + x][j + y] += filter.data[x][y] * dout.data[i / stride][j / stride]
-					dB += dout.data[i / stride][j / stride]
+					dB = Matrix.scalar_add(dB, dout.data[i / stride][j / stride])
 			return {
 				"dW": dW,
 				"dB": dB,
-				"dX": dX
+				"dX": dX,
+				"type": "SingleFilterConvolutional1D"
 			}
 
 	class Pooling:
@@ -109,7 +110,8 @@ class Layer:
 								max_y = j + y
 					dX.data[max_x][max_y] = dout.data[i / stride][j / stride]
 			return {
-				"dX": dX
+				"dX": dX,
+				"type": "Pooling"
 			}
 
 	class Dense:
@@ -151,11 +153,12 @@ class Layer:
 		func backward(dout: Matrix) -> Dictionary:
 			var dW: Matrix = Matrix.outer_product(dout, input)
 			var dB: Matrix = dout
-			var dX: Matrix = Matrix.multiply(weights, dout)
+			var dX: Matrix = Matrix.dot_product(Matrix.transpose(weights), dout)
 			return {
 				"dW": dW,
 				"dB": dB,
-				"dX": dX
+				"dX": dX,
+				"type": "Dense"
 			}
 
 	class Flatten:
@@ -184,9 +187,10 @@ class Layer:
 				for j in range(input_shape.y):
 					dX.data[i][j] = dout.data[i * input_shape.y + j][0]
 			return {
-				"dX": dX
+				"dX": dX,
+				"type": "Flatten"
 			}
-    
+
 	class SoftmaxDense:
 		var weights: Matrix
 		var biases: Matrix
@@ -214,15 +218,16 @@ class Layer:
 		func backward(dout: Matrix) -> Dictionary:
 			var dW: Matrix = Matrix.outer_product(dout, input)
 			var dB: Matrix = dout
-			var dX: Matrix = Matrix.multiply(weights, dout)
+			var dX: Matrix = Matrix.dot_product(Matrix.transpose(weights), dout)
 			return {
 				"dW": dW,
 				"dB": dB,
-				"dX": dX
+				"dX": dX,
+				"type": "SoftmaxDense"
 			}
-        
+
 		func softmax(x: Matrix) -> Matrix:
-			var max_val: float = x.data.max()
+			var max_val: float = Matrix.max(x)
 			var x_stable: Matrix = Matrix.scalar_add(x, -max_val)
 			var exps: Matrix = Matrix.map(x_stable, func(value: float, _row: int, _col: int): return exp(value))
 			var sum_exp: float = Matrix.sum(exps)
@@ -253,16 +258,21 @@ func gradient_cross_entropy_loss(y_pred: Matrix, y_true: Matrix) -> Matrix:
 func train(input_data: Matrix, label) -> float:
 	# One-hot encode the label
 	var output_data: Matrix = Matrix.new(layers[-1].output_shape.x, 1)
-	output_data.data[label][0] = 1.0
+	output_data.data[labels[label]][0] = 1.0
 
 	var y_pred: Matrix = forward(input_data)
 	var loss: float = cross_entropy_loss(y_pred, output_data)
 	var grad: Matrix = gradient_cross_entropy_loss(y_pred, output_data)
+
+	# SGD
 	for i in range(layers.size() - 1, -1, -1):
 		var layer = layers[i]
 		var gradients = layer.backward(grad)
 		if gradients.has("dW"):
-			layer.weights = Matrix.subtract(layer.weights, Matrix.scalar(gradients["dW"], learning_rate))
+			if gradients["type"] == "SingleFilterConvolutional1D":
+				layer.filter = Matrix.subtract(layer.filter, Matrix.scalar(gradients["dW"], learning_rate))
+			else:
+				layer.weights = Matrix.subtract(layer.weights, Matrix.scalar(gradients["dW"], learning_rate))
 		if gradients.has("dB"):
 			layer.biases = Matrix.subtract(layer.biases, Matrix.scalar(gradients["dB"], learning_rate))
 		if gradients.has("dX"):
@@ -276,7 +286,6 @@ func categorise(input_data: Matrix):
 		if labels[key] == max_index:
 			return key
 	return null
-	
 
 func add_labels(_labels: Array) -> void:
 	for i in range(_labels.size()):

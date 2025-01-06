@@ -280,3 +280,10 @@ static func sum(matrix: Matrix) -> float:
 		for col in range(matrix.cols):
 			sum_value += matrix.data[row][col]
 	return sum_value
+
+static func max(matrix: Matrix) -> float:
+	var max_value: float = matrix.data[0][0]
+	for row in range(matrix.rows):
+		for col in range(matrix.cols):
+			max_value = max(max_value, matrix.data[row][col])
+	return max_value
