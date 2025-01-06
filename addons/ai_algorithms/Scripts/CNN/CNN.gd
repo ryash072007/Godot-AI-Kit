@@ -33,6 +33,23 @@ class Layer:
                     output.data[i / stride][j / stride] = sum + bias
             output = Matrix.map(output, activationFunction.function)
             return output
+        
+        func backward(dout: Matrix) -> Dictionary:
+            var dW: Matrix = Matrix.new(filter_shape.x, filter_shape.y)
+            var dB: float = 0.0
+            var dX: Matrix = Matrix.new(input_shape.x, input_shape.y)
+            for i in range(0, input_shape.x - filter_shape.x + 1, stride):
+                for j in range(0, input_shape.y - filter_shape.y + 1, stride):
+                    for x in range(filter_shape.x):
+                        for y in range(filter_shape.y):
+                            dW.data[x][y] += input.data[i + x][j + y] * dout.data[i / stride][j / stride]
+                            dX.data[i + x][j + y] += filter.data[x][y] * dout.data[i / stride][j / stride]
+                    dB += dout.data[i / stride][j / stride]
+            return {
+                "dW": dW,
+                "dB": dB,
+                "dX": dX
+            }
     
     class Pooling:
         var stride: int = 1
