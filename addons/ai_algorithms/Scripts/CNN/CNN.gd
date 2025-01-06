@@ -1,23 +1,31 @@
 class_name CNN
 
+var learning_rate: float = 0.01
+var layers: Array = []
+
 class Layer:
     class SingleFilterConvolutional1D:
         var filter: Matrix
         var bias: float = 0.0
         var stride: int = 1
-        var input_shape: Vector2i = Vector2(0, 0)
-        var filter_shape: Vector2i = Vector2(0, 0)
-        var output_shape: Vector2i = Vector2(0, 0)
+        var input_shape: Vector2i
+        var filter_shape: Vector2i = Vector2i(3, 3)
+        var output_shape: Vector2i
         var output: Matrix
 
         var input: Matrix
 
         var activationFunction := Activation.RELU
 
-        func _init(_input_shape: Vector2i, _output_shape: Vector2i, _filter_shape: Vector2i = Vector2i(3,3), _stride: int = 1) -> void:
+        func _init(_input_shape: Vector2i, _filter_shape: Vector2i = Vector2i(3,3), _stride: int = 1) -> void:
             input_shape = _input_shape
-            output_shape = _output_shape
             filter_shape = _filter_shape
+
+            output_shape = Vector2i(
+                ((input_shape.x - filter_shape.x) / stride) + 1,
+                ((input_shape.y - filter_shape.y) / stride) + 1
+            )
+
             stride = _stride
             filter = Matrix.uniform_he_init(Matrix.new(filter_shape.x, filter_shape.y), filter_shape.x * filter_shape.y)
         
@@ -67,8 +75,8 @@ class Layer:
             stride = _stride
 
             output_shape = Vector2i(
-                (input_shape.x - pool_size.x) / stride + 1,
-                (input_shape.y - pool_size.y) / stride + 1
+                ((input_shape.x - pool_size.x) / stride) + 1,
+                ((input_shape.y - pool_size.y) / stride) + 1
             )
         
         # Max pooling
@@ -99,8 +107,7 @@ class Layer:
                                 max_y = j + y
                     dx.data[max_x][max_y] = dout.data[i / stride][j / stride]
             return dx
-
-    
+ 
     class Dense:
         var weights: Matrix
         var biases: Matrix
@@ -147,4 +154,40 @@ class Layer:
                 "dB": dB,
                 "dX": dX
             }
+    
+    class Flatten:
+        var input_shape: Vector2i
+        var output_shape: Vector2i
+        var output: Matrix
 
+        # Storing the input from the last forward pass
+        var input: Matrix
+
+        func _init(_input_shape: Vector2i) -> void:
+            input_shape = _input_shape
+            output_shape = Vector2i(input_shape.x * input_shape.y, 1)
+        
+        func forward(_input: Matrix) -> Matrix:
+            input = _input
+            output = Matrix.new(output_shape.x, output_shape.y)
+            for i in range(input_shape.x):
+                for j in range(input_shape.y):
+                    output.data[i * input_shape.y + j][0] = input.data[i][j]
+            return output
+        
+        func backward(dout: Matrix) -> Matrix:
+            var dx = Matrix.new(input_shape.x, input_shape.y)
+            for i in range(input_shape.x):
+                for j in range(input_shape.y):
+                    dx.data[i][j] = dout.data[i * input_shape.y + j][0]
+            return dx
+
+func add_layer(layer) -> Vector2i:
+    layers.append(layer)
+    return layer.output_shape
+
+func forward(input: Matrix) -> Matrix:
+    var output = input
+    for layer in layers:
+        output = layer.forward(output)
+    return output
