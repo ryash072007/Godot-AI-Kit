@@ -26,11 +26,28 @@ class Layer:
         var output_shape: Vector2i = Vector2i(0, 0)
         var output: Matrix
 
-        func _init(_input_shape: Vector2i, _output_shape: Vector2i, _pool_size: Vector2i = Vector2i(2, 2), _stride: int = 2) -> void:
+        func _init(_input_shape: Vector2i, _pool_size: Vector2i = Vector2i(2, 2), _stride: int = 2) -> void:
             input_shape = _input_shape
-            output_shape = _output_shape
             pool_size = _pool_size
             stride = _stride
+
+            output_shape = Vector2i(
+                (input_shape.x - pool_size.x) / stride + 1,
+                (input_shape.y - pool_size.y) / stride + 1
+            )
+        
+        # Max pooling
+        func forward(input: Matrix) -> Matrix:
+            output = Matrix.new(output_shape.x, output_shape.y)
+            for i in range(0, input_shape.x - pool_size.x + 1, stride):
+                for j in range(0, input_shape.y - pool_size.y + 1, stride):
+                    var max_val = -INF
+                    for x in range(pool_size.x):
+                        for y in range(pool_size.y):
+                            max_val = max(max_val, input.data[i + x][j + y])
+                    output.data[i / stride][j / stride] = max_val
+            return output
+
     
     class Dense:
         var weights: Matrix
