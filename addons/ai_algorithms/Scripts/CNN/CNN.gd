@@ -3,6 +3,8 @@ class_name CNN
 var learning_rate: float = 0.01
 var layers: Array = []
 
+var labels: Dictionary = {}
+
 class Layer:
 	class SingleFilterConvolutional1D:
 		var filter: Matrix
@@ -92,8 +94,8 @@ class Layer:
 					output.data[i / stride][j / stride] = max_val
 			return output
 
-		func backward(dout: Matrix) -> Matrix:
-			var dx = Matrix.new(input_shape.x, input_shape.y)
+		func backward(dout: Matrix) -> Dictionary:
+			var dX = Matrix.new(input_shape.x, input_shape.y)
 			for i in range(0, input_shape.x - pool_size.x + 1, stride):
 				for j in range(0, input_shape.y - pool_size.y + 1, stride):
 					var max_val = -INF
@@ -105,8 +107,10 @@ class Layer:
 								max_val = input.data[i + x][j + y]
 								max_x = i + x
 								max_y = j + y
-					dx.data[max_x][max_y] = dout.data[i / stride][j / stride]
-			return dx
+					dX.data[max_x][max_y] = dout.data[i / stride][j / stride]
+			return {
+				"dX": dX
+			}
 
 	class Dense:
 		var weights: Matrix
@@ -174,12 +178,14 @@ class Layer:
 					output.data[i * input_shape.y + j][0] = input.data[i][j]
 			return output
 
-		func backward(dout: Matrix) -> Matrix:
-			var dx = Matrix.new(input_shape.x, input_shape.y)
+		func backward(dout: Matrix) -> Dictionary:
+			var dX = Matrix.new(input_shape.x, input_shape.y)
 			for i in range(input_shape.x):
 				for j in range(input_shape.y):
-					dx.data[i][j] = dout.data[i * input_shape.y + j][0]
-			return dx
+					dX.data[i][j] = dout.data[i * input_shape.y + j][0]
+			return {
+				"dX": dX
+			}
     
 	class SoftmaxDense:
 		var weights: Matrix
@@ -244,3 +250,34 @@ func cross_entropy_loss(y_pred: Matrix, y_true: Matrix) -> float:
 func gradient_cross_entropy_loss(y_pred: Matrix, y_true: Matrix) -> Matrix:
 	return Matrix.subtract(y_pred, y_true)
 
+func train(input_data: Matrix, label) -> float:
+	# One-hot encode the label
+	var output_data: Matrix = Matrix.new(layers[-1].output_shape.x, 1)
+	output_data.data[label][0] = 1.0
+
+	var y_pred: Matrix = forward(input_data)
+	var loss: float = cross_entropy_loss(y_pred, output_data)
+	var grad: Matrix = gradient_cross_entropy_loss(y_pred, output_data)
+	for i in range(layers.size() - 1, -1, -1):
+		var layer = layers[i]
+		var gradients = layer.backward(grad)
+		if gradients.has("dW"):
+			layer.weights = Matrix.subtract(layer.weights, Matrix.scalar(gradients["dW"], learning_rate))
+		if gradients.has("dB"):
+			layer.biases = Matrix.subtract(layer.biases, Matrix.scalar(gradients["dB"], learning_rate))
+		if gradients.has("dX"):
+			grad = gradients["dX"]
+	return loss
+
+func categorise(input_data: Matrix):
+	var y_pred: Matrix = forward(input_data)
+	var max_index: int = Matrix.transpose(y_pred).index_of_max_from_row(0)
+	for key in labels.keys():
+		if labels[key] == max_index:
+			return key
+	return null
+	
+
+func add_labels(_labels: Array) -> void:
+	for i in range(_labels.size()):
+		labels[_labels[i]] = i
