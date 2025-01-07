@@ -12,6 +12,7 @@ class Layer:
 		var stride: int = 1
 		var input_shape: Vector2i
 		var filter_shape: Vector2i = Vector2i(3, 3)
+		var padding: int = 0
 		var output_shape: Vector2i
 		var output: Matrix
 
@@ -19,13 +20,14 @@ class Layer:
 
 		var activationFunction := Activation.RELU
 
-		func _init(_input_shape: Vector2i, _filter_shape: Vector2i = Vector2i(3, 3), _stride: int = 1) -> void:
+		func _init(_input_shape: Vector2i, _padding: int, _filter_shape: Vector2i = Vector2i(3, 3), _stride: int = 1) -> void:
 			input_shape = _input_shape
 			filter_shape = _filter_shape
+			padding = _padding
 
 			output_shape = Vector2i(
-				((input_shape.x - filter_shape.x) / stride) + 1,
-				((input_shape.y - filter_shape.y) / stride) + 1
+				((input_shape.x - filter_shape.x + 2 * padding) / stride) + 1,
+				((input_shape.y - filter_shape.y + 2 * padding) / stride) + 1
 			)
 
 			stride = _stride
@@ -61,7 +63,82 @@ class Layer:
 				"dX": dX,
 				"type": "SingleFilterConvolutional1D"
 			}
-	
+
+
+	class MutliFilterConvolutional1D:
+		var filters: Array[Matrix]
+		var num_filters: int
+		var biases: Matrix
+		var stride: int
+		var input_shape: Vector2i
+		var filter_shape: Vector2i = Vector2i(3, 3)
+		var padding: int
+		var output_shape: Vector2i
+		var output: Array[Matrix]
+
+		var input: Matrix
+
+		var activationFunction := Activation.RELU
+
+		func _init(_input_shape: Vector2i, _num_filters: int = 1, _padding: int = 0, _filter_shape: Vector2i = Vector2i(3, 3), _stride: int = 1) -> void:
+			input_shape = _input_shape
+			filter_shape = _filter_shape
+			padding = _padding
+			num_filters = _num_filters
+			stride = _stride
+
+			biases = Matrix.new(num_filters, 1)
+
+			output_shape = Vector2i(
+				((input_shape.x - filter_shape.x + 2 * padding) / stride) + 1,
+				((input_shape.y - filter_shape.y + 2 * padding) / stride) + 1
+			)
+
+			for i in range(num_filters):
+				filters.append(Matrix.uniform_he_init(Matrix.new(filter_shape.x, filter_shape.y), filter_shape.x * filter_shape.y))
+
+		func forward(_input: Matrix) -> Array[Matrix]:
+			input = _input
+			for filter_index in range(num_filters):
+				var filter: Matrix = filters[filter_index]
+				var bias: Matrix = biases.data[filter_index][0]
+				var _output: Matrix = Matrix.new(output_shape.x, output_shape.y)
+				for i in range(0, input_shape.x - filter_shape.x + 1, stride):
+					for j in range(0, input_shape.y - filter_shape.y + 1, stride):
+						var sum = 0.0
+						for x in range(filter_shape.x):
+							for y in range(filter_shape.y):
+								sum += input.data[i + x][j + y] * filter.data[x][y]
+						_output.data[i / stride][j / stride] = sum + bias
+				_output = Matrix.map(_output, activationFunction.function)
+				output.append(_output)
+			return output
+
+		func backward(_dout: Array[Matrix]) -> Dictionary:
+			var dB: Matrix = Matrix.new(num_filters, 1)
+			var dW: Array[Matrix]
+			var dX: Array[Matrix]
+			for index in range(num_filters):
+				var filter: Matrix = filters[index]
+				var dout: Matrix = _dout[index]
+				var _dW: Matrix = Matrix.new(filter_shape.x, filter_shape.y)
+				var _dX: Matrix = Matrix.new(input_shape.x, input_shape.y)
+				for i in range(0, input_shape.x - filter_shape.x + 1, stride):
+					for j in range(0, input_shape.y - filter_shape.y + 1, stride):
+						for x in range(filter_shape.x):
+							for y in range(filter_shape.y):
+								_dW.data[x][y] += input.data[i + x][j + y] * dout.data[i / stride][j / stride]
+								_dX.data[i + x][j + y] += filter.data[x][y] * dout.data[i / stride][j / stride]
+						dB.data[index][0] = dB.data[index][0] + dout.data[i / stride][j / stride]
+				dW.append(_dW)
+				dX.append(_dX)
+			return {
+				"dW": dW,
+				"dB": dB,
+				"dX": dX,
+				"type": "MutliFilterConvolutional1D"
+			}
+
 
 	class Pooling:
 		var stride: int = 1
@@ -155,7 +232,6 @@ class Layer:
 			var dW: Matrix = Matrix.outer_product(dout, input)
 			var dB: Matrix = dout
 			var dX: Matrix = Matrix.dot_product(Matrix.transpose(weights), dout)
-			dX = Matrix.map(dX, activationFunction.derivative)
 			return {
 				"dW": dW,
 				"dB": dB,
