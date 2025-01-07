@@ -371,12 +371,56 @@ class Layer:
 				"type": "BatchNormalization"
 			}
 
+	class Dropout:
+		var rate: float
+		var mask: Matrix
+		var input_shape: Vector2i
+		var flattened: bool
+
+		func _init(_rate: float) -> void:
+			rate = _rate
+
+		func set_input_shape(_input_shape: Vector2i, _flattened: bool) -> void:
+			input_shape = _input_shape
+			flattened = _flattened
+
+		func forward(_input):
+			mask = Matrix.new(input_shape.x, input_shape.y)
+			for i in range(input_shape.x):
+				for j in range(input_shape.y):
+					mask.data[i][j] = 0.0 if randf() < rate else 1.0
+			
+			if flattened:
+				return Matrix.multiply(_input, mask)
+			else:
+				var outputs: Array[Matrix] = []
+				for matrix in _input:
+					outputs.append(Matrix.multiply(matrix, mask))
+				return outputs
+
+		func backward(dout) -> Dictionary:
+			if flattened:
+				return {
+					"dX": Matrix.multiply(dout, mask),
+					"type": "Dropout"
+				}
+			else:
+				var dX: Array[Matrix] = []
+				for i in range(dout.size()):
+					dX.append(Matrix.multiply(dout[i], mask))
+				return {
+					"dX": dX,
+					"type": "Dropout"
+				}
+
 func add_layer(layer) -> void:
 	layers.append(layer)
 
-func forward(input: Matrix) -> Matrix:
+func forward(input: Matrix, skip_dropout: bool = false) -> Matrix:
 	var output = [input]
 	for layer in layers:
+		if skip_dropout and layer is Layer.Dropout:
+			continue
 		output = layer.forward(output)
 	return output
 
@@ -422,7 +466,7 @@ func train(input_data: Matrix, label) -> float:
 	return loss
 
 func categorise(input_data: Matrix):
-	var y_pred: Matrix = forward(input_data)
+	var y_pred: Matrix = forward(input_data, true)
 	var max_index: int = Matrix.transpose(y_pred).index_of_max_from_row(0)
 	for key in labels.keys():
 		if labels[key] == max_index:
@@ -443,9 +487,11 @@ func compile_network(input_dimensions: Vector2i) -> void:
 			layer.set_input_shape(current_input_shape)
 			current_input_shape = layer.output_shape
 			num_feature_maps *= layer.num_filters
+			flattened = false
 		elif layer is Layer.MultiPoolPooling:
 			layer.set_input_shape(current_input_shape, num_feature_maps)
 			current_input_shape = layer.output_shape
+			flattened = false
 		elif layer is Layer.Flatten:
 			layer.set_input_shape(current_input_shape, num_feature_maps)
 			current_input_shape = layer.output_shape
@@ -454,5 +500,7 @@ func compile_network(input_dimensions: Vector2i) -> void:
 			layer.set_input_shape(current_input_shape)
 			current_input_shape = layer.output_shape
 		elif layer is Layer.BatchNormalization:
+			layer.set_input_shape(current_input_shape, flattened)
+		elif layer is Layer.Dropout:
 			layer.set_input_shape(current_input_shape, flattened)
 
