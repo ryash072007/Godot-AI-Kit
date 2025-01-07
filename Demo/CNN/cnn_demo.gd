@@ -21,11 +21,11 @@ func _ready() -> void:
 	cnn.learning_rate = 0.005
 	cnn.add_labels(["O", "X"])
 
-	var next_layer_output = cnn.add_layer(cnn.Layer.SingleFilterConvolutional1D.new(Vector2i(14,14)))
-	next_layer_output = cnn.add_layer(cnn.Layer.Pooling.new(next_layer_output))
-	next_layer_output = cnn.add_layer(cnn.Layer.Flatten.new(next_layer_output))  # 8 feature maps
-	next_layer_output = cnn.add_layer(cnn.Layer.Dense.new(next_layer_output, 16))
-	next_layer_output = cnn.add_layer(cnn.Layer.SoftmaxDense.new(next_layer_output, 2))
+	# var next_layer_output = cnn.add_layer(cnn.Layer.SingleFilterConvolutional1D.new(Vector2i(14,14)))
+	# next_layer_output = cnn.add_layer(cnn.Layer.Pooling.new(next_layer_output))
+	# next_layer_output = cnn.add_layer(cnn.Layer.Flatten.new(next_layer_output))  # 8 feature maps
+	# next_layer_output = cnn.add_layer(cnn.Layer.Dense.new(next_layer_output, 16))
+	# next_layer_output = cnn.add_layer(cnn.Layer.SoftmaxDense.new(next_layer_output, 2))
 
 	training_O_images = load_images_from_folder(training_O_dir)
 	training_X_images = load_images_from_folder(training_X_dir)

@@ -6,65 +6,6 @@ var layers: Array = []
 var labels: Dictionary = {}
 
 class Layer:
-	class SingleFilterConvolutional1D:
-		var filter: Matrix
-		var biases: Matrix = Matrix.new(1, 1)
-		var stride: int = 1
-		var input_shape: Vector2i
-		var filter_shape: Vector2i = Vector2i(3, 3)
-		var padding: int = 0
-		var output_shape: Vector2i
-		var output: Matrix
-
-		var input: Matrix
-
-		var activationFunction := Activation.RELU
-
-		func _init(_input_shape: Vector2i, _padding: int, _filter_shape: Vector2i = Vector2i(3, 3), _stride: int = 1) -> void:
-			input_shape = _input_shape
-			filter_shape = _filter_shape
-			padding = _padding
-
-			output_shape = Vector2i(
-				((input_shape.x - filter_shape.x + 2 * padding) / stride) + 1,
-				((input_shape.y - filter_shape.y + 2 * padding) / stride) + 1
-			)
-
-			stride = _stride
-			filter = Matrix.uniform_he_init(Matrix.new(filter_shape.x, filter_shape.y), filter_shape.x * filter_shape.y)
-
-		func forward(_input: Matrix) -> Matrix:
-			input = _input
-			output = Matrix.new(output_shape.x, output_shape.y)
-			for i in range(0, input_shape.x - filter_shape.x + 1, stride):
-				for j in range(0, input_shape.y - filter_shape.y + 1, stride):
-					var sum = 0.0
-					for x in range(filter_shape.x):
-						for y in range(filter_shape.y):
-							sum += input.data[i + x][j + y] * filter.data[x][y]
-					output.data[i / stride][j / stride] = sum + biases.data[0][0]
-			output = Matrix.map(output, activationFunction.function)
-			return output
-
-		func backward(dout: Matrix) -> Dictionary:
-			var dW: Matrix = Matrix.new(filter_shape.x, filter_shape.y)
-			var dB: Matrix = Matrix.new(1, 1)
-			var dX: Matrix = Matrix.new(input_shape.x, input_shape.y)
-			for i in range(0, input_shape.x - filter_shape.x + 1, stride):
-				for j in range(0, input_shape.y - filter_shape.y + 1, stride):
-					for x in range(filter_shape.x):
-						for y in range(filter_shape.y):
-							dW.data[x][y] += input.data[i + x][j + y] * dout.data[i / stride][j / stride]
-							dX.data[i + x][j + y] += filter.data[x][y] * dout.data[i / stride][j / stride]
-					dB = Matrix.scalar_add(dB, dout.data[i / stride][j / stride])
-			return {
-				"dW": dW,
-				"dB": dB,
-				"dX": dX,
-				"type": "SingleFilterConvolutional1D"
-			}
-
-
 	class MutliFilterConvolutional1D:
 		var filters: Array[Matrix]
 		var num_filters: int
@@ -79,8 +20,7 @@ class Layer:
 
 		var activationFunction := Activation.RELU
 
-		func _init(_input_shape: Vector2i, _num_filters: int = 1, _padding: int = 0, _filter_shape: Vector2i = Vector2i(3, 3), _stride: int = 1) -> void:
-			input_shape = _input_shape
+		func _init(_num_filters: int = 1, _padding: int = 0, _filter_shape: Vector2i = Vector2i(3, 3), _stride: int = 1) -> void:
 			filter_shape = _filter_shape
 			padding = _padding
 			num_filters = _num_filters
@@ -88,13 +28,15 @@ class Layer:
 
 			biases = Matrix.new(num_filters, 1)
 
+			for i in range(num_filters):
+				filters.append(Matrix.uniform_he_init(Matrix.new(filter_shape.x, filter_shape.y), filter_shape.x * filter_shape.y))
+
+		func set_input_shape(_input_shape: Vector2i) -> void:
+			input_shape = _input_shape
 			output_shape = Vector2i(
 				((input_shape.x - filter_shape.x + 2 * padding) / stride) + 1,
 				((input_shape.y - filter_shape.y + 2 * padding) / stride) + 1
 			)
-
-			for i in range(num_filters):
-				filters.append(Matrix.uniform_he_init(Matrix.new(filter_shape.x, filter_shape.y), filter_shape.x * filter_shape.y))
 
 		func forward(_input: Matrix) -> Array[Matrix]:
 			input = _input
@@ -140,58 +82,6 @@ class Layer:
 				"type": "MutliFilterConvolutional1D"
 			}
 
-
-	class Pooling:
-		var stride: int = 1
-		var pool_size: Vector2i = Vector2i(0, 0)
-		var input_shape: Vector2i = Vector2i(0, 0)
-		var output_shape: Vector2i = Vector2i(0, 0)
-
-		# Storing the input from the last forward pass
-		var input: Matrix
-
-		func _init(_input_shape: Vector2i, _stride: int = 2, _pool_size: Vector2i = Vector2i(2, 2)) -> void:
-			input_shape = _input_shape
-			pool_size = _pool_size
-			stride = _stride
-
-			output_shape = Vector2i(
-				((input_shape.x - pool_size.x) / stride) + 1,
-				((input_shape.y - pool_size.y) / stride) + 1
-			)
-
-		# Max pooling
-		func forward(_input: Matrix) -> Matrix:
-			input = _input
-			var output: Matrix = Matrix.new(output_shape.x, output_shape.y)
-			for i in range(0, input_shape.x - pool_size.x + 1, stride):
-				for j in range(0, input_shape.y - pool_size.y + 1, stride):
-					var max_val = -INF
-					for x in range(pool_size.x):
-						for y in range(pool_size.y):
-							max_val = max(max_val, input.data[i + x][j + y])
-					output.data[i / stride][j / stride] = max_val
-			return output
-
-		func backward(dout: Matrix) -> Dictionary:
-			var dX = Matrix.new(input_shape.x, input_shape.y)
-			for i in range(0, input_shape.x - pool_size.x + 1, stride):
-				for j in range(0, input_shape.y - pool_size.y + 1, stride):
-					var max_val = -INF
-					var max_x = 0
-					var max_y = 0
-					for x in range(pool_size.x):
-						for y in range(pool_size.y):
-							if input.data[i + x][j + y] > max_val:
-								max_val = input.data[i + x][j + y]
-								max_x = i + x
-								max_y = j + y
-					dX.data[max_x][max_y] = dout.data[i / stride][j / stride]
-			return {
-				"dX": dX,
-				"type": "Pooling"
-			}
-	
 	class MultiPoolPooling:
 		var stride: int = 1
 		var pool_size: Vector2i = Vector2i(0, 0)
@@ -202,12 +92,13 @@ class Layer:
 		# Storing the input from the last forward pass
 		var input: Array[Matrix]
 
-		func _init(_input_shape: Vector2i, _num_pool: int = 1, _stride: int = 2, _pool_size: Vector2i = Vector2i(2, 2)) -> void:
-			input_shape = _input_shape
+		func _init(_num_pool: int = 1, _stride: int = 2, _pool_size: Vector2i = Vector2i(2, 2)) -> void:
 			pool_size = _pool_size
 			stride = _stride
 			num_pools = _num_pool			
 
+		func set_input_shape(_input_shape: Vector2i) -> void:
+			input_shape = _input_shape
 			output_shape = Vector2i(
 				((input_shape.x - pool_size.x) / stride) + 1,
 				((input_shape.y - pool_size.y) / stride) + 1
@@ -267,12 +158,14 @@ class Layer:
 		var ACTIVATIONS: Activation = Activation.new()
 		var activationFunction
 
-		func _init(_input_shape: Vector2i, _output_shape: int, _activation: String = "RELU") -> void:
-			input_shape = _input_shape.x
+		func _init(_output_shape: int, _activation: String = "RELU") -> void:
 			output_shape = Vector2i(_output_shape, 1)
 			activation = _activation
-
 			activationFunction = ACTIVATIONS.get(activation)
+			biases = Matrix.new(output_shape.x, 1)
+		
+		func set_input_shape(_input_shape: Vector2i) -> void:
+			input_shape = _input_shape.x
 
 			if activation in ["RELU", "LEAKYRELU", "ELU", "LINEAR"]:
 				weights = Matrix.uniform_he_init(Matrix.new(output_shape.x, input_shape), input_shape)
@@ -280,8 +173,6 @@ class Layer:
 				weights = Matrix.uniform_glorot_init(Matrix.new(output_shape.x, input_shape), input_shape, output_shape.x)
 			else:
 				weights = Matrix.rand(Matrix.new(output_shape.x, input_shape))
-
-			biases = Matrix.new(output_shape.x, 1)
 
 		func forward(_input: Matrix) -> Matrix:
 			input = _input
@@ -304,27 +195,35 @@ class Layer:
 		var input_shape: Vector2i
 		var output_shape: Vector2i
 		var output: Matrix
+		var num_feature_maps: int
 
 		# Storing the input from the last forward pass
-		var input: Matrix
+		var input: Array[Matrix]
 
-		func _init(_input_shape: Vector2i) -> void:
+		func _init(_num_feature_maps: int = 1) -> void:
+			num_feature_maps = _num_feature_maps
+
+		func set_input_shape(_input_shape: Vector2i) -> void:
 			input_shape = _input_shape
-			output_shape = Vector2i(input_shape.x * input_shape.y, 1)
+			output_shape = Vector2i(input_shape.x * input_shape.y * num_feature_maps, 1)
 
-		func forward(_input: Matrix) -> Matrix:
+		func forward(_input: Array[Matrix]) -> Matrix:
 			input = _input
 			output = Matrix.new(output_shape.x, output_shape.y)
-			for i in range(input_shape.x):
-				for j in range(input_shape.y):
-					output.data[i * input_shape.y + j][0] = input.data[i][j]
+			for feature_index in range(num_feature_maps):
+				for i in range(input_shape.x):
+					for j in range(input_shape.y):
+						output.data[feature_index * input_shape.x * input_shape.y + i * input_shape.y + j][0] = input[feature_index].data[i][j]
 			return output
 
 		func backward(dout: Matrix) -> Dictionary:
-			var dX = Matrix.new(input_shape.x, input_shape.y)
-			for i in range(input_shape.x):
-				for j in range(input_shape.y):
-					dX.data[i][j] = dout.data[i * input_shape.y + j][0]
+			var dX: Array[Matrix] = []
+			for feature_index in range(num_feature_maps):
+				var _dX = Matrix.new(input_shape.x, input_shape.y)
+				for i in range(input_shape.x):
+					for j in range(input_shape.y):
+						_dX.data[i][j] = dout.data[feature_index * input_shape.x * input_shape.y + i * input_shape.y + j][0]
+				dX.append(_dX)
 			return {
 				"dX": dX,
 				"type": "Flatten"
