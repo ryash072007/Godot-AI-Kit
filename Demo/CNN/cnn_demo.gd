@@ -21,6 +21,14 @@ func _ready() -> void:
 	cnn.learning_rate = 0.005
 	cnn.add_labels(["O", "X"])
 
+	cnn.add_layer(cnn.Layer.MutliFilterConvolutional1D.new(1))
+	cnn.add_layer(cnn.Layer.MultiPoolPooling.new())
+	cnn.add_layer(cnn.Layer.Flatten.new())
+	cnn.add_layer(cnn.Layer.SoftmaxDense.new(2))
+
+	cnn.compile_network(Vector2i(14, 14))
+
+
 	# var next_layer_output = cnn.add_layer(cnn.Layer.SingleFilterConvolutional1D.new(Vector2i(14,14)))
 	# next_layer_output = cnn.add_layer(cnn.Layer.Pooling.new(next_layer_output))
 	# next_layer_output = cnn.add_layer(cnn.Layer.Flatten.new(next_layer_output))  # 8 feature maps
