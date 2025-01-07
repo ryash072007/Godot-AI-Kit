@@ -80,8 +80,8 @@ class Layer:
 			var dW: Array[Matrix] = []
 			var dX: Array[Matrix] = []
 			for input_index in range(inputs.size()):
-				var input: Matrix = inputs[input_index]
-				var dout: Matrix = _dout[input_index]
+				var input: Matrix = Matrix.map(inputs[input_index], activationFunction.derivative)
+				var dout: Matrix = Matrix.multiply(_dout[input_index], input)
 				for filter_index in range(num_filters):
 					var filter: Matrix = filters[filter_index]
 					var _dW: Matrix = Matrix.new(filter_shape.x, filter_shape.y)
@@ -116,7 +116,7 @@ class Layer:
 		# Storing the input from the last forward pass
 		var input: Array[Matrix]
 
-		func _init(_padding: int = 0, _stride: int = 2, _pool_size: Vector2i = Vector2i(2, 2)) -> void:
+		func _init( _stride: int = 2, _padding: int = 0, _pool_size: Vector2i = Vector2i(2, 2)) -> void:
 			pool_size = _pool_size
 			stride = _stride
 			padding = _padding
@@ -207,6 +207,8 @@ class Layer:
 			return output
 
 		func backward(dout: Matrix) -> Dictionary:
+			# Testing
+			input = Matrix.map(input, activationFunction.derivative)
 			var dW: Matrix = Matrix.outer_product(dout, input)
 			var dB: Matrix = dout
 			var dX: Matrix = Matrix.dot_product(Matrix.transpose(weights), dout)

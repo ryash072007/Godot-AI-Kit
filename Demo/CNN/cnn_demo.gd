@@ -17,24 +17,28 @@ var training_steps: int = 0
 var total_O_loss: float = 0.0
 var total_X_loss: float = 0.0
 
+var total_testing_images: int
+
 func _ready() -> void:
-	cnn.learning_rate = 0.005
+	cnn.learning_rate = 0.001
 	cnn.add_labels(["O", "X"])
 
-	cnn.add_layer(cnn.Layer.MutliFilterConvolutional1D.new(8, "same"))
+	cnn.add_layer(cnn.Layer.MutliFilterConvolutional1D.new(4, "same"))
 	cnn.add_layer(cnn.Layer.MultiPoolPooling.new())
+	#cnn.add_layer(cnn.Layer.MutliFilterConvolutional1D.new(4, "same"))
+	#cnn.add_layer(cnn.Layer.MultiPoolPooling.new())
 	cnn.add_layer(cnn.Layer.Flatten.new())
-	cnn.add_layer(cnn.Layer.Dense.new(32, "ELU"))
+	cnn.add_layer(cnn.Layer.Dense.new(64, "RELU"))
 	cnn.add_layer(cnn.Layer.SoftmaxDense.new(2))
 
-	cnn.compile_network(Vector2i(14, 14))
+	cnn.compile_network(Vector2i(28, 28))
 
-	training_O_images = load_images_from_folder(training_O_dir)
-	training_X_images = load_images_from_folder(training_X_dir)
-	testing_O_images = load_images_from_folder(testing_O_dir)
-	testing_X_images = load_images_from_folder(testing_X_dir)
+	training_O_images = ImageHelper.load_grayscale_images_from_folder(training_O_dir)
+	training_X_images = ImageHelper.load_grayscale_images_from_folder(training_X_dir)
+	testing_O_images = ImageHelper.load_grayscale_images_from_folder(testing_O_dir)
+	testing_X_images = ImageHelper.load_grayscale_images_from_folder(testing_X_dir)
 
-func _physics_process(_delta: float) -> void:
+func _process(_delta: float) -> void:
 	if training_O_images.size() > 0:
 		total_O_loss += cnn.train(training_O_images.pick_random(), "O")
 
@@ -43,22 +47,24 @@ func _physics_process(_delta: float) -> void:
 
 	training_steps += 1
 
-	if training_steps % 100 == 0:
+	if training_steps % 50 == 0:
 		var avg_O_loss = total_O_loss / 100.0
 		var avg_X_loss = total_X_loss / 100.0
 		total_O_loss = 0.0
 		total_X_loss = 0.0
 
 		print("________________________________________________________")
-		print("Average O Loss: ", avg_O_loss, "at training step: ", training_steps)
-		print("Average X Loss: ", avg_X_loss, "at training step: ", training_steps)
+		print("Average O Loss: ", avg_O_loss, " at training step: ", training_steps)
+		print("Average X Loss: ", avg_X_loss, " at training step: ", training_steps)
 
-		var accuracy = test_all_images()
-		print("Model Accuracy: ", accuracy, "%")
+		if training_steps % 100 == 0:
+			var accuracy = test_all_images()
+			print("Model Accuracy: ", accuracy)
+			print("Model got ", accuracy * total_testing_images, " out of ", total_testing_images, " correct!")
 
-		if accuracy > 98.0:
-			print("Training complete. Accuracy is greater than 98%.")
-			get_tree().quit()
+			if accuracy > 0.95:
+				print("Training complete. Accuracy is greater than 95%.")
+				get_tree().quit()
 
 	if Input.is_action_just_pressed("ui_accept"):
 		print("________________________________________________________")
@@ -73,37 +79,11 @@ func _physics_process(_delta: float) -> void:
 			print("Testing X - Prediction: ", prediction_X)
 		print("________________________________________________________")
 
-func load_image_data(image_path: String) -> Matrix:
-	var image = Image.new()
-	if image.load(image_path) != OK:
-		push_error("Failed to load image: " + image_path)
-		return Matrix.new(0, 0)
-	image.convert(Image.FORMAT_L8)  # Convert to grayscale
-	var width = image.get_width()
-	var height = image.get_height()
-	var matrix = Matrix.new(width, height)
-	for x in range(width):
-		for y in range(height):
-			matrix.data[x][y] = image.get_pixel(x, y).r  # Get the red channel (grayscale)
-	return matrix
-
-func load_images_from_folder(folder_path: String) -> Array[Matrix]:
-	var images: Array[Matrix] = []
-	var dir = DirAccess.open(folder_path)
-	dir.list_dir_begin()
-	var file_name = dir.get_next()
-	while file_name != "":
-		if !dir.current_is_dir() and file_name.ends_with(".png"):
-			var image_path = folder_path.path_join(file_name)
-			var image_data = load_image_data(image_path)
-			images.append(image_data)
-		file_name = dir.get_next()
-	dir.list_dir_end()
-	return images
-
 func test_all_images() -> float:
 	var correct_predictions: int = 0
 	var total_predictions: int = 0
+
+	total_testing_images = testing_O_images.size() + testing_X_images.size()
 
 	for image in testing_O_images:
 		var prediction = cnn.categorise(image)
@@ -117,6 +97,6 @@ func test_all_images() -> float:
 			correct_predictions += 1
 		total_predictions += 1
 
-	var accuracy = float(correct_predictions) / float(total_predictions) * 100.0
+	var accuracy = float(correct_predictions) / float(total_predictions)
 	return accuracy
 
