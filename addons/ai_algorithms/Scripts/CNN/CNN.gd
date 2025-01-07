@@ -504,3 +504,4 @@ func compile_network(input_dimensions: Vector2i) -> void:
 		elif layer is Layer.Dropout:
 			layer.set_input_shape(current_input_shape, flattened)
 
+

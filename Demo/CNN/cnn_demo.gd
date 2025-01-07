@@ -19,17 +19,23 @@ var total_X_loss: float = 0.0
 
 var total_testing_images: int
 
+var training_O_index: int = 0
+var training_X_index: int = 0
+
+var lr_change_rate: float = 0.05
+
 func _ready() -> void:
-	cnn.learning_rate = 0.001
+	cnn.learning_rate = 0.003
 	cnn.add_labels(["O", "X"])
 
-	cnn.add_layer(cnn.Layer.MutliFilterConvolutional1D.new(4, "same"))
-	# cnn.add_layer(cnn.Layer.BatchNormalization.new())
+	cnn.add_layer(cnn.Layer.MutliFilterConvolutional1D.new(8, "same"))
 	cnn.add_layer(cnn.Layer.MultiPoolPooling.new())
-	#cnn.add_layer(cnn.Layer.MutliFilterConvolutional1D.new(4, "same"))
-	#cnn.add_layer(cnn.Layer.MultiPoolPooling.new())
+	cnn.add_layer(cnn.Layer.Dropout.new(0.2))
+
 	cnn.add_layer(cnn.Layer.Flatten.new())
 	cnn.add_layer(cnn.Layer.Dense.new(64, "RELU"))
+	cnn.add_layer(cnn.Layer.Dropout.new(0.1))
+
 	cnn.add_layer(cnn.Layer.SoftmaxDense.new(2))
 
 	cnn.compile_network(Vector2i(28, 28))
@@ -39,12 +45,35 @@ func _ready() -> void:
 	testing_O_images = ImageHelper.load_grayscale_images_from_folder(testing_O_dir)
 	testing_X_images = ImageHelper.load_grayscale_images_from_folder(testing_X_dir)
 
+	training_O_images.shuffle()
+	training_X_images.shuffle()
+
+func adaptive_learning_rate(loss: float, accuracy: float) -> float:
+	var new_learning_rate = cnn.learning_rate
+	if accuracy < 0.5:
+		new_learning_rate *= 1.0 + lr_change_rate
+	elif accuracy > 0.9:
+		new_learning_rate *= 1 - lr_change_rate
+	if loss > 0.5:
+		new_learning_rate *= 1.0 + lr_change_rate
+	elif loss < 0.1:
+		new_learning_rate *= 1 - lr_change_rate
+	return clamp(new_learning_rate, 0.0001, 0.01)
+
 func _process(_delta: float) -> void:
 	if training_O_images.size() > 0:
-		total_O_loss += cnn.train(training_O_images.pick_random(), "O")
+		total_O_loss += cnn.train(training_O_images[training_O_index], "O")
+		training_O_index += 1
+		if training_O_index >= training_O_images.size():
+			training_O_index = 0
+			training_O_images.shuffle()
 
 	if training_X_images.size() > 0:
-		total_X_loss += cnn.train(training_X_images.pick_random(), "X")
+		total_X_loss += cnn.train(training_X_images[training_X_index], "X")
+		training_X_index += 1
+		if training_X_index >= training_X_images.size():
+			training_X_index = 0
+			training_X_images.shuffle()
 
 	training_steps += 1
 
@@ -59,9 +88,13 @@ func _process(_delta: float) -> void:
 		print("Average X Loss: ", avg_X_loss, " at training step: ", training_steps)
 
 		if training_steps % 100 == 0:
+			training_steps = 0
 			var accuracy = test_all_images()
 			print("Model Accuracy: ", accuracy)
 			print("Model got ", accuracy * total_testing_images, " out of ", total_testing_images, " correct!")
+
+			cnn.learning_rate = adaptive_learning_rate((avg_O_loss + avg_X_loss) / 2.0, accuracy)
+			print("New Learning Rate: ", cnn.learning_rate)
 
 			if accuracy > 0.95:
 				print("Training complete. Accuracy is greater than 95%.")
