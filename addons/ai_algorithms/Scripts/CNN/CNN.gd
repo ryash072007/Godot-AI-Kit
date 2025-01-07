@@ -1,6 +1,6 @@
 class_name CNN
 
-var learning_rate: float = 0.01
+var learning_rate: float = 0.005
 var layers: Array = []
 
 var labels: Dictionary = {}
@@ -15,16 +15,17 @@ class Layer:
 		var filter_shape: Vector2i = Vector2i(3, 3)
 		var padding: int
 		var output_shape: Vector2i
+		var padding_mode: String = "same"
 
 		var inputs: Array
 
 		var activationFunction := Activation.RELU
 
-		func _init(_num_filters: int = 1, _padding: int = 0, _filter_shape: Vector2i = Vector2i(3, 3), _stride: int = 1) -> void:
+		func _init(_num_filters: int = 1,  _padding_mode: String = "same", _filter_shape: Vector2i = Vector2i(3, 3), _stride: int = 1) -> void:
 			filter_shape = _filter_shape
-			padding = _padding
 			num_filters = _num_filters
 			stride = _stride
+			padding_mode = _padding_mode
 
 			biases = Matrix.new(num_filters, 1)
 
@@ -33,10 +34,17 @@ class Layer:
 
 		func set_input_shape(_input_shape: Vector2i) -> void:
 			input_shape = _input_shape
-			output_shape = Vector2i(
-				((input_shape.x - filter_shape.x + 2 * padding) / stride) + 1,
-				((input_shape.y - filter_shape.y + 2 * padding) / stride) + 1
-			)
+			if padding_mode == "same":
+				output_shape = Vector2i(
+					ceil(float(input_shape.x) / float(stride)),
+					ceil(float(input_shape.y) / float(stride))
+				)
+				padding = ((output_shape.x - 1) * stride + filter_shape.x - input_shape.x) / 2
+			else:
+				output_shape = Vector2i(
+					((input_shape.x - filter_shape.x + 2 * padding) / stride) + 1,
+					((input_shape.y - filter_shape.y + 2 * padding) / stride) + 1
+				)
 
 		func forward(_input: Array) -> Array[Matrix]:
 			inputs = _input
@@ -53,8 +61,8 @@ class Layer:
 				var filter: Matrix = filters[filter_index]
 				var bias: float = biases.data[filter_index][0]
 				var _output: Matrix = Matrix.new(output_shape.x, output_shape.y)
-				for i in range(0, input_shape.x - filter_shape.x + 1, stride):
-					for j in range(0, input_shape.y - filter_shape.y + 1, stride):
+				for i in range(0, input_shape.x - filter_shape.x + 1 + 2 * padding, stride):
+					for j in range(0, input_shape.y - filter_shape.y + 1 + 2 * padding, stride):
 						var sum: float = 0.0
 						for x in range(filter_shape.x):
 							for y in range(filter_shape.y):
@@ -75,8 +83,8 @@ class Layer:
 					var filter: Matrix = filters[filter_index]
 					var _dW: Matrix = Matrix.new(filter_shape.x, filter_shape.y)
 					var _dX: Matrix = Matrix.new(input_shape.x, input_shape.y)
-					for i in range(0, input_shape.x - filter_shape.x + 1, stride):
-						for j in range(0, input_shape.y - filter_shape.y + 1, stride):
+					for i in range(0, input_shape.x - filter_shape.x + 1 + 2 * padding, stride):
+						for j in range(0, input_shape.y - filter_shape.y + 1 + 2 * padding, stride):
 							for x in range(filter_shape.x):
 								for y in range(filter_shape.y):
 									_dW.data[x][y] += input.data[i + x][j + y] * dout.data[i / stride][j / stride]
