@@ -151,6 +151,14 @@ static func average(matrix: Matrix) -> float:
 	average_value = average_value / matrix.rows * matrix.cols
 	return average_value
 
+static func variance(matrix: Matrix) -> float:
+	var mean_value = Matrix.average(matrix)
+	var sum_value: float = 0.0
+	for row in range(matrix.rows):
+		for col in range(matrix.cols):
+			sum_value += pow(matrix.data[row][col] - mean_value, 2)
+	return sum_value / (matrix.rows * matrix.cols)
+
 func index_of_max_from_row(_row: int) -> int:
 	return data[_row].find(data[_row].max())
 
