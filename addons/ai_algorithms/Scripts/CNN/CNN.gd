@@ -16,7 +16,7 @@ class Layer:
 		var padding: int
 		var output_shape: Vector2i
 
-		var inputs: Array[Matrix]
+		var inputs: Array
 
 		var activationFunction := Activation.RELU
 
@@ -38,12 +38,12 @@ class Layer:
 				((input_shape.y - filter_shape.y + 2 * padding) / stride) + 1
 			)
 
-		func forward(_input: Array[Matrix]) -> Array[Matrix]:
+		func forward(_input: Array) -> Array[Matrix]:
 			inputs = _input
 			var outputs: Array[Matrix] = []
 			for input in inputs:
 				var output: Array[Matrix] = forward_single(input)
-				for _output in outputs:
+				for _output in output:
 					outputs.append(_output)
 			return outputs
 
@@ -51,11 +51,11 @@ class Layer:
 			var outputs: Array[Matrix] = []
 			for filter_index in range(num_filters):
 				var filter: Matrix = filters[filter_index]
-				var bias: Matrix = biases.data[filter_index][0]
+				var bias: float = biases.data[filter_index][0]
 				var _output: Matrix = Matrix.new(output_shape.x, output_shape.y)
 				for i in range(0, input_shape.x - filter_shape.x + 1, stride):
 					for j in range(0, input_shape.y - filter_shape.y + 1, stride):
-						var sum = 0.0
+						var sum: float = 0.0
 						for x in range(filter_shape.x):
 							for y in range(filter_shape.y):
 								sum += _input.data[i + x][j + y] * filter.data[x][y]
@@ -285,7 +285,7 @@ func add_layer(layer) -> void:
 	layers.append(layer)
 
 func forward(input: Matrix) -> Matrix:
-	var output = input
+	var output = [input]
 	for layer in layers:
 		output = layer.forward(output)
 	return output
