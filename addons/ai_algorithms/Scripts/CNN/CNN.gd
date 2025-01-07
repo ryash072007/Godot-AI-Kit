@@ -133,7 +133,7 @@ class Layer:
 			return outputs
 
 		func backward(dout: Array[Matrix]) -> Dictionary:
-			var dX: Array[Matrix]
+			var dX: Array[Matrix] = []
 			for index in range(num_pools):
 				var _input: Matrix = input[index]
 				var _dout: Matrix = dout[index]
@@ -150,6 +150,7 @@ class Layer:
 									max_x = i + x
 									max_y = j + y
 						_dX.data[max_x][max_y] = _dout.data[i / stride][j / stride]
+				dX.append(_dX)
 			return {
 				"dX": dX,
 				"type": "Pooling"
@@ -211,8 +212,9 @@ class Layer:
 		# Storing the input from the last forward pass
 		var input: Array[Matrix]
 
-		func set_input_shape(_input_shape: Vector2i, num_feature_maps: int) -> void:
+		func set_input_shape(_input_shape: Vector2i, _num_feature_maps: int) -> void:
 			input_shape = _input_shape
+			num_feature_maps = _num_feature_maps
 			output_shape = Vector2i(input_shape.x * input_shape.y * num_feature_maps, 1)
 
 		func forward(_input: Array[Matrix]) -> Matrix:
@@ -306,17 +308,19 @@ func train(input_data: Matrix, label) -> float:
 	var output_data: Matrix = Matrix.new(layers[-1].output_shape.x, 1)
 	output_data.data[labels[label]][0] = 1.0
 
+	# Forward pass
 	var y_pred: Matrix = forward(input_data)
 	var loss: float = cross_entropy_loss(y_pred, output_data)
-	var grad: Matrix = gradient_cross_entropy_loss(y_pred, output_data)
+	var grad = gradient_cross_entropy_loss(y_pred, output_data)
 
-	# SGD
+	# Backward pass and update weights
 	for i in range(layers.size() - 1, -1, -1):
 		var layer = layers[i]
 		var gradients = layer.backward(grad)
 		if gradients.has("dW"):
-			if gradients["type"] == "SingleFilterConvolutional1D":
-				layer.filter = Matrix.subtract(layer.filter, Matrix.scalar(gradients["dW"], learning_rate))
+			if gradients["type"] == "MutliFilterConvolutional1D":
+				for j in range(layer.num_filters):
+					layer.filters[j] = Matrix.subtract(layer.filters[j], Matrix.scalar(gradients["dW"][j], learning_rate))
 			else:
 				layer.weights = Matrix.subtract(layer.weights, Matrix.scalar(gradients["dW"], learning_rate))
 		if gradients.has("dB"):
