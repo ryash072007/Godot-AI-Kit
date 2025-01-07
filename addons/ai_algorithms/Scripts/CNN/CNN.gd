@@ -74,7 +74,6 @@ class Layer:
 		var filter_shape: Vector2i = Vector2i(3, 3)
 		var padding: int
 		var output_shape: Vector2i
-		var output: Array[Matrix]
 
 		var input: Matrix
 
@@ -99,6 +98,7 @@ class Layer:
 
 		func forward(_input: Matrix) -> Array[Matrix]:
 			input = _input
+			var outputs: Array[Matrix] = []
 			for filter_index in range(num_filters):
 				var filter: Matrix = filters[filter_index]
 				var bias: Matrix = biases.data[filter_index][0]
@@ -111,8 +111,8 @@ class Layer:
 								sum += input.data[i + x][j + y] * filter.data[x][y]
 						_output.data[i / stride][j / stride] = sum + bias
 				_output = Matrix.map(_output, activationFunction.function)
-				output.append(_output)
-			return output
+				outputs.append(_output)
+			return outputs
 
 		func backward(_dout: Array[Matrix]) -> Dictionary:
 			var dB: Matrix = Matrix.new(num_filters, 1)
@@ -132,6 +132,7 @@ class Layer:
 						dB.data[index][0] = dB.data[index][0] + dout.data[i / stride][j / stride]
 				dW.append(_dW)
 				dX.append(_dX)
+
 			return {
 				"dW": dW,
 				"dB": dB,
@@ -145,7 +146,6 @@ class Layer:
 		var pool_size: Vector2i = Vector2i(0, 0)
 		var input_shape: Vector2i = Vector2i(0, 0)
 		var output_shape: Vector2i = Vector2i(0, 0)
-		var output: Matrix
 
 		# Storing the input from the last forward pass
 		var input: Matrix
@@ -163,7 +163,7 @@ class Layer:
 		# Max pooling
 		func forward(_input: Matrix) -> Matrix:
 			input = _input
-			output = Matrix.new(output_shape.x, output_shape.y)
+			var output: Matrix = Matrix.new(output_shape.x, output_shape.y)
 			for i in range(0, input_shape.x - pool_size.x + 1, stride):
 				for j in range(0, input_shape.y - pool_size.y + 1, stride):
 					var max_val = -INF
@@ -187,6 +187,67 @@ class Layer:
 								max_x = i + x
 								max_y = j + y
 					dX.data[max_x][max_y] = dout.data[i / stride][j / stride]
+			return {
+				"dX": dX,
+				"type": "Pooling"
+			}
+	
+	class MultiPoolPooling:
+		var stride: int = 1
+		var pool_size: Vector2i = Vector2i(0, 0)
+		var input_shape: Vector2i = Vector2i(0, 0)
+		var output_shape: Vector2i = Vector2i(0, 0)
+		var num_pools: int
+
+		# Storing the input from the last forward pass
+		var input: Array[Matrix]
+
+		func _init(_input_shape: Vector2i, _num_pool: int = 1, _stride: int = 2, _pool_size: Vector2i = Vector2i(2, 2)) -> void:
+			input_shape = _input_shape
+			pool_size = _pool_size
+			stride = _stride
+			num_pools = _num_pool			
+
+			output_shape = Vector2i(
+				((input_shape.x - pool_size.x) / stride) + 1,
+				((input_shape.y - pool_size.y) / stride) + 1
+			)
+
+		# Max pooling
+		func forward(input_array: Array[Matrix]) -> Array[Matrix]:
+			input = input_array
+			var outputs: Array[Matrix] = []
+			for pool_index in range(num_pools):
+				var _input: Matrix = input[pool_index]
+				var output = Matrix.new(output_shape.x, output_shape.y)
+				for i in range(0, input_shape.x - pool_size.x + 1, stride):
+					for j in range(0, input_shape.y - pool_size.y + 1, stride):
+						var max_val = -INF
+						for x in range(pool_size.x):
+							for y in range(pool_size.y):
+								max_val = max(max_val, _input.data[i + x][j + y])
+						output.data[i / stride][j / stride] = max_val
+				outputs.append(output)
+			return outputs
+
+		func backward(dout: Array[Matrix]) -> Dictionary:
+			var dX: Matrix = Array[Matrix]
+			for index in range(num_pools):
+				var _input: Matrix = input[index]
+				var _dout: Matrix = dout[index]
+				var _dX = Matrix.new(input_shape.x, input_shape.y)
+				for i in range(0, input_shape.x - pool_size.x + 1, stride):
+					for j in range(0, input_shape.y - pool_size.y + 1, stride):
+						var max_val = -INF
+						var max_x = 0
+						var max_y = 0
+						for x in range(pool_size.x):
+							for y in range(pool_size.y):
+								if _input.data[i + x][j + y] > max_val:
+									max_val = _input.data[i + x][j + y]
+									max_x = i + x
+									max_y = j + y
+						_dX.data[max_x][max_y] = _dout.data[i / stride][j / stride]
 			return {
 				"dX": dX,
 				"type": "Pooling"
