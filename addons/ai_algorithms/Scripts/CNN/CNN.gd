@@ -304,13 +304,10 @@ class Layer:
 		var output_shape: Vector2i
 		var flattened: bool = false
 
-		# Storing the input from the last forward pass
 		var input: Array[Matrix] = []
-		var mean: float
-		var variance: float
-
-		func _init() -> void:
-			pass
+		var normalized: Array[Matrix] = []
+		var mean: Matrix
+		var variance: Matrix
 
 		func set_input_shape(_input_shape: Vector2i, _flattened: bool = false) -> void:
 			input_shape = _input_shape
@@ -324,59 +321,55 @@ class Layer:
 				beta = Matrix.new(input_shape.x, input_shape.y, 0.0)
 
 		func forward(_input):
-			if flattened:
-				input = [_input]
-			else:
-				input = _input
-
-			var mean_matrix: Matrix = Matrix.new(input_shape.x, input_shape.y)
-			var variance_matrix: Matrix = Matrix.new(input_shape.x, input_shape.y)
+			input = _input
+			mean = Matrix.new(input_shape.x, input_shape.y)
+			variance = Matrix.new(input_shape.x, input_shape.y)
 
 			for matrix in input:
-				mean_matrix = Matrix.add(mean_matrix, matrix)
-			mean_matrix = Matrix.scalar(mean_matrix, 1.0 / input.size())
+				mean = Matrix.add(mean, matrix)
+			mean = Matrix.scalar(mean, 1.0 / input.size())
 
 			for matrix in input:
-				variance_matrix = Matrix.add(variance_matrix, Matrix.square(Matrix.subtract(matrix, mean_matrix)))
-			variance_matrix = Matrix.scalar(variance_matrix, 1.0 / input.size())
+				variance = Matrix.add(variance, Matrix.square(Matrix.subtract(matrix, mean)))
+			variance = Matrix.scalar(variance, 1.0 / input.size())
 
-			var normalized: Array[Matrix] = []
+			normalized.clear()
 			for matrix in input:
-				var norm = Matrix.scalar(Matrix.scalar_add(matrix, -Matrix.average(mean_matrix)), 1 / sqrt(Matrix.average(variance_matrix) + epsilon))
+				var norm: Matrix = Matrix.divide(Matrix.subtract(matrix, mean), Matrix.scalar_add(Matrix.square_root(variance), epsilon))
 				normalized.append(Matrix.add(Matrix.multiply(norm, gamma), beta))
 
-			if flattened:
-				return normalized[0]
-			else:
-				return normalized
+			return normalized
 
-		func backward(dout) -> Dictionary:
-			if flattened:
-				dout = [dout]
-
+		func backward(dout: Array[Matrix]) -> Dictionary:
 			var dgamma = Matrix.new(input_shape.x, input_shape.y)
 			var dbeta = Matrix.new(input_shape.x, input_shape.y)
 			var dX = []
 
-			for i in range(input.size()):
-				dgamma = Matrix.add(dgamma, Matrix.multiply(dout[i], input[i]))
+			var N = input.size()
+			for i in range(N):
+				dgamma = Matrix.add(dgamma, Matrix.multiply(dout[i], normalized[i]))
 				dbeta = Matrix.add(dbeta, dout[i])
-				dX.append(Matrix.multiply(dout[i], gamma))
 
-			if flattened:
-				return {
-					"dX": dX[0],
-					"dgamma": dgamma,
-					"dbeta": dbeta,
-					"type": "BatchNormalization"
-				}
-			else:
-				return {
-					"dX": dX,
-					"dgamma": dgamma,
-					"dbeta": dbeta,
-					"type": "BatchNormalization"
-				}
+			for i in range(N):
+				var x_hat = Matrix.divide(Matrix.subtract(input[i], mean), Matrix.square_root(Matrix.scalar_add(variance, epsilon)))
+				var dx_hat = Matrix.multiply(dout[i], gamma)
+
+				var dvar: Matrix = Matrix.multiply(dx_hat, Matrix.subtract(input[i], mean))
+				dvar = Matrix.multiply(dvar, Matrix.scalar_denominator(-0.5, Matrix.power(Matrix.scalar_add(Matrix.square_root(variance), epsilon), 3)))
+
+				var dmean: Matrix = Matrix.multiply(dx_hat, Matrix.scalar_denominator(-1.0, Matrix.scalar_add(Matrix.square_root(variance), epsilon)))
+				dmean = Matrix.add(dmean, Matrix.scalar(dvar, -2.0 / N))
+
+				var dx: Matrix = Matrix.add(Matrix.multiply(dx_hat, Matrix.scalar_denominator(1.0, Matrix.scalar_add(Matrix.square_root(variance), epsilon))), Matrix.scalar(dvar, 2.0 / N))
+				dx = Matrix.add(dx, Matrix.scalar(dmean, 1.0 / N))
+				dX.append(dx)
+
+			return {
+				"dX": dX,
+				"dgamma": dgamma,
+				"dbeta": dbeta,
+				"type": "BatchNormalization"
+			}
 
 func add_layer(layer) -> void:
 	layers.append(layer)

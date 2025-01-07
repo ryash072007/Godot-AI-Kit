@@ -204,6 +204,24 @@ static func square(matrix: Matrix) -> Matrix:
 
 	return result
 
+static func power(matrix: Matrix, _power: float) -> Matrix:
+	var result: Matrix = Matrix.new(matrix.rows, matrix.cols)
+
+	for row in range(result.rows):
+		for col in range(result.cols):
+			result.data[row][col] = pow(matrix.data[row][col], _power)
+
+	return result
+
+static func scalar_denominator(scalar: float, matrix: Matrix) -> Matrix:
+	var result: Matrix = Matrix.new(matrix.rows, matrix.cols)
+
+	for row in range(result.rows):
+		for col in range(result.cols):
+			result.data[row][col] = scalar / matrix.data[row][col]
+
+	return result
+
 static func square_root(matrix: Matrix) -> Matrix:
 	var result: Matrix = Matrix.new(matrix.rows, matrix.cols)
 

@@ -24,7 +24,7 @@ func _ready() -> void:
 	cnn.add_labels(["O", "X"])
 
 	cnn.add_layer(cnn.Layer.MutliFilterConvolutional1D.new(4, "same"))
-	cnn.add_layer(cnn.Layer.BatchNormalization.new())
+	# cnn.add_layer(cnn.Layer.BatchNormalization.new())
 	cnn.add_layer(cnn.Layer.MultiPoolPooling.new())
 	#cnn.add_layer(cnn.Layer.MutliFilterConvolutional1D.new(4, "same"))
 	#cnn.add_layer(cnn.Layer.MultiPoolPooling.new())
