@@ -15,13 +15,13 @@ class Layer:
 		var filter_shape: Vector2i = Vector2i(3, 3)
 		var padding: int
 		var output_shape: Vector2i
-		var padding_mode: String = "same"
+		var padding_mode: String
 
 		var inputs: Array
 
 		var activationFunction := Activation.RELU
 
-		func _init(_num_filters: int = 1,  _padding_mode: String = "same", _filter_shape: Vector2i = Vector2i(3, 3), _stride: int = 1) -> void:
+		func _init(_num_filters: int = 1,  _padding_mode: String = "valid", _filter_shape: Vector2i = Vector2i(3, 3), _stride: int = 1) -> void:
 			filter_shape = _filter_shape
 			num_filters = _num_filters
 			stride = _stride
@@ -66,7 +66,10 @@ class Layer:
 						var sum: float = 0.0
 						for x in range(filter_shape.x):
 							for y in range(filter_shape.y):
-								sum += _input.data[i + x][j + y] * filter.data[x][y]
+								var input_x = i + x - padding
+								var input_y = j + y - padding
+								if input_x >= 0 and input_x < input_shape.x and input_y >= 0 and input_y < input_shape.y:
+									sum += _input.data[input_x][input_y] * filter.data[x][y]
 						_output.data[i / stride][j / stride] = sum + bias
 				_output = Matrix.map(_output, activationFunction.function)
 				outputs.append(_output)
@@ -87,8 +90,11 @@ class Layer:
 						for j in range(0, input_shape.y - filter_shape.y + 1 + 2 * padding, stride):
 							for x in range(filter_shape.x):
 								for y in range(filter_shape.y):
-									_dW.data[x][y] += input.data[i + x][j + y] * dout.data[i / stride][j / stride]
-									_dX.data[i + x][j + y] += filter.data[x][y] * dout.data[i / stride][j / stride]
+									var input_x = i + x - padding
+									var input_y = j + y - padding
+									if input_x >= 0 and input_x < input_shape.x and input_y >= 0 and input_y < input_shape.y:
+										_dW.data[x][y] += input.data[input_x][input_y] * dout.data[i / stride][j / stride]
+										_dX.data[input_x][input_y] += filter.data[x][y] * dout.data[i / stride][j / stride]
 							dB.data[filter_index][0] += dout.data[i / stride][j / stride]
 					dW.append(_dW)
 					dX.append(_dX)
