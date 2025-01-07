@@ -61,6 +61,7 @@ class Layer:
 				"dX": dX,
 				"type": "SingleFilterConvolutional1D"
 			}
+	
 
 	class Pooling:
 		var stride: int = 1
@@ -72,7 +73,7 @@ class Layer:
 		# Storing the input from the last forward pass
 		var input: Matrix
 
-		func _init(_input_shape: Vector2i, _pool_size: Vector2i = Vector2i(2, 2), _stride: int = 2) -> void:
+		func _init(_input_shape: Vector2i, _stride: int = 2, _pool_size: Vector2i = Vector2i(2, 2)) -> void:
 			input_shape = _input_shape
 			pool_size = _pool_size
 			stride = _stride
@@ -154,6 +155,7 @@ class Layer:
 			var dW: Matrix = Matrix.outer_product(dout, input)
 			var dB: Matrix = dout
 			var dX: Matrix = Matrix.dot_product(Matrix.transpose(weights), dout)
+			dX = Matrix.map(dX, activationFunction.derivative)
 			return {
 				"dW": dW,
 				"dB": dB,
