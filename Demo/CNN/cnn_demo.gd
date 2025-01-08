@@ -41,7 +41,7 @@ func _ready() -> void:
 
 	cnn.add_layer(cnn.Layer.SoftmaxDense.new(2))
 
-	cnn.compile_network(Vector2i(28, 28), cnn.optimizers.ADAM)
+	cnn.compile_network(Vector2i(28, 28), cnn.optimizers.AMSGRAD)
 
 	training_O_images = ImageHelper.load_grayscale_images_from_folder(training_O_dir)
 	training_X_images = ImageHelper.load_grayscale_images_from_folder(training_X_dir)

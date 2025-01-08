@@ -5,7 +5,7 @@ var layers: Array = []
 
 var labels: Dictionary = {}
 
-enum optimizers {SGD, SGD_MOMENTUM, ADAM}
+enum optimizers {SGD, SGD_MOMENTUM, ADAM, AMSGRAD}
 var optimising_method: int = optimizers.SGD
 
 var velocity: Dictionary = {}
@@ -482,6 +482,8 @@ func optimise(layer_index: int, parameter: Matrix, gradient: Matrix, learning_ra
 			return SGD_MOMENTUM(layer_index, parameter, gradient, learning_rate, 0.9, param_name)
 		optimizers.ADAM:
 			return ADAM(layer_index, parameter, gradient, learning_rate, param_name)
+		optimizers.AMSGRAD:
+			return AMSGRAD(layer_index, parameter, gradient, learning_rate, param_name)
 
 	return Matrix.new(0,0)
 
@@ -505,6 +507,22 @@ func ADAM(layer_index: int, parameter: Matrix, gradient: Matrix, learning_rate: 
 
 	var m_hat: Matrix = Matrix.scalar(moment[layer_index][param_name], 1 / (1 - pow(beta1, timestep)))
 	var v_hat: Matrix = Matrix.scalar(velocity[layer_index][param_name], 1 / (1 - pow(beta2, timestep)))
+
+	return Matrix.subtract(parameter, Matrix.scalar(Matrix.divide(m_hat, Matrix.scalar_add(Matrix.square_root(v_hat), epsilon)), learning_rate))
+
+func AMSGRAD(layer_index: int, parameter: Matrix, gradient: Matrix, learning_rate: float, param_name: String = "", beta1: float = 0.9, beta2: float = 0.999, epsilon: float = 1e-8) -> Matrix:
+	if not moment[layer_index].has(param_name):
+		moment[layer_index][param_name] = Matrix.new(parameter.rows, parameter.cols)
+	if not velocity[layer_index].has(param_name):
+		velocity[layer_index][param_name] = Matrix.new(parameter.rows, parameter.cols)
+
+	moment[layer_index][param_name] = Matrix.add(Matrix.scalar(moment[layer_index][param_name], beta1), Matrix.scalar(gradient, 1 - beta1))
+	var new_velocity: Matrix = Matrix.add(Matrix.scalar(velocity[layer_index][param_name], beta2), Matrix.scalar(Matrix.square(gradient), 1 - beta2))
+
+	velocity[layer_index][param_name] = Matrix.max_matrix(new_velocity, velocity[layer_index][param_name])
+
+	var m_hat: Matrix = Matrix.scalar(moment[layer_index][param_name], 1 / (1 - pow(beta1, timestep)))
+	var v_hat: Matrix = velocity[layer_index][param_name]
 
 	return Matrix.subtract(parameter, Matrix.scalar(Matrix.divide(m_hat, Matrix.scalar_add(Matrix.square_root(v_hat), epsilon)), learning_rate))
 
