@@ -5,10 +5,12 @@ var layers: Array = []
 
 var labels: Dictionary = {}
 
-enum optimizers {SGD, SGD_MOMENTUM}
+enum optimizers {SGD, SGD_MOMENTUM, ADAM}
 var optimising_method: int = optimizers.SGD
 
 var velocity: Dictionary = {}
+var moment: Dictionary = {}
+var timestep: int = 0
 
 class Layer:
 	class MutliFilterConvolutional1D:
@@ -452,6 +454,7 @@ func train(input_data: Matrix, label) -> float:
 	var grad = gradient_cross_entropy_loss(y_pred, output_data)
 
 	# Backward pass and update weights
+	timestep += 1
 	for i in range(layers.size() - 1, -1, -1):
 		var layer = layers[i]
 		var gradients = layer.backward(grad)
@@ -477,6 +480,8 @@ func optimise(layer_index: int, parameter: Matrix, gradient: Matrix, learning_ra
 			return SGD(layer_index, parameter, gradient, learning_rate)
 		optimizers.SGD_MOMENTUM:
 			return SGD_MOMENTUM(layer_index, parameter, gradient, learning_rate, 0.9, param_name)
+		optimizers.ADAM:
+			return ADAM(layer_index, parameter, gradient, learning_rate, param_name)
 
 	return Matrix.new(0,0)
 
@@ -488,6 +493,20 @@ func SGD_MOMENTUM(layer_index: int, parameter: Matrix, gradient: Matrix, learnin
 		velocity[layer_index][param_name] = Matrix.new(parameter.rows, parameter.cols)
 	velocity[layer_index][param_name] = Matrix.add(Matrix.scalar(velocity[layer_index][param_name], momentum), Matrix.scalar(gradient, learning_rate))
 	return Matrix.subtract(parameter, velocity[layer_index][param_name])
+
+func ADAM(layer_index: int, parameter: Matrix, gradient: Matrix, learning_rate: float, param_name: String = "", beta1: float = 0.9, beta2: float = 0.999, epsilon: float = 1e-8) -> Matrix:
+	if not moment[layer_index].has(param_name):
+		moment[layer_index][param_name] = Matrix.new(parameter.rows, parameter.cols)
+	if not velocity[layer_index].has(param_name):
+		velocity[layer_index][param_name] = Matrix.new(parameter.rows, parameter.cols)
+
+	moment[layer_index][param_name] = Matrix.add(Matrix.scalar(moment[layer_index][param_name], beta1), Matrix.scalar(gradient, 1 - beta1))
+	velocity[layer_index][param_name] = Matrix.add(Matrix.scalar(velocity[layer_index][param_name], beta2), Matrix.scalar(Matrix.square(gradient), 1 - beta2))
+
+	var m_hat: Matrix = Matrix.scalar(moment[layer_index][param_name], 1 / (1 - pow(beta1, timestep)))
+	var v_hat: Matrix = Matrix.scalar(velocity[layer_index][param_name], 1 / (1 - pow(beta2, timestep)))
+
+	return Matrix.subtract(parameter, Matrix.scalar(Matrix.divide(m_hat, Matrix.scalar_add(Matrix.square_root(v_hat), epsilon)), learning_rate))
 
 func categorise(input_data: Matrix):
 	var y_pred: Matrix = forward(input_data, true)
@@ -508,6 +527,8 @@ func compile_network(input_dimensions: Vector2i, _optimising_method: int = optim
 	optimising_method = _optimising_method
 
 	velocity.clear()
+	moment.clear()
+	timestep = 0
 
 	for layer_index in range(layers.size()):
 		var layer = layers[layer_index]
@@ -533,6 +554,7 @@ func compile_network(input_dimensions: Vector2i, _optimising_method: int = optim
 			layer.set_input_shape(current_input_shape, flattened)
 
 		initialize_velocity(layer_index, layer)
+		initialize_moment(layer_index, layer)
 
 func initialize_velocity(layer_index: int, layer) -> void:
 	velocity[layer_index] = {}
@@ -547,5 +569,19 @@ func initialize_velocity(layer_index: int, layer) -> void:
 	elif layer is Layer.BatchNormalization:
 		velocity[layer_index]["gamma"] = Matrix.new(layer.gamma.rows, layer.gamma.cols)
 		velocity[layer_index]["beta"] = Matrix.new(layer.beta.rows, layer.beta.cols)
+
+func initialize_moment(layer_index: int, layer) -> void:
+	moment[layer_index] = {}
+	if layer is Layer.MutliFilterConvolutional1D:
+		moment[layer_index]["filters"] = []
+		for filter in layer.filters:
+			moment[layer_index]["filters"].append(Matrix.new(filter.rows, filter.cols))
+		moment[layer_index]["biases"] = Matrix.new(layer.biases.rows, layer.biases.cols)
+	elif layer is Layer.Dense or layer is Layer.SoftmaxDense:
+		moment[layer_index]["weights"] = Matrix.new(layer.weights.rows, layer.weights.cols)
+		moment[layer_index]["biases"] = Matrix.new(layer.biases.rows, layer.biases.cols)
+	elif layer is Layer.BatchNormalization:
+		moment[layer_index]["gamma"] = Matrix.new(layer.gamma.rows, layer.gamma.cols)
+		moment[layer_index]["beta"] = Matrix.new(layer.beta.rows, layer.beta.cols)
 
 
