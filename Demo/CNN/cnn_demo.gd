@@ -17,20 +17,23 @@ var training_steps: int = 0
 var total_O_loss: float = 0.0
 var total_X_loss: float = 0.0
 
-var total_testing_images: int
-
 var training_O_index: int = 0
 var training_X_index: int = 0
 
-var lr_change_rate: float = 0.05
+var lr_change_rate: float = 0.002
+
 
 func _ready() -> void:
-	cnn.learning_rate = 0.003
+	cnn.learning_rate = 0.001
 	cnn.add_labels(["O", "X"])
 
-	cnn.add_layer(cnn.Layer.MutliFilterConvolutional1D.new(8, "same"))
+	cnn.add_layer(cnn.Layer.MutliFilterConvolutional1D.new(4, "same"))
 	cnn.add_layer(cnn.Layer.MultiPoolPooling.new())
-	cnn.add_layer(cnn.Layer.Dropout.new(0.2))
+	cnn.add_layer(cnn.Layer.Dropout.new(0.1))
+
+	cnn.add_layer(cnn.Layer.MutliFilterConvolutional1D.new(4, "same"))
+	cnn.add_layer(cnn.Layer.MultiPoolPooling.new())
+	cnn.add_layer(cnn.Layer.Dropout.new(0.1))
 
 	cnn.add_layer(cnn.Layer.Flatten.new())
 	cnn.add_layer(cnn.Layer.Dense.new(64, "RELU"))
@@ -48,19 +51,8 @@ func _ready() -> void:
 	training_O_images.shuffle()
 	training_X_images.shuffle()
 
-func adaptive_learning_rate(loss: float, accuracy: float) -> float:
-	var new_learning_rate = cnn.learning_rate
-	if accuracy < 0.5:
-		new_learning_rate *= 1.0 + lr_change_rate
-	elif accuracy > 0.9:
-		new_learning_rate *= 1 - lr_change_rate
-	if loss > 0.5:
-		new_learning_rate *= 1.0 + lr_change_rate
-	elif loss < 0.1:
-		new_learning_rate *= 1 - lr_change_rate
-	return clamp(new_learning_rate, 0.0001, 0.01)
 
-func _process(_delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	if training_O_images.size() > 0:
 		total_O_loss += cnn.train(training_O_images[training_O_index], "O")
 		training_O_index += 1
@@ -88,15 +80,18 @@ func _process(_delta: float) -> void:
 		print("Average X Loss: ", avg_X_loss, " at training step: ", training_steps)
 
 		if training_steps % 100 == 0:
-			training_steps = 0
-			var accuracy = test_all_images()
-			print("Model Accuracy: ", accuracy)
-			print("Model got ", accuracy * total_testing_images, " out of ", total_testing_images, " correct!")
+			var accuracy: Array[float] = test_all_images()
+			var model_accuracy: float = (accuracy[0] + accuracy[1]) / 2
+			print("***********************************************")
+			print("Model Accuracy: ", model_accuracy)
+			print("Model got ", accuracy[0] * testing_O_images.size(), " O out of ", testing_O_images.size(), " correct!")
+			print("Model got ", accuracy[1] * testing_X_images.size(), " X out of ", testing_X_images.size(), " correct!")
+			print("***********************************************")
 
-			cnn.learning_rate = adaptive_learning_rate((avg_O_loss + avg_X_loss) / 2.0, accuracy)
-			print("New Learning Rate: ", cnn.learning_rate)
+			#cnn.learning_rate = max(cnn.learning_rate * (1 - lr_change_rate), 0.0005)
+			#print("New Learning Rate: ", cnn.learning_rate)
 
-			if accuracy > 0.95:
+			if model_accuracy > 0.95:
 				print("Training complete. Accuracy is greater than 95%.")
 				get_tree().quit()
 
@@ -113,24 +108,24 @@ func _process(_delta: float) -> void:
 			print("Testing X - Prediction: ", prediction_X)
 		print("________________________________________________________")
 
-func test_all_images() -> float:
-	var correct_predictions: int = 0
-	var total_predictions: int = 0
+func test_all_images() -> Array[float]:
+	var correct_O_predictions: int = 0
+	var total_O_predictions: int = 0
+	var correct_X_predictions: int = 0
+	var total_X_predictions: int = 0
 
-	total_testing_images = testing_O_images.size() + testing_X_images.size()
 
 	for image in testing_O_images:
 		var prediction = cnn.categorise(image)
 		if prediction == "O":
-			correct_predictions += 1
-		total_predictions += 1
+			correct_O_predictions += 1
+		total_O_predictions += 1
 
 	for image in testing_X_images:
 		var prediction = cnn.categorise(image)
 		if prediction == "X":
-			correct_predictions += 1
-		total_predictions += 1
+			correct_X_predictions += 1
+		total_X_predictions += 1
 
-	var accuracy = float(correct_predictions) / float(total_predictions)
-	return accuracy
+	return [float(correct_O_predictions) / float(total_O_predictions), float(correct_X_predictions) / float(total_X_predictions)]
 
