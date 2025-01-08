@@ -5,6 +5,9 @@ var layers: Array = []
 
 var labels: Dictionary = {}
 
+enum optimizers {SGD}
+var optimising_method: int = optimizers.SGD
+
 class Layer:
 	class MutliFilterConvolutional1D:
 		var filters: Array[Matrix]
@@ -335,32 +338,33 @@ class Layer:
 
 			normalized.clear()
 			for matrix in input:
-				var norm: Matrix = Matrix.divide(Matrix.subtract(matrix, mean), Matrix.scalar_add(Matrix.square_root(variance), epsilon))
+				var norm: Matrix = Matrix.divide(Matrix.subtract(matrix, mean), Matrix.square_root(Matrix.scalar_add(variance, epsilon)))
 				normalized.append(Matrix.add(Matrix.multiply(norm, gamma), beta))
 
 			return normalized
 
 		func backward(dout: Array[Matrix]) -> Dictionary:
-			var dgamma = Matrix.new(input_shape.x, input_shape.y)
-			var dbeta = Matrix.new(input_shape.x, input_shape.y)
-			var dX = []
+			var dgamma: Matrix = Matrix.new(input_shape.x, input_shape.y)
+			var dbeta: Matrix = Matrix.new(input_shape.x, input_shape.y)
+			var dX: Array[Matrix] = []
 
-			var N = input.size()
+			var N: int = input.size()
 			for i in range(N):
 				dgamma = Matrix.add(dgamma, Matrix.multiply(dout[i], normalized[i]))
 				dbeta = Matrix.add(dbeta, dout[i])
 
 			for i in range(N):
-				var x_hat = Matrix.divide(Matrix.subtract(input[i], mean), Matrix.square_root(Matrix.scalar_add(variance, epsilon)))
-				var dx_hat = Matrix.multiply(dout[i], gamma)
+				var dx_hat: Matrix = Matrix.multiply(dout[i], gamma)
 
-				var dvar: Matrix = Matrix.multiply(dx_hat, Matrix.subtract(input[i], mean))
-				dvar = Matrix.multiply(dvar, Matrix.scalar_denominator(-0.5, Matrix.power(Matrix.scalar_add(Matrix.square_root(variance), epsilon), 3)))
+				var XMeanDiff: Matrix = Matrix.subtract(input[i], mean)
 
-				var dmean: Matrix = Matrix.multiply(dx_hat, Matrix.scalar_denominator(-1.0, Matrix.scalar_add(Matrix.square_root(variance), epsilon)))
-				dmean = Matrix.add(dmean, Matrix.scalar(dvar, -2.0 / N))
+				var dvar: Matrix = Matrix.multiply(dx_hat, XMeanDiff)
+				dvar = Matrix.multiply(dvar, Matrix.scalar(Matrix.power(Matrix.scalar_add(variance, epsilon), -1.5), -0.5))
 
-				var dx: Matrix = Matrix.add(Matrix.multiply(dx_hat, Matrix.scalar_denominator(1.0, Matrix.scalar_add(Matrix.square_root(variance), epsilon))), Matrix.scalar(dvar, 2.0 / N))
+				var dmean: Matrix = Matrix.multiply(dx_hat, Matrix.scalar_denominator(-1.0, Matrix.square_root(Matrix.scalar_add(variance, epsilon))))
+				dmean = Matrix.add(dmean, Matrix.multiply(dvar, Matrix.scalar(XMeanDiff, -2.0 / N)))
+
+				var dx: Matrix = Matrix.add(Matrix.multiply(dx_hat, Matrix.scalar_denominator(-1.0, Matrix.square_root(Matrix.scalar_add(variance, epsilon)))), Matrix.multiply(Matrix.scalar(dvar, 2.0 / N), XMeanDiff))
 				dx = Matrix.add(dx, Matrix.scalar(dmean, 1.0 / N))
 				dX.append(dx)
 
@@ -389,7 +393,7 @@ class Layer:
 			for i in range(input_shape.x):
 				for j in range(input_shape.y):
 					mask.data[i][j] = 0.0 if randf() < rate else 1.0
-			
+
 			if flattened:
 				return Matrix.multiply(_input, mask)
 			else:
@@ -452,18 +456,29 @@ func train(input_data: Matrix, label) -> float:
 		if gradients.has("dW"):
 			if gradients["type"] == "MutliFilterConvolutional1D":
 				for j in range(layer.num_filters):
-					layer.filters[j] = Matrix.subtract(layer.filters[j], Matrix.scalar(gradients["dW"][j], learning_rate))
+					layer.filters[j] = optimise(i, layer.filters[j], gradients["dW"][j], learning_rate)
 			else:
-				layer.weights = Matrix.subtract(layer.weights, Matrix.scalar(gradients["dW"], learning_rate))
+				layer.weights = optimise(i, layer.weights, gradients["dW"], learning_rate)
 		if gradients.has("dB"):
-			layer.biases = Matrix.subtract(layer.biases, Matrix.scalar(gradients["dB"], learning_rate))
+			layer.biases = optimise(i, layer.biases, gradients["dB"], learning_rate)
 		if gradients.has("dX"):
 			grad = gradients["dX"]
 		if gradients.has("dgamma"):
-			layer.gamma = Matrix.subtract(layer.gamma, Matrix.scalar(gradients["dgamma"], learning_rate))
+			layer.gamma = optimise(i, layer.gamma, gradients["dgamma"], learning_rate)
 		if gradients.has("dbeta"):
-			layer.beta = Matrix.subtract(layer.beta, Matrix.scalar(gradients["dbeta"], learning_rate))
+			layer.beta = optimise(i, layer.beta, gradients["dbeta"], learning_rate)
 	return loss
+
+func optimise(layer_index: int, parameter: Matrix, gradient: Matrix, learning_rate: float) -> Matrix:
+	match optimising_method:
+		optimizers.SGD:
+			return SGD(layer_index, parameter, gradient, learning_rate)
+
+	return Matrix.new(0,0)
+
+func SGD(layer_index: int, parameter: Matrix, gradient: Matrix, learning_rate: float) -> Matrix:
+	return Matrix.subtract(parameter, Matrix.scalar(gradient, learning_rate))
+
 
 func categorise(input_data: Matrix):
 	var y_pred: Matrix = forward(input_data, true)
@@ -477,10 +492,12 @@ func add_labels(_labels: Array) -> void:
 	for i in range(_labels.size()):
 		labels[_labels[i]] = i
 
-func compile_network(input_dimensions: Vector2i) -> void:
+func compile_network(input_dimensions: Vector2i, _optimising_method: int = optimizers.SGD) -> void:
 	var current_input_shape = input_dimensions
 	var num_feature_maps = 1
 	var flattened = false
+	optimising_method = _optimising_method
+
 
 	for layer in layers:
 		if layer is Layer.MutliFilterConvolutional1D:
