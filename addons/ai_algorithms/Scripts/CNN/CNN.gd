@@ -5,8 +5,10 @@ var layers: Array = []
 
 var labels: Dictionary = {}
 
-enum optimizers {SGD}
+enum optimizers {SGD, SGD_MOMENTUM}
 var optimising_method: int = optimizers.SGD
+
+var velocity: Dictionary = {}
 
 class Layer:
 	class MutliFilterConvolutional1D:
@@ -456,29 +458,36 @@ func train(input_data: Matrix, label) -> float:
 		if gradients.has("dW"):
 			if gradients["type"] == "MutliFilterConvolutional1D":
 				for j in range(layer.num_filters):
-					layer.filters[j] = optimise(i, layer.filters[j], gradients["dW"][j], learning_rate)
+					layer.filters[j] = optimise(i, layer.filters[j], gradients["dW"][j], learning_rate, "filters_" + str(j))
+				layer.biases = optimise(i, layer.biases, gradients["dB"], learning_rate, "biases")
 			else:
-				layer.weights = optimise(i, layer.weights, gradients["dW"], learning_rate)
-		if gradients.has("dB"):
-			layer.biases = optimise(i, layer.biases, gradients["dB"], learning_rate)
+				layer.weights = optimise(i, layer.weights, gradients["dW"], learning_rate, "weights")
+				layer.biases = optimise(i, layer.biases, gradients["dB"], learning_rate, "biases")
 		if gradients.has("dX"):
 			grad = gradients["dX"]
 		if gradients.has("dgamma"):
-			layer.gamma = optimise(i, layer.gamma, gradients["dgamma"], learning_rate)
+			layer.gamma = optimise(i, layer.gamma, gradients["dgamma"], learning_rate, "gamma")
 		if gradients.has("dbeta"):
-			layer.beta = optimise(i, layer.beta, gradients["dbeta"], learning_rate)
+			layer.beta = optimise(i, layer.beta, gradients["dbeta"], learning_rate, "beta")
 	return loss
 
-func optimise(layer_index: int, parameter: Matrix, gradient: Matrix, learning_rate: float) -> Matrix:
+func optimise(layer_index: int, parameter: Matrix, gradient: Matrix, learning_rate: float, param_name: String = "") -> Matrix:
 	match optimising_method:
 		optimizers.SGD:
 			return SGD(layer_index, parameter, gradient, learning_rate)
+		optimizers.SGD_MOMENTUM:
+			return SGD_MOMENTUM(layer_index, parameter, gradient, learning_rate, 0.9, param_name)
 
 	return Matrix.new(0,0)
 
 func SGD(layer_index: int, parameter: Matrix, gradient: Matrix, learning_rate: float) -> Matrix:
 	return Matrix.subtract(parameter, Matrix.scalar(gradient, learning_rate))
 
+func SGD_MOMENTUM(layer_index: int, parameter: Matrix, gradient: Matrix, learning_rate: float, momentum: float = 0.9, param_name: String = "") -> Matrix:
+	if not velocity[layer_index].has(param_name):
+		velocity[layer_index][param_name] = Matrix.new(parameter.rows, parameter.cols)
+	velocity[layer_index][param_name] = Matrix.add(Matrix.scalar(velocity[layer_index][param_name], momentum), Matrix.scalar(gradient, learning_rate))
+	return Matrix.subtract(parameter, velocity[layer_index][param_name])
 
 func categorise(input_data: Matrix):
 	var y_pred: Matrix = forward(input_data, true)
@@ -498,8 +507,10 @@ func compile_network(input_dimensions: Vector2i, _optimising_method: int = optim
 	var flattened = false
 	optimising_method = _optimising_method
 
+	velocity.clear()
 
-	for layer in layers:
+	for layer_index in range(layers.size()):
+		var layer = layers[layer_index]
 		if layer is Layer.MutliFilterConvolutional1D:
 			layer.set_input_shape(current_input_shape)
 			current_input_shape = layer.output_shape
@@ -520,5 +531,21 @@ func compile_network(input_dimensions: Vector2i, _optimising_method: int = optim
 			layer.set_input_shape(current_input_shape, flattened)
 		elif layer is Layer.Dropout:
 			layer.set_input_shape(current_input_shape, flattened)
+
+		initialize_velocity(layer_index, layer)
+
+func initialize_velocity(layer_index: int, layer) -> void:
+	velocity[layer_index] = {}
+	if layer is Layer.MutliFilterConvolutional1D:
+		velocity[layer_index]["filters"] = []
+		for filter in layer.filters:
+			velocity[layer_index]["filters"].append(Matrix.new(filter.rows, filter.cols))
+		velocity[layer_index]["biases"] = Matrix.new(layer.biases.rows, layer.biases.cols)
+	elif layer is Layer.Dense or layer is Layer.SoftmaxDense:
+		velocity[layer_index]["weights"] = Matrix.new(layer.weights.rows, layer.weights.cols)
+		velocity[layer_index]["biases"] = Matrix.new(layer.biases.rows, layer.biases.cols)
+	elif layer is Layer.BatchNormalization:
+		velocity[layer_index]["gamma"] = Matrix.new(layer.gamma.rows, layer.gamma.cols)
+		velocity[layer_index]["beta"] = Matrix.new(layer.beta.rows, layer.beta.cols)
 
 

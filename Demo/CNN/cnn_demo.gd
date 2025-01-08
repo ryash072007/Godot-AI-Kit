@@ -41,7 +41,7 @@ func _ready() -> void:
 
 	cnn.add_layer(cnn.Layer.SoftmaxDense.new(2))
 
-	cnn.compile_network(Vector2i(28, 28))
+	cnn.compile_network(Vector2i(28, 28), cnn.optimizers.SGD_MOMENTUM)
 
 	training_O_images = ImageHelper.load_grayscale_images_from_folder(training_O_dir)
 	training_X_images = ImageHelper.load_grayscale_images_from_folder(training_X_dir)
@@ -53,19 +53,17 @@ func _ready() -> void:
 
 
 func _physics_process(_delta: float) -> void:
-	if training_O_images.size() > 0:
-		total_O_loss += cnn.train(training_O_images[training_O_index], "O")
-		training_O_index += 1
-		if training_O_index >= training_O_images.size():
-			training_O_index = 0
-			training_O_images.shuffle()
+	total_O_loss += cnn.train(training_O_images[training_O_index], "O")
+	training_O_index += 1
+	if training_O_index >= training_O_images.size():
+		training_O_index = 0
+		training_O_images.shuffle()
 
-	if training_X_images.size() > 0:
-		total_X_loss += cnn.train(training_X_images[training_X_index], "X")
-		training_X_index += 1
-		if training_X_index >= training_X_images.size():
-			training_X_index = 0
-			training_X_images.shuffle()
+	total_X_loss += cnn.train(training_X_images[training_X_index], "X")
+	training_X_index += 1
+	if training_X_index >= training_X_images.size():
+		training_X_index = 0
+		training_X_images.shuffle()
 
 	training_steps += 1
 
