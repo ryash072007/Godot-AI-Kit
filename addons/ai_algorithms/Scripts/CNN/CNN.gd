@@ -538,7 +538,7 @@ func add_labels(_labels: Array) -> void:
 	for i in range(_labels.size()):
 		labels[_labels[i]] = i
 
-func compile_network(input_dimensions: Vector2i, _optimising_method: int = optimizers.SGD) -> void:
+func compile_network(input_dimensions: Vector2i, _optimising_method: int = optimizers.AMSGRAD) -> void:
 	var current_input_shape = input_dimensions
 	var num_feature_maps = 1
 	var flattened = false

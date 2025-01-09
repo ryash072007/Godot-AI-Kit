@@ -6,7 +6,7 @@ TODO:
 
 ~~3. Simple DQN Support~~ [Completed]
 
-4. Convolutional  Neural Network [Ongoing]
+~~4. Convolutional Neural Network~~ [Completed]
 
 
 # AI Algorithm for Godot 4
@@ -25,6 +25,7 @@ https://github.com/user-attachments/assets/013f31c1-d4e4-429a-8ea1-62c760061884
 3. [Q-Learning Algorithm (and SARSA)](#q-learning-algorithm)
 4. [Minimax Algorithm](#minimax-algorithm)
 5. [SDQN (Simple Deep Q-Network)](#sdqn-simple-deep-q-network)
+6. [Convolutional Neural Network](#convolutional-neural-network)
 
 ## Simple Neural Network and Neural Net Plugin for Godot 4
 
@@ -546,4 +547,133 @@ DQN.set_q_network(your_neural_network)
 DQN.add_memory(state, action, reward, next_state, done)
 var action = DQN.choose_action(state)
 ```
+
+## Convolutional Neural Network
+
+The `CNN` class implements a Convolutional Neural Network (CNN) for image classification in Godot using GDScript.
+
+Check out the `cnn_demo.tscn` and `cnn_demo.gd` to understand how everything works.
+
+### How to use CNN class
+
+1. Initialize the CNN variable:
+
+    ```gdscript
+    var cnn: CNN = CNN.new()
+    ```
+
+2. Set the learning rate and add labels:
+
+    ```gdscript
+    cnn.learning_rate = 0.001
+    cnn.add_labels(["O", "X"])
+    ```
+
+    The number of labels added should be the same as the number of nodes assigned to `SoftmaxDense` layer.
+
+3. Add layers to the CNN:
+
+    ```gdscript
+    cnn.add_layer(cnn.Layer.MutliFilterConvolutional1D.new(8, "same"))
+    cnn.add_layer(cnn.Layer.MultiPoolPooling.new())
+    cnn.add_layer(cnn.Layer.Dropout.new(0.1))
+
+    cnn.add_layer(cnn.Layer.MutliFilterConvolutional1D.new(4, "same"))
+    cnn.add_layer(cnn.Layer.MultiPoolPooling.new())
+    cnn.add_layer(cnn.Layer.Dropout.new(0.1))
+
+    cnn.add_layer(cnn.Layer.Flatten.new())
+
+    cnn.add_layer(cnn.Layer.Dense.new(64, "RELU"))
+    cnn.add_layer(cnn.Layer.Dropout.new(0.1))
+
+    cnn.add_layer(cnn.Layer.SoftmaxDense.new(2))
+    ```
+
+4. Compile the network with input dimensions and optimizer:
+
+    ```gdscript
+    cnn.compile_network(Vector2i(28, 28), cnn.optimizers.AMSGRAD)
+    ```
+
+    **Note:** The network must be compiled after adding all the layers. The input dimensions has to be the same as the number of pixels in the input image / data.
+
+5. Train the network with input data and labels:
+
+    ```gdscript
+    var loss: float = cnn.train(input_data, "O")
+    ```
+    The `input_data` has to be a `Matrix` of the input that is been fed forward. The label has to match with one of the labels added using `add_labels`.
+    
+    This function returns the training loss of that step.
+
+6. Categorize new input data:
+
+    ```gdscript
+    var prediction: String = cnn.categorise(input_data)
+    ```
+
+    **Note:** The input to the CNN must be a `Matrix`. This is automatically handled by using the `ImageHelper` class.
+
+### Layer Types
+
+1. **MutliFilterConvolutional2D**: Applies multiple convolutional filters to the input data.
+    - Arguments:
+        - `num_filters` (int): Number of filters to apply.
+        - `padding_mode` (String): Padding mode, either "same" (output size is the same as input size) or "valid" (no padding).
+        - `filter_shape` (Vector2i): Shape of the convolutional filters.
+        - `stride` (int): Stride of the convolution.
+
+2. **MultiPoolPooling**: Applies max pooling to the input data.
+    - Arguments:
+        - `padding` (int): Padding to apply before pooling.
+        - `stride` (int): Stride of the pooling operation.
+        - `pool_size` (Vector2i): Size of the pooling window.
+
+3. **Dropout**: Applies dropout to the input data to prevent overfitting.
+    - Arguments:
+        - `rate` (float): Dropout rate (fraction of inputs to drop).
+
+4. **Flatten**: Flattens the input data to a 1D array.
+
+5. **Dense**: Fully connected layer with specified activation function.
+    - Arguments:
+        - `output_shape` (int): Number of neurons in the layer.
+        - `activation` (String): Activation function to use (e.g., "RELU", "SIGMOID").
+
+6. **SoftmaxDense**: Fully connected layer with softmax activation for classification.
+    - Arguments:
+        - `output_shape` (int): Number of neurons in the layer. Should match the number of labels added.
+
+7. **BatchNormalization**: Normalizes the input data to have zero mean and unit variance.
+    - Arguments:
+        - `epsilon` (float): Small constant to avoid division by zero.
+    
+    **Note:** DOES NOT WORK
+
+### Optimizers
+
+1. **SGD**: Stochastic Gradient Descent.
+2. **SGD_MOMENTUM**: Stochastic Gradient Descent with Momentum.
+3. **ADAM**: Adaptive Moment Estimation.
+4. **AMSGRAD**: AMSGrad variant of ADAM. (Default Optimizer)
+
+### ImageHelper
+
+The `ImageHelper` class provides utility functions for loading grayscale images from files and folders.
+
+#### How to use ImageHelper class
+
+1. Load a single grayscale image:
+
+    ```gdscript
+    var image_data: Matrix = ImageHelper.load_grayscale_image_data("res://path/to/image.png")
+    ```
+
+2. Load multiple grayscale images from a folder:
+
+    ```gdscript
+    var images: Array[Matrix] = ImageHelper.load_grayscale_images_from_folder("res://path/to/folder/")
+    ```
+
 
