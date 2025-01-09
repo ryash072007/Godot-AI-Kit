@@ -27,7 +27,7 @@ func _ready() -> void:
 	cnn.learning_rate = 0.001
 	cnn.add_labels(["O", "X"])
 
-	cnn.add_layer(cnn.Layer.MutliFilterConvolutional1D.new(6, "same"))
+	cnn.add_layer(cnn.Layer.MutliFilterConvolutional1D.new(8, "same"))
 	cnn.add_layer(cnn.Layer.MultiPoolPooling.new())
 	cnn.add_layer(cnn.Layer.Dropout.new(0.1))
 
