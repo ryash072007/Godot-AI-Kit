@@ -13,7 +13,7 @@ var moment: Dictionary = {}
 var timestep: int = 0
 
 class Layer:
-	class MutliFilterConvolutional1D:
+	class MutliFilterConvolutional2D:
 		var filters: Array[Matrix]
 		var num_filters: int
 		var biases: Matrix
@@ -550,7 +550,7 @@ func compile_network(input_dimensions: Vector2i, _optimising_method: int = optim
 
 	for layer_index in range(layers.size()):
 		var layer = layers[layer_index]
-		if layer is Layer.MutliFilterConvolutional1D:
+		if layer is Layer.MutliFilterConvolutional2D:
 			layer.set_input_shape(current_input_shape)
 			current_input_shape = layer.output_shape
 			num_feature_maps *= layer.num_filters
@@ -576,7 +576,7 @@ func compile_network(input_dimensions: Vector2i, _optimising_method: int = optim
 
 func initialize_velocity(layer_index: int, layer) -> void:
 	velocity[layer_index] = {}
-	if layer is Layer.MutliFilterConvolutional1D:
+	if layer is Layer.MutliFilterConvolutional2D:
 		velocity[layer_index]["filters"] = []
 		for filter in layer.filters:
 			velocity[layer_index]["filters"].append(Matrix.new(filter.rows, filter.cols))
@@ -590,7 +590,7 @@ func initialize_velocity(layer_index: int, layer) -> void:
 
 func initialize_moment(layer_index: int, layer) -> void:
 	moment[layer_index] = {}
-	if layer is Layer.MutliFilterConvolutional1D:
+	if layer is Layer.MutliFilterConvolutional2D:
 		moment[layer_index]["filters"] = []
 		for filter in layer.filters:
 			moment[layer_index]["filters"].append(Matrix.new(filter.rows, filter.cols))
