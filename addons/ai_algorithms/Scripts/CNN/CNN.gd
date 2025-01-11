@@ -3,6 +3,8 @@ class_name CNN
 var learning_rate: float = 0.005
 var layers: Array = []
 
+var augmentation_functions: Array[Callable] = []
+
 var labels: Dictionary = {}
 
 enum optimizers {SGD, SGD_MOMENTUM, ADAM, AMSGRAD}
@@ -448,6 +450,9 @@ func train(input_data: Matrix, label) -> float:
 	var output_data: Matrix = Matrix.new(layers[-1].output_shape.x, 1)
 	output_data.data[labels[label]][0] = 1.0
 
+	for augments in augmentation_functions:
+		input_data = augments.call(input_data)
+
 	# Forward pass
 	var y_pred: Matrix = forward(input_data)
 	var loss: float = cross_entropy_loss(y_pred, output_data)
@@ -602,4 +607,5 @@ func initialize_moment(layer_index: int, layer) -> void:
 		moment[layer_index]["gamma"] = Matrix.new(layer.gamma.rows, layer.gamma.cols)
 		moment[layer_index]["beta"] = Matrix.new(layer.beta.rows, layer.beta.cols)
 
-
+func add_augmentation_function(func_name: Callable) -> void:
+	augmentation_functions.append(func_name)

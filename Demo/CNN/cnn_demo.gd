@@ -29,11 +29,12 @@ func _ready() -> void:
 
 	cnn.add_layer(cnn.Layer.MutliFilterConvolutional2D.new(6, "same"))
 	cnn.add_layer(cnn.Layer.MultiPoolPooling.new())
+	cnn.add_layer(cnn.Layer.Dropout.new(0.1))
 
 	cnn.add_layer(cnn.Layer.Flatten.new())
 
-	cnn.add_layer(cnn.Layer.Dense.new(64, "RELU"))
-	cnn.add_layer(cnn.Layer.Dropout.new(0.05))
+	cnn.add_layer(cnn.Layer.Dense.new(32, "RELU"))
+	cnn.add_layer(cnn.Layer.Dropout.new(0.1))
 
 	cnn.add_layer(cnn.Layer.SoftmaxDense.new(2))
 
