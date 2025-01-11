@@ -27,18 +27,13 @@ func _ready() -> void:
 	cnn.learning_rate = 0.001
 	cnn.add_labels(["O", "X"])
 
-	cnn.add_layer(cnn.Layer.MutliFilterConvolutional2D.new(8, "same"))
+	cnn.add_layer(cnn.Layer.MutliFilterConvolutional2D.new(6, "same"))
 	cnn.add_layer(cnn.Layer.MultiPoolPooling.new())
-	cnn.add_layer(cnn.Layer.Dropout.new(0.1))
-
-	cnn.add_layer(cnn.Layer.MutliFilterConvolutional2D.new(4, "same"))
-	cnn.add_layer(cnn.Layer.MultiPoolPooling.new())
-	cnn.add_layer(cnn.Layer.Dropout.new(0.1))
 
 	cnn.add_layer(cnn.Layer.Flatten.new())
 
 	cnn.add_layer(cnn.Layer.Dense.new(64, "RELU"))
-	cnn.add_layer(cnn.Layer.Dropout.new(0.1))
+	cnn.add_layer(cnn.Layer.Dropout.new(0.05))
 
 	cnn.add_layer(cnn.Layer.SoftmaxDense.new(2))
 
@@ -69,8 +64,8 @@ func _physics_process(_delta: float) -> void:
 	training_steps += 1
 
 	if training_steps % 50 == 0:
-		var avg_O_loss = total_O_loss / 100.0
-		var avg_X_loss = total_X_loss / 100.0
+		var avg_O_loss = total_O_loss / 50.0
+		var avg_X_loss = total_X_loss / 50.0
 		total_O_loss = 0.0
 		total_X_loss = 0.0
 
@@ -81,6 +76,12 @@ func _physics_process(_delta: float) -> void:
 		if training_steps % 100 == 0:
 			var accuracy: Array[float] = test_all_images()
 			var model_accuracy: float = (accuracy[0] + accuracy[1]) / 2
+
+			if model_accuracy > 0.9:
+				cnn.optimising_method = cnn.optimizers.SGD_MOMENTUM
+				cnn.learning_rate = 0.0001
+				print("Switched optimizer to SGD_MOMENTUM and learning rate to 0.0001")
+
 			print("***********************************************")
 			print("Model Accuracy: ", model_accuracy)
 			print("Model got ", accuracy[0] * testing_O_images.size(), " O out of ", testing_O_images.size(), " correct!")
