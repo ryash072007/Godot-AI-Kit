@@ -658,6 +658,33 @@ Check out the `cnn_demo.tscn` and `cnn_demo.gd` to understand how everything wor
 3. **ADAM**: Adaptive Moment Estimation.
 4. **AMSGRAD**: AMSGrad variant of ADAM. (Default Optimizer)
 
+### Image Augmentations
+
+The `Augmentations` class provides utility functions for augmenting images to improve the robustness of the CNN model.
+
+#### Available Augmentations
+
+1. **rotate_random**: Rotates the image by a random angle between 0 and 360 degrees.
+
+2. **flip_horizontal**: Flips the image horizontally.
+
+3. **flip_vertical**: Flips the image vertically.
+
+#### How to use Augmentations
+
+1. Add an augmentation to the CNN:
+    ```gdscript
+    cnn.add_augmentation(Augmentations.rotate_random)
+    ```
+
+2. You can add multiple augmentations:
+    ```gdscript
+    cnn.add_augmentation(Augmentations.flip_horizontal)
+    cnn.add_augmentation(Augmentations.flip_vertical)
+    ```
+
+3. The augmentations will be applied during the training process to the input data.
+
 ### ImageHelper
 
 The `ImageHelper` class provides utility functions for loading grayscale images from files and folders.
