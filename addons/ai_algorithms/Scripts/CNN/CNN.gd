@@ -607,5 +607,5 @@ func initialize_moment(layer_index: int, layer) -> void:
 		moment[layer_index]["gamma"] = Matrix.new(layer.gamma.rows, layer.gamma.cols)
 		moment[layer_index]["beta"] = Matrix.new(layer.beta.rows, layer.beta.cols)
 
-func add_augmentation_function(func_name: Callable) -> void:
+func add_augmentation(func_name: Callable) -> void:
 	augmentation_functions.append(func_name)

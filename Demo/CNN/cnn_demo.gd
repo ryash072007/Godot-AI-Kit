@@ -31,14 +31,20 @@ func _ready() -> void:
 	cnn.add_layer(cnn.Layer.MultiPoolPooling.new())
 	cnn.add_layer(cnn.Layer.Dropout.new(0.1))
 
+	cnn.add_layer(cnn.Layer.MutliFilterConvolutional2D.new(4, "same"))
+	cnn.add_layer(cnn.Layer.MultiPoolPooling.new())
+	cnn.add_layer(cnn.Layer.Dropout.new(0.1))
+
 	cnn.add_layer(cnn.Layer.Flatten.new())
 
-	cnn.add_layer(cnn.Layer.Dense.new(32, "RELU"))
+	cnn.add_layer(cnn.Layer.Dense.new(64, "RELU"))
 	cnn.add_layer(cnn.Layer.Dropout.new(0.1))
 
 	cnn.add_layer(cnn.Layer.SoftmaxDense.new(2))
 
 	cnn.compile_network(Vector2i(28, 28), cnn.optimizers.AMSGRAD)
+
+	cnn.add_augmentation(Augmentations.rotate_random)
 
 	training_O_images = ImageHelper.load_grayscale_images_from_folder(training_O_dir)
 	training_X_images = ImageHelper.load_grayscale_images_from_folder(training_X_dir)
