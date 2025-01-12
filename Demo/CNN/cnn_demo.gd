@@ -44,7 +44,7 @@ func _ready() -> void:
 
 	cnn.compile_network(Vector2i(28, 28), cnn.optimizers.AMSGRAD)
 
-	cnn.add_augmentation(Augmentations.rotate_random)
+	#cnn.add_augmentation(Augmentations.rotate_random)
 
 	training_O_images = ImageHelper.load_grayscale_images_from_folder(training_O_dir)
 	training_X_images = ImageHelper.load_grayscale_images_from_folder(training_X_dir)
