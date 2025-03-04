@@ -1,10 +1,10 @@
 [gd_scene load_steps=11 format=3 uid="uid://cwhep14njs57"]
 
-[ext_resource type="Script" path="res://Demo/PPO/ppo_demo.gd" id="1_ab8bs"]
+[ext_resource type="Script" uid="uid://cfn7piluqm28w" path="res://Demo/PPO/ppo_demo.gd" id="1_ab8bs"]
 [ext_resource type="PackedScene" uid="uid://dct4lf201mpkb" path="res://Demo/PPO/obstacle.tscn" id="1_ejxwt"]
 [ext_resource type="PackedScene" uid="uid://dw0gpkhp4olc5" path="res://Demo/PPO/goal.tscn" id="2_4dd1v"]
 [ext_resource type="PackedScene" uid="uid://ccc61bxvqbc63" path="res://Demo/PPO/wall.tscn" id="4_orpwb"]
-[ext_resource type="Script" path="res://Demo/PPO/agent.gd" id="5_immtb"]
+[ext_resource type="Script" uid="uid://c20it8hauibhn" path="res://Demo/PPO/agent.gd" id="5_immtb"]
 
 [sub_resource type="TileSetScenesCollectionSource" id="TileSetScenesCollectionSource_bwyam"]
 resource_name = "obstacle"

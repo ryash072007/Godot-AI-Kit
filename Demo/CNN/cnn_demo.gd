@@ -135,4 +135,3 @@ func test_all_images() -> Array[float]:
 		total_X_predictions += 1
 
 	return [float(correct_O_predictions) / float(total_O_predictions), float(correct_X_predictions) / float(total_X_predictions)]
-

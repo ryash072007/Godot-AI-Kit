@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://c4llqcymcrfg0"]
 
-[ext_resource type="Script" path="res://Demo/DQN/Using SDQN class/cart.gd" id="1_6opgl"]
+[ext_resource type="Script" uid="uid://cjhrg6jqy86c4" path="res://Demo/DQN/Using SDQN class/cart.gd" id="1_6opgl"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_po0xa"]
 size = Vector2(50, 20)
@@ -20,8 +20,10 @@ lock_rotation = true
 script = ExtResource("1_6opgl")
 force_magnitude = 2000.0
 optimiser = 1
+log_data = false
 log_file_name = "ADAM_001_ELU.csv"
 SDQN_file_name = "ADAM_0001_ELU.json"
+is_learning = false
 use_pretrained_model = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="cart"]

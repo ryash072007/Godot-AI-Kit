@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://br7q850tfbf6"]
 
-[ext_resource type="Script" path="res://Demo/QL/QL_demo.gd" id="1_0okm1"]
+[ext_resource type="Script" uid="uid://1ssyxij3b8sf" path="res://Demo/QL/QL_demo.gd" id="1_0okm1"]
 
 [node name="QL_demo" type="Node2D"]
 position = Vector2(294, 37)

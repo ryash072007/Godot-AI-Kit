@@ -3,20 +3,16 @@
 [ext_resource type="Texture2D" uid="uid://bu2yphb0pshw8" path="res://Demo/NN/tilemap.png" id="1_kuhs7"]
 [ext_resource type="PackedScene" uid="uid://c87rop3h5d1ue" path="res://Demo/NN/block.tscn" id="2_iyiel"]
 [ext_resource type="PackedScene" uid="uid://c3pjp67bbav1k" path="res://Demo/NN/die_block.tscn" id="3_4mem1"]
-[ext_resource type="Script" path="res://Demo/NN/won.gd" id="4_v6yp1"]
-[ext_resource type="Script" path="res://addons/ai_algorithms/Scripts/Neural/Neural_Net.gd" id="5_tewmy"]
+[ext_resource type="Script" uid="uid://blhu043e3k858" path="res://Demo/NN/won.gd" id="4_v6yp1"]
+[ext_resource type="Script" uid="uid://34tmijg1k75v" path="res://addons/ai_algorithms/Scripts/Neural/Neural_Net.gd" id="5_tewmy"]
 [ext_resource type="PackedScene" uid="uid://dqh5ftagl7t68" path="res://Demo/NN/player.tscn" id="6_qs1wj"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_b72eq"]
 texture = ExtResource("1_kuhs7")
 texture_region_size = Vector2i(8, 8)
 0:0/0 = 0
-0:0/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-0:0/0/physics_layer_0/angular_velocity = 0.0
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-4, -4, -4, 4, 4, 4, 4, -4)
 1:0/0 = 0
-1:0/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-1:0/0/physics_layer_0/angular_velocity = 0.0
 
 [sub_resource type="TileSetScenesCollectionSource" id="TileSetScenesCollectionSource_xojt2"]
 scenes/1/scene = ExtResource("2_iyiel")

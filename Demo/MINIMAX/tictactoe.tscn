@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dkirr84hb380s"]
 
-[ext_resource type="Script" path="res://Demo/MINIMAX/tictactoe.gd" id="1_u3n37"]
+[ext_resource type="Script" uid="uid://clkbjrvp3kgf8" path="res://Demo/MINIMAX/tictactoe.gd" id="1_u3n37"]
 
 [node name="Tictactoe" type="Node2D"]
 script = ExtResource("1_u3n37")
