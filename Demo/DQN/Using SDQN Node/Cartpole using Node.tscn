@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3 uid="uid://yojh2nnjqsgq"]
 
-[ext_resource type="Script" path="res://Demo/DQN/Using SDQN Node/cart.gd" id="1_ut6kb"]
-[ext_resource type="Script" path="res://addons/ai_algorithms/Scripts/DQN/SDQN_Node.gd" id="2_so2dv"]
+[ext_resource type="Script" uid="uid://dxpvfgsglg7ik" path="res://Demo/DQN/Using SDQN Node/cart.gd" id="1_ut6kb"]
+[ext_resource type="Script" uid="uid://cmk8nemnvdk5m" path="res://addons/ai_algorithms/Scripts/DQN/SDQN_Node.gd" id="2_so2dv"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_po0xa"]
 size = Vector2(50, 20)
