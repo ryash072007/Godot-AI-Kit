@@ -4,7 +4,7 @@ class SIGMOID:
 	static func function(value: float, _row: int, _col: int) -> float:
 		return 1 / (1 + exp(-value))
 
-	static func derivaive(value: float, _row: int, _col: int) -> float:
+	static func derivative(value: float, _row: int, _col: int) -> float:
 		return value * (1 - value)
 
 class RELU:
