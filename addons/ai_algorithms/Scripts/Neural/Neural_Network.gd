@@ -56,7 +56,7 @@ func set_nn_color():
 	Matrix.average(Matrix.dot_product(bias_hidden, bias_output)), 1)
 
 # Configure activation functions for neurons
-func set_activation_function(callback: Callable = ACTIVATIONS.SIGMOID.function, dcallback: Callable = ACTIVATIONS.SIGMOID.derivaive) -> void:
+func set_activation_function(callback: Callable = ACTIVATIONS.SIGMOID.function, dcallback: Callable = ACTIVATIONS.SIGMOID.derivative) -> void:
 	activation_function = callback
 	activation_dfunction = dcallback
 
